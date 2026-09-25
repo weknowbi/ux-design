@@ -694,7 +694,7 @@ export default function FormulaEditor({
                 aria-haspopup="listbox"
                 aria-expanded={orderMenuOpen}
                 className="wk-icon-btn flex items-center justify-center"
-                style={{ width: 32, height: 32, color: orderMenuOpen ? COLOR.primary : COLOR.navLabel }}
+                style={{ width: 32, height: 32, color: COLOR.navLabel }}
               >
                 <Icon name="sort" size={24} />
               </button>
