@@ -5,41 +5,44 @@ avulso que alguém manda por chat, todos ficam num só lugar: você abre o link 
 workspace, vê a lista de projetos como se fossem arquivos, clica no que quer ver, e
 o protótipo abre ali mesmo, rodando de verdade — não é uma imagem nem uma gravação.
 
+**Link público:** https://weknowbi.github.io/ux-design/ — abre em qualquer navegador,
+sem login, sempre disponível. É a versão publicada automaticamente pelo GitHub Pages.
+
 ## Como usar
 
-1. Abra o link do workspace (peça a quem administra, caso ainda não tenha).
+1. Abra o link acima.
 2. Você cai em **Todos os projetos** — a grade com todos os protótipos disponíveis,
-   com miniatura, nome e quando foi aberto/atualizado pela última vez.
-3. Clique num projeto para abrir. Se ele não estiver rodando naquele momento, o
-   workspace inicia sozinho (leva alguns segundos na primeira vez); se já estiver
-   rodando, abre na hora.
-4. Use **← Voltar ao workspace** (o logo, no canto superior) para sair do protótipo
-   e voltar para a lista.
+   com miniatura, nome e quando cada um foi atualizado pela última vez.
+3. Clique num projeto para abrir. Ele já vem pronto, sem espera.
+4. Use o logo/**Weknow** no canto superior para voltar à lista de projetos.
 
 Isso substitui mandar um link de protótipo do Figma: quem recebe já cai direto na
 aplicação web funcionando, sem precisar rodar nada na própria máquina.
 
-### Navegando
-
-- **Todos os projetos** — tudo que existe no workspace.
-- **Recentes** — os projetos abertos mais recentemente, do mais novo pro mais antigo.
-- **Rodando** — só os que estão com o processo ativo agora.
-- **Pastas** — organização por assunto/time. Clique numa pasta na barra lateral para
-  ver só os projetos dela.
-- **Busca** (`/` ou `Ctrl+K`) — procura por nome, descrição ou pasta.
-- Setas do teclado navegam entre os cards, `Enter` abre o selecionado, `Shift+F10`
-  abre o menu `•••` (reiniciar, parar, mover de pasta, editar informações...).
-
 ### Sobre o acesso
 
-Hoje o link de acesso é o que a pessoa que mantém o workspace compartilhar com você.
-A forma definitiva de publicação — um link sempre ativo, sem depender de um
-computador específico ligado — ainda está sendo definida pelo time (ver
-[Próximos passos](#próximos-passos-e-decisões-em-aberto)).
+Este repositório é **público** — qualquer pessoa com o link consegue abrir o
+workspace e os protótipos, sem precisar de conta, login ou instalar nada. Isso foi
+uma escolha deliberada para ter um link simples e sempre ativo; a contrapartida é
+que o código-fonte e os protótipos também ficam visíveis a qualquer pessoa da
+internet, não só à Weknow (ver [Próximos passos](#próximos-passos-e-decisões-em-aberto)).
+
+**Nunca coloque dados reais de clientes em nenhum protótipo** (nomes, e-mails,
+CNPJs, telefones etc.) — use sempre dados fictícios, porque tudo aqui é público.
 
 ## Para quem mantém o workspace
 
-### Rodar localmente
+Existem duas versões deste projeto:
+
+- **Publicada (GitHub Pages)** — estática: cada protótipo é pré-compilado
+  (`npm run build`) e publicado como arquivo pronto. É o que todo mundo acessa
+  pelo link público. Atualiza sozinha a cada push na `main` (ver
+  [Como o site publicado é gerado](#como-o-site-publicado-é-gerado)).
+- **Local (`app/`)** — o workspace "de verdade", com servidor: descobre os
+  projetos, roda `npm run dev` de cada um sob demanda, e reflete qualquer
+  alteração instantaneamente. Serve para desenvolver e testar antes de publicar.
+
+### Rodar a versão local
 
 ```bash
 cd app
@@ -47,15 +50,22 @@ npm install
 npm run dev
 ```
 
-Abra [http://localhost:3000](http://localhost:3000).
+Abra [http://localhost:3000](http://localhost:3000). Aqui sim, ao clicar num projeto
+que não está rodando, o workspace inicia o servidor de dev dele na hora.
+
+Navegação da versão local: **Todos os projetos**, **Recentes** (últimos abertos),
+**Rodando** (processos ativos agora), **Pastas** (organização por assunto/time),
+busca (`/` ou `Ctrl+K`), setas do teclado entre os cards, `Enter` abre, `Shift+F10`
+abre o menu `•••` (reiniciar, parar, mover de pasta, editar informações...).
 
 ### Adicionar um novo protótipo
 
 1. Coloque a pasta do projeto dentro de `projects/` (ex: `projects/meu-prototipo`).
-2. Garanta que ela tenha um `package.json` com um script `dev` ou `start`.
-3. Pronto — o workspace verifica a pasta a cada poucos segundos e o projeto aparece
-   sozinho na lista (o ícone ↻ força uma atualização imediata). Não precisa reiniciar
-   nada nem editar código.
+2. Garanta que ela tenha um `package.json` com um script `dev` (pra rodar local) e
+   `build` (pra publicar no Pages).
+3. Rodando local, o workspace já mostra o projeto sozinho, sem reiniciar nada.
+4. Para ele aparecer no **link público**, é só dar commit e push na `main` — a
+   publicação é automática (ver abaixo).
 
 ### Metadata opcional do projeto
 
@@ -82,16 +92,34 @@ ao iniciar).
 1. `thumbnail` definido no `workspace.config.json`;
 2. imagem na raiz do projeto: `thumbnail`, `screenshot`, `preview` ou `cover`
    (`.png`, `.jpg`, `.webp`, `.gif`, `.svg`);
-3. captura automática em `app/server/data/thumbnails/<id-do-projeto>.png` — a leitura
-   já está ligada; um futuro job de screenshot só precisa gravar o arquivo ali;
+3. captura automática em `app/server/data/thumbnails/<id-do-projeto>.png` (versão
+   local) — a leitura já está ligada; um futuro job de screenshot só precisa gravar
+   o arquivo ali;
 4. placeholder neutro.
 
-Pastas e histórico de acesso (quem abriu o quê) ficam em
-`app/server/data/workspace-state.json` — local na máquina que hospeda o workspace,
-fora do git. É organização do workspace, não metadata do projeto, então não altera
-nada dentro das pastas dos projetos.
+Pastas e histórico de acesso (quem abriu o quê, na versão local) ficam em
+`app/server/data/workspace-state.json` — local na máquina, fora do git.
 
-### Como funciona por baixo
+### Como o site publicado é gerado
+
+`.github/workflows/pages.yml` roda `scripts/build-pages.mjs` a cada push na `main`:
+
+1. Builda cada projeto em `projects/*` (`npm install && npm run build`) — os
+   projetos em Vite usam base relativa (`--base=./`) pra funcionar em qualquer
+   subcaminho; o Gerenciador de Licenças usa o próprio `build.js` dele, que gera
+   um HTML único com CSS/JS embutidos.
+2. Copia o resultado de cada um pra `_site/p/<slug>/`.
+3. Gera `_site/index.html` — a página inicial estática com a grade de projetos —
+   e `_site/manifest.json` com nome, descrição, miniatura e data de atualização
+   (tirada do histórico do git, já que o checkout não preserva a data real dos
+   arquivos).
+4. Publica `_site/` no GitHub Pages.
+
+Pra testar essa build localmente antes de dar push: `node scripts/build-pages.mjs`
+(gera `_site/` na raiz) e sirva com qualquer servidor estático — **sem** modo SPA
+(a flag `-s` de `npx serve`, por exemplo, quebra os subcaminhos `/p/<slug>/`).
+
+### Como funciona a versão local por baixo
 
 - **Descoberta**: a cada consulta, o backend varre `projects/*` procurando pastas com
   `package.json`. Não há registro manual no código.
@@ -110,18 +138,18 @@ nada dentro das pastas dos projetos.
 
 ## Próximos passos e decisões em aberto
 
-- **Publicação permanente**: hoje o workspace só fica acessível enquanto a máquina que
-  o hospeda estiver ligada e conectada (via Tailscale). Para um link "sempre no ar",
-  independente de qualquer computador específico, as opções em avaliação são:
-  tornar este repositório público + GitHub Pages (grátis, mas o código e os
-  protótipos ficam visíveis a qualquer pessoa da internet), GitHub Enterprise
-  (mantém tudo privado à empresa, é pago), ou hospedar o workspace real num servidor
-  próprio na nuvem (roda igual está hoje, com custo pequeno de hospedagem).
-- Banco de dados leve (SQLite) para metadata e histórico.
+- **Repositório público**: decisão consciente da equipe para ter um link simples e
+  sempre ativo. Se um dia isso precisar mudar para privado com controle de acesso
+  (GitHub Enterprise, ou hospedar a versão local num servidor próprio na nuvem com
+  senha), é uma migração possível, mas não trivial — bom rever com alguém de
+  desenvolvimento antes.
+- Banco de dados leve (SQLite) para metadata e histórico, na versão local.
 - Geração automática de thumbnail a partir do projeto em execução.
-- Autenticação por usuário (hoje quem tem o link tem acesso completo ao workspace).
+- Autenticação por usuário (hoje quem tem o link do repositório e da versão local
+  tem acesso completo).
 - Integração com Git/Jira, comentários, versionamento.
 
-A API HTTP (`/api/projects`, `/api/projects/:id/start`, etc.) já foi desenhada para
-não depender de acesso direto ao filesystem do cliente, o que facilita essa evolução
-para um servidor compartilhado no futuro.
+A API HTTP da versão local (`/api/projects`, `/api/projects/:id/start`, etc.) já foi
+desenhada para não depender de acesso direto ao filesystem do cliente, o que
+facilita uma evolução futura para um servidor compartilhado de verdade (com
+processos ao vivo, não só arquivos estáticos).

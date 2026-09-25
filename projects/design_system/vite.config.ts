@@ -25,6 +25,14 @@ export default defineConfig({
       '@docs': path.resolve(import.meta.dirname, './src'),
       '@': ASK,
     },
+    // Sem isso, o build de producao (diferente do "npm run dev") resolve
+    // "react"/"react-dom" a partir de node_modules do proprio weknow_ask (por
+    // causa do alias '@' apontar pra la) E do node_modules deste projeto,
+    // empacotando duas copias distintas na mesma pagina -- os hooks quebram
+    // com "Cannot read properties of null (reading 'useState')" porque cada
+    // copia tem seu proprio dispatcher interno. "dedupe" forca as duas
+    // resolucoes a caırem sempre no mesmo modulo.
+    dedupe: ['react', 'react-dom'],
   },
   server: {
     host: '0.0.0.0',

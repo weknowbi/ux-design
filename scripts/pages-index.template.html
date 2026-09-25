@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Weknow · Protótipos</title>
+  <meta name="description" content="Workspace de protótipos da Weknow — abra e veja cada protótipo rodando." />
+  <link rel="icon" href="logo.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="./">
+      <img class="brand-logo" src="logo.svg" alt="" />
+      <span class="brand-text">
+        <strong>Weknow</strong>
+        <small>Protótipos</small>
+      </span>
+    </a>
+    <label class="search">
+      <svg class="icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" aria-hidden="true">
+        <circle cx="7.25" cy="7.25" r="4.5" /><path d="M10.5 10.5l3 3" />
+      </svg>
+      <input id="search" type="search" placeholder="Buscar projetos…" autocomplete="off" spellcheck="false" aria-label="Buscar projetos" />
+    </label>
+  </header>
+
+  <main class="content">
+    <h1 class="view-title">Todos os projetos</h1>
+    <p class="view-count" id="count"></p>
+    <div class="grid" id="grid"></div>
+    <p class="empty hidden" id="empty">Nenhum resultado.</p>
+  </main>
+
+  <footer class="footer">
+    Publicado automaticamente pelo GitHub Pages a cada atualização do
+    <a href="https://github.com/weknowbi/ux-design" target="_blank" rel="noopener">repositório</a>.
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

@@ -15,3 +15,7 @@ app/server/data/
 
 # Backup do historico git antigo do weknow_ask (ver mensagem de commit)
 weknow_ask-historico-antigo.bundle
+
+# Site estatico publicado no GitHub Pages -- gerado pelo workflow
+# (.github/workflows/pages.yml) a cada push, nao faz sentido versionar.
+/_site/

@@ -1,0 +1,48 @@
+name: Publicar Workspace no GitHub Pages
+
+# Builda os 5 prototipos e a pagina inicial estatica, e publica no GitHub
+# Pages a cada push na main. E o que mantem o link publico sempre
+# atualizado com a ultima versao de cada projeto.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # historico completo -- usado pra achar a data do ultimo commit de cada projeto
+          lfs: true
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Buildar site estatico
+        run: node scripts/build-pages.mjs
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
