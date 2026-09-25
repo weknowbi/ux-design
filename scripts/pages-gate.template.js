@@ -10,15 +10,50 @@
        por CSS) ate a senha certa ser digitada -- entao nao basta apagar
        uma div no inspetor pra "ver por baixo", o app realmente nao rodou.
 
-   Este arquivo e copiado (sem alteracao) para a raiz publicada e para
-   dentro de cada /p/<slug>/ pelo build-pages.mjs, que tambem e quem
-   desativa os <script> originais de cada pagina (ver applyGate() la).
+   Sao duas senhas, cada uma com um papel:
+     - "edit": pode ver tudo e renomear projetos na pagina inicial;
+     - "view": so visualizacao.
+   O papel fica em localStorage (STORAGE_KEY) e em <html data-ws-role>,
+   que e onde o app.js da pagina inicial le. Forjar o papel e trivial
+   (e so editar o localStorage) -- a protecao real da edicao e o token do
+   GitHub que o editor precisa colar pra salvar (ver pages-index.js).
+
+   Este arquivo e copiado para a raiz publicada e para dentro de cada
+   /p/<slug>/ pelo build-pages.mjs, que tambem e quem desativa os <script>
+   originais de cada pagina (ver applyGate() la).
    ========================================================================= */
 (function () {
   "use strict";
 
   var STORAGE_KEY = "wsauth";
-  var HASH = "__PASSWORD_HASH__"; // substituido no build -- nunca a senha em si
+  // Substituidos no build -- nunca as senhas em si, so os hashes.
+  var EDIT_HASH = "__EDIT_HASH__";
+  var VIEW_HASH = "__VIEW_HASH__";
+
+  function roleForHash(hash) {
+    if (hash === EDIT_HASH) return "edit";
+    if (hash === VIEW_HASH) return "view";
+    return null;
+  }
+
+  // "1" era o valor salvo quando so existia uma senha (a de edicao).
+  function storedRole() {
+    var value = null;
+    try { value = localStorage.getItem(STORAGE_KEY); } catch (e) { /* sem storage disponivel */ }
+    if (value === "1") value = "edit";
+    return value === "edit" || value === "view" ? value : null;
+  }
+
+  // Usado pelo botao "Sair" da pagina inicial -- limpa tambem o token do GitHub.
+  window.wsGate = {
+    logout: function () {
+      try {
+        localStorage.removeItem(STORAGE_KEY);
+        localStorage.removeItem("wsgh-token");
+      } catch (e) { /* sem storage disponivel */ }
+      location.reload();
+    },
+  };
 
   function toHex(buffer) {
     return Array.from(new Uint8Array(buffer))
@@ -49,7 +84,9 @@
     });
   }
 
-  function reveal() {
+  function reveal(role) {
+    document.documentElement.dataset.wsRole = role;
+    window.wsGate.role = role;
     var style = document.getElementById("wsg-style");
     if (style) style.remove();
     document.documentElement.style.visibility = "visible";
@@ -296,13 +333,13 @@
       e.preventDefault();
       if (!input.value) { input.focus(); return; }
 
-      var typed = await sha256(input.value);
-      if (typed === HASH) {
-        try { localStorage.setItem(STORAGE_KEY, "1"); } catch (e) { /* modo privado sem storage: sem persistencia, tudo bem */ }
+      var role = roleForHash(await sha256(input.value));
+      if (role) {
+        try { localStorage.setItem(STORAGE_KEY, role); } catch (e) { /* modo privado sem storage: sem persistencia, tudo bem */ }
         submit.classList.add("done");
         submit.innerHTML = ICON_CHECK + "<span>Liberado</span>";
         // Reativa a pagina por baixo ja, e so depois some com a cortina.
-        reveal();
+        reveal(role);
         setTimeout(function () {
           wrap.classList.add("leaving");
           setTimeout(function () { host.remove(); }, 360);
@@ -317,9 +354,7 @@
     });
   }
 
-  var alreadyOk = false;
-  try { alreadyOk = localStorage.getItem(STORAGE_KEY) === "1"; } catch (e) { /* sem storage disponivel */ }
-
-  if (alreadyOk) reveal();
+  var role = storedRole();
+  if (role) reveal(role);
   else showPrompt();
 })();

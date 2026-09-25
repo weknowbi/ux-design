@@ -22,11 +22,14 @@ const ROOT = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 const PROJECTS_ROOT = path.join(ROOT, "projects");
 const SITE_ROOT = path.join(ROOT, "_site");
 
-// Hash SHA-256 da senha de acesso do site publicado -- nunca a senha em
-// texto puro (nem aqui, nem em nenhum outro arquivo). Ver pages-gate.template.js
-// pra entender o mecanismo e as limitacoes (site estatico, sem servidor:
-// isso e uma cortina contra acesso casual, nao seguranca de verdade).
-const GATE_PASSWORD_HASH = "2c2bebaf13e1ea040ba145dc49dd5e01cac66f95765d81849ac8890180efa3a9";
+// Hashes SHA-256 das senhas de acesso do site publicado -- nunca as senhas
+// em texto puro (nem aqui, nem em nenhum outro arquivo). "edit" pode
+// renomear projetos na pagina inicial; "view" so visualiza. Ver
+// pages-gate.template.js pra entender o mecanismo e as limitacoes (site
+// estatico, sem servidor: isso e uma cortina contra acesso casual, nao
+// seguranca de verdade).
+const GATE_EDIT_HASH = "2c2bebaf13e1ea040ba145dc49dd5e01cac66f95765d81849ac8890180efa3a9";
+const GATE_VIEW_HASH = "015f027c6b45c15d936d8bc321ae08b7bedc9e81dcd349dfe05a3858ad96f60b";
 
 // Desativa (sem remover) os <script> de uma pagina, pra nenhum deles rodar
 // antes da senha ser confirmada -- ver reactivateScripts() no gate.
@@ -56,7 +59,8 @@ function applyGate(dir) {
 
   const gateJs = fs
     .readFileSync(path.join(ROOT, "scripts", "pages-gate.template.js"), "utf-8")
-    .replace("__PASSWORD_HASH__", GATE_PASSWORD_HASH);
+    .replace("__EDIT_HASH__", GATE_EDIT_HASH)
+    .replace("__VIEW_HASH__", GATE_VIEW_HASH);
   fs.writeFileSync(path.join(dir, "gate.js"), gateJs);
 }
 
@@ -135,7 +139,10 @@ function buildProject(entryName) {
   const pkg = readJsonSafe(pkgPath) || {};
   const config = readJsonSafe(path.join(projectPath, "workspace.config.json")) || {};
   const name = config.name || titleCase(pkg.name || entryName);
-  const slug = slugify(name);
+  // "slug" fixo no config (gravado na primeira vez que o projeto e
+  // renomeado pelo site) mantem o link /p/<slug>/ estavel mesmo com o nome
+  // mudando -- sem ele, cada renomeacao quebraria os links ja compartilhados.
+  const slug = config.slug || slugify(name);
   const outDir = path.join(SITE_ROOT, "p", slug);
 
   console.log(`\n== ${name} (${entryName} -> /p/${slug}/) ==`);
@@ -189,6 +196,7 @@ function buildProject(entryName) {
 
   return {
     slug,
+    dir: entryName, // pasta em projects/ -- a pagina inicial usa pra saber qual config editar
     name,
     description: config.description || pkg.description || "",
     href: `p/${slug}/`,

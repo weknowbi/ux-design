@@ -20,12 +20,18 @@
         <small>Protótipos</small>
       </span>
     </a>
+    <div class="topbar-right">
     <label class="search">
       <svg class="icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" aria-hidden="true">
         <circle cx="7.25" cy="7.25" r="4.5" /><path d="M10.5 10.5l3 3" />
       </svg>
       <input id="search" type="search" placeholder="Buscar projetos…" autocomplete="off" spellcheck="false" aria-label="Buscar projetos" />
     </label>
+    <div class="session hidden" id="session">
+      <span class="role" id="role"></span>
+      <button type="button" class="btn-ghost" id="logout">Sair</button>
+    </div>
+    </div>
   </header>
 
   <main class="content">
@@ -39,6 +45,30 @@
     Publicado automaticamente pelo GitHub Pages a cada atualização do
     <a href="https://github.com/weknowbi/ux-design" target="_blank" rel="noopener">repositório</a>.
   </footer>
+
+  <dialog class="modal" id="token-modal" aria-labelledby="token-title">
+    <form method="dialog" class="modal-body" id="token-form">
+      <h2 id="token-title">Conectar ao GitHub</h2>
+      <p>
+        O nome novo é salvo direto no repositório, então é preciso um token do GitHub
+        com permissão de escrita em <strong>weknowbi/ux-design</strong>. Ele fica salvo
+        só neste navegador — você cola uma vez.
+      </p>
+      <ol class="steps">
+        <li><a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">Criar um token</a> (fine-grained)</li>
+        <li>Resource owner <strong>weknowbi</strong>, repositório <strong>ux-design</strong></li>
+        <li>Permissão <strong>Contents: Read and write</strong></li>
+      </ol>
+      <input type="password" id="token-input" class="text-input" placeholder="github_pat_…" autocomplete="off" spellcheck="false" aria-label="Token do GitHub" />
+      <p class="modal-error hidden" id="token-error" role="alert"></p>
+      <div class="modal-actions">
+        <button type="button" class="btn-secondary" id="token-cancel">Cancelar</button>
+        <button type="submit" class="btn-primary" id="token-save">Conectar</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
   <script src="app.js"></script>
 </body>
