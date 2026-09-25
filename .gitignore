@@ -19,3 +19,8 @@ weknow_ask-historico-antigo.bundle
 # Site estatico publicado no GitHub Pages -- gerado pelo workflow
 # (.github/workflows/pages.yml) a cada push, nao faz sentido versionar.
 /_site/
+
+# Estado local de ferramentas de assistente de codigo na raiz do workspace
+# (diferente do .claude/launch.json de cada projeto em projects/*, que e
+# metadata legitima do projeto e continua versionada).
+/.claude/
