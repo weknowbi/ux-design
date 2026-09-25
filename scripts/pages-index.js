@@ -180,13 +180,25 @@ function gh(apiPath, token, { method = "GET", body } = {}) {
   });
 }
 
-function errorFor(res) {
-  if (res.status === 401) return new GitHubError(401, "Token do GitHub inválido ou expirado.");
-  // O GitHub responde 404 (e nao 403) quando o token nao enxerga o repo.
-  if (res.status === 403 || res.status === 404) {
-    return new GitHubError(res.status, "Esse token não tem permissão de escrita no repositório ux-design.");
+// Traduz os motivos mais comuns de recusa -- o resto mostra a mensagem
+// crua do GitHub, que e o que ajuda a descobrir o problema.
+async function errorFor(res) {
+  const { message = "" } = await res.json().catch(() => ({}));
+  if (res.status === 401) return new GitHubError(401, "Token do GitHub inválido ou expirado. Confira se colou o token inteiro.");
+  if (/lifetime/i.test(message)) {
+    return new GitHubError(res.status, "A organização weknowbi não aceita tokens sem data de expiração (ou com mais de 1 ano). Crie um token com validade.");
   }
-  return new GitHubError(res.status, `O GitHub recusou a alteração (erro ${res.status}).`);
+  if (/approv|pending/i.test(message)) {
+    return new GitHubError(res.status, "Esse token ainda precisa ser aprovado por um admin da organização weknowbi.");
+  }
+  // O GitHub responde 404 (e nao 403) quando o token nao enxerga o repo.
+  if (res.status === 404) {
+    return new GitHubError(404, "Esse token não enxerga o repositório. Confira se o Resource owner é weknowbi e o repositório é ux-design.");
+  }
+  if (res.status === 403 && /not accessible/i.test(message)) {
+    return new GitHubError(403, "Esse token não tem permissão de escrita. Dê a permissão Contents: Read and write.");
+  }
+  return new GitHubError(res.status, `O GitHub recusou (erro ${res.status})${message ? `: ${message}` : "."}`);
 }
 
 async function saveProjectName(project, newName, token) {
@@ -204,7 +216,7 @@ async function saveProjectName(project, newName, token) {
       sha = file.sha;
       config = JSON.parse(base64ToUtf8(file.content));
     } else if (current.status !== 404) {
-      throw errorFor(current);
+      throw await errorFor(current);
     }
 
     config.name = newName;
@@ -222,7 +234,7 @@ async function saveProjectName(project, newName, token) {
     });
     if (put.ok) return;
     if (put.status === 409 && attempt === 0) continue;
-    throw errorFor(put);
+    throw await errorFor(put);
   }
 }
 
@@ -267,8 +279,7 @@ function askForToken() {
       tokenSave.textContent = "Verificando…";
       try {
         const res = await gh(`/repos/${REPO}`, token);
-        if (res.status === 401) return showError("Token inválido ou expirado.");
-        if (!res.ok) return showError(`Não foi possível acessar o repositório (erro ${res.status}).`);
+        if (!res.ok) return showError((await errorFor(res)).message);
         const repo = await res.json();
         if (repo.permissions && !repo.permissions.push) {
           return showError("Esse token não tem permissão de escrita no repositório.");
