@@ -22,6 +22,44 @@ const ROOT = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 const PROJECTS_ROOT = path.join(ROOT, "projects");
 const SITE_ROOT = path.join(ROOT, "_site");
 
+// Hash SHA-256 da senha de acesso do site publicado -- nunca a senha em
+// texto puro (nem aqui, nem em nenhum outro arquivo). Ver pages-gate.template.js
+// pra entender o mecanismo e as limitacoes (site estatico, sem servidor:
+// isso e uma cortina contra acesso casual, nao seguranca de verdade).
+const GATE_PASSWORD_HASH = "2c2bebaf13e1ea040ba145dc49dd5e01cac66f95765d81849ac8890180efa3a9";
+
+// Desativa (sem remover) os <script> de uma pagina, pra nenhum deles rodar
+// antes da senha ser confirmada -- ver reactivateScripts() no gate.
+function disableScripts(html) {
+  return html.replace(/<script\b([^>]*)>/gi, (full, attrs) => {
+    if (/\btype\s*=\s*["']module["']/i.test(attrs)) {
+      return full.replace(/type\s*=\s*["']module["']/i, 'type="disabled-module"');
+    }
+    if (/\btype\s*=/i.test(attrs)) return full; // outro type explicito -- nao mexe
+    return `<script type="disabled-classic"${attrs}>`;
+  });
+}
+
+// Aplica a cortina de acesso num diretorio publicado (a raiz do site ou
+// cada /p/<slug>/): desativa os scripts do index.html dele, injeta o CSS
+// que esconde a pagina ate a liberacao, e copia o gate.js que faz a
+// verificacao da senha e reativa os scripts quando ela bate.
+function applyGate(dir) {
+  const indexPath = path.join(dir, "index.html");
+  if (!fs.existsSync(indexPath)) return;
+
+  let html = fs.readFileSync(indexPath, "utf-8");
+  html = disableScripts(html);
+  html = html.replace(/<head(\s[^>]*)?>/i, (m) => `${m}\n<style id="wsg-style">html{visibility:hidden}</style>`);
+  html = html.replace(/<\/body>/i, `<script src="./gate.js"></script>\n</body>`);
+  fs.writeFileSync(indexPath, html);
+
+  const gateJs = fs
+    .readFileSync(path.join(ROOT, "scripts", "pages-gate.template.js"), "utf-8")
+    .replace("__PASSWORD_HASH__", GATE_PASSWORD_HASH);
+  fs.writeFileSync(path.join(dir, "gate.js"), gateJs);
+}
+
 function readJsonSafe(p) {
   try {
     return JSON.parse(fs.readFileSync(p, "utf-8"));
@@ -139,6 +177,8 @@ function buildProject(entryName) {
     }
   }
 
+  applyGate(outDir);
+
   let thumbUrl = null;
   const thumbAbs = findThumbnail(projectPath, config);
   if (thumbAbs) {
@@ -165,6 +205,9 @@ function buildStaticIndex(projects) {
   fs.copyFileSync(path.join(ROOT, "scripts", "pages-index.css"), path.join(SITE_ROOT, "styles.css"));
   fs.copyFileSync(path.join(ROOT, "scripts", "pages-index.js"), path.join(SITE_ROOT, "app.js"));
   fs.copyFileSync(path.join(ROOT, "app", "public", "logo.svg"), path.join(SITE_ROOT, "logo.svg"));
+
+  applyGate(SITE_ROOT);
+
   // GitHub Pages: garante que rotas desconhecidas caiam de volta no index
   // (nenhum destes projetos usa roteamento por historico, mas e barato ter).
   fs.copyFileSync(path.join(SITE_ROOT, "index.html"), path.join(SITE_ROOT, "404.html"));
