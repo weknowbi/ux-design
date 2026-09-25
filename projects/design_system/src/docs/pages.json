@@ -1,0 +1,102 @@
+{
+  "$comment": "Índice do documento. É a ÚNICA lista de páginas: a barra lateral mostra os grupos, a tela mostra as páginas do grupo aberto, e o gerador de /llms.txt lê este mesmo arquivo.",
+  "groups": [
+    {
+      "id": "fundamentos",
+      "label": "Fundamentos",
+      "icon": "foundation",
+      "pages": [
+        {
+          "id": "cor",
+          "title": "Cor",
+          "icon": "palette",
+          "summary": "Cada cor é nomeada pelo que faz, não pelo tom que tem, e existe nos dois temas.",
+          "status": "pronto",
+          "source": "weknow_ask/src/index.css"
+        },
+        {
+          "id": "tipografia",
+          "title": "Tipografia",
+          "icon": "text_fields",
+          "summary": "Inter 400/500/600/700 e a escala em uso; peso como hierarquia, não tamanho.",
+          "status": "pronto"
+        },
+        {
+          "id": "espacamento",
+          "title": "Espaçamento, raio e elevação",
+          "icon": "straighten",
+          "summary": "Grade de 4, cinco raios com significado e duas sombras.",
+          "status": "pronto",
+          "source": "weknow_ask/src/design/tokens.ts"
+        },
+        {
+          "id": "icones",
+          "title": "Ícones",
+          "icon": "emoji_symbols",
+          "summary": "Material Symbols Outlined em wght 200, GRAD 0, opsz 24. FILL 1 é estado ativo.",
+          "status": "pronto",
+          "source": "weknow_ask/src/components/icons.tsx"
+        },
+        {
+          "id": "tema",
+          "title": "Tema claro e escuro",
+          "icon": "contrast",
+          "summary": "A inversão de profundidade, o que muda de cor no escuro e por quê.",
+          "status": "pronto",
+          "source": "weknow_ask/src/design/theme.ts"
+        }
+      ]
+    },
+    {
+      "id": "componentes",
+      "label": "Componentes",
+      "icon": "widgets",
+      "pages": [
+        {
+          "id": "botao",
+          "title": "Botão",
+          "icon": "smart_button",
+          "summary": "Cinco variantes, três tamanhos. Uma primária por tela.",
+          "status": "pronto",
+          "source": "weknow_ask/src/components/Btn.tsx",
+          "figma": "Make / Button variations with animations"
+        },
+        {
+          "id": "chip",
+          "title": "Chip",
+          "icon": "label",
+          "summary": "Pílula de 36px para contexto e filtro. Neutro quando está dentro de tabela.",
+          "status": "pronto",
+          "source": "weknow_ask/src/components/Chip.tsx",
+          "figma": "4454:7159"
+        },
+        {
+          "id": "campo",
+          "title": "Campo e seletor",
+          "icon": "list_alt",
+          "summary": "Caixa de 38px, raio 6, borda de controle. Rótulo sempre visível.",
+          "status": "pronto",
+          "source": "weknow_ask/src/components/Field.tsx",
+          "figma": "4454:8719"
+        },
+        {
+          "id": "tabela",
+          "title": "Tabela",
+          "icon": "table",
+          "summary": "Um padrão só, com e sem moldura. Sem zebra e sem divisória vertical.",
+          "status": "pronto",
+          "source": "weknow_ask/src/components/Table.tsx"
+        },
+        {
+          "id": "navegacao",
+          "title": "Menu lateral e barra de topo",
+          "icon": "menu",
+          "summary": "Item de 40px, raio 8, ícone 24. Barra de 56px com busca de 328.",
+          "status": "rascunho",
+          "source": "weknow_ask/src/components/PortalSidebar.tsx",
+          "figma": "sidebar white (WP-832)"
+        }
+      ]
+    }
+  ]
+}

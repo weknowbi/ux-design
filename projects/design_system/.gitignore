@@ -1,0 +1,7 @@
+node_modules
+dist
+
+# Gerados por scripts/build-agent-docs.mjs a cada `npm run dev`/`build`.
+public/llms.txt
+public/tokens.json
+public/docs/

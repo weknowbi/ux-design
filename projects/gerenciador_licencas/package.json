@@ -1,0 +1,12 @@
+{
+  "name": "gerenciador-licencas-weknow",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Protótipo navegável do novo Gerenciador de Licenças Weknow",
+  "scripts": {
+    "dev": "node server.js",
+    "start": "node server.js",
+    "build": "node build.js",
+    "share": "node share.js"
+  }
+}

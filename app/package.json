@@ -1,0 +1,16 @@
+{
+  "name": "prototype-workspace",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Workspace central para organizar, iniciar e visualizar prototipos web independentes.",
+  "main": "server/index.js",
+  "scripts": {
+    "dev": "node server/index.js",
+    "start": "node server/index.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "http-proxy-middleware": "^4.2.0"
+  }
+}

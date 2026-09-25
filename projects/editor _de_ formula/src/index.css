@@ -1,0 +1,355 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=block');
+@import 'tailwindcss';
+
+/* ---------------------------------------------------------------------------
+   Paleta. Cada token existe nos dois temas; `design/tokens.ts` apenas aponta
+   para estas variáveis, então todo componente que já usa `COLOR.*` troca de
+   tema sem saber que existe tema.
+
+   O escuro vem do nó "home dark" (3990:3872) e da tela de busca (3990:6774),
+   com os estilos nomeados do arquivo: Fonte primária/secundária/terciária
+   dark, Ícone primária dark, Ação primária dark, Card fundo 1 escuro.
+
+   Repare na inversão de profundidade: no claro a folha de conteúdo é *mais
+   clara* que o fundo da página (branco sobre #f3f6fc); no escuro ela é *mais
+   escura* (#131314 sobre #1a1b1c). Não é engano — é o que o protótipo faz, e
+   é a convenção do modo escuro: o que se aproxima clareia.
+--------------------------------------------------------------------------- */
+:root {
+  --wk-primary: #3366cc;
+  --wk-primary-hover: #2e5bb8;
+  --wk-primary-strong: #2563eb;
+  --wk-primary-deep: #1d4ed8;
+  --wk-tint: #dbeafe;
+  --wk-tint-hover: #bfdbfe;
+  --wk-tint-soft: #eff6ff;
+
+  --wk-text: #363e49;
+  --wk-text-secondary: #475569;
+  --wk-text-muted: #8c98a8;
+  --wk-text-icon: #8c98a8;
+
+  --wk-user-bubble: #f0f0ef;
+
+  --wk-canvas: #f3f6fc;
+  --wk-card-bg: #f3f6fc;
+  --wk-surface: #ffffff;
+  --wk-surface-subtle: #f8fafc;
+  --wk-hover: #f8f9fa;
+  --wk-hover-strong: #f1f5f9;
+  --wk-menu-hover: #f1f5f9;
+  --wk-filter-hover: #e9ecec;
+  /* Hover de linha de lista (itens da pasta): véu da ação primária, mais
+     presente que o cinza de hover comum. Em teste. */
+  --wk-list-hover: rgba(51, 102, 204, 0.08);
+  --wk-pill-active: #e9ecef;
+  --wk-chip-bg: #e0e9f2;
+  --wk-chip-bg-hover: #d3dfec;
+  --wk-search-pill: #e3e7ee;
+  --wk-search-pill-light: #edf0f3;
+  --wk-placeholder: #bababa;
+  /* Placeholder de campo: fonte secundária a 75% — #475569 no claro,
+     #d3d4d5 no escuro. Vale para busca e para os demais campos de texto. */
+  --wk-placeholder-soft: rgba(71, 85, 105, 0.75);
+
+  --wk-nav-active: #e4e9f1;
+  --wk-nav-active-text: #3366cc;
+  --wk-nav-hover: #ebeef5;
+  --wk-nav-hover-text: #334155;
+  --wk-nav-text: #475569;
+  --wk-nav-label: #8c98a8;
+
+  --wk-border: #dee2e6;
+  --wk-border-strong: #e2e8f0;
+
+  --wk-icon-hover: rgba(51, 102, 204, 0.08);
+  --wk-danger: #b91c1c;
+
+/* Botões — nó Make "Button variations with animations" (tema claro) */
+  --wk-btn-on-primary: #ffffff;
+  --wk-btn-primary-shadow: 0 4px 14px rgba(51, 102, 204, 0.38);
+  --wk-btn-outlined-hover-bg: var(--wk-primary);
+  --wk-btn-outlined-hover-fg: #ffffff;
+  --wk-btn-outlined-shadow: 0 2px 8px rgba(51, 102, 204, 0.2);
+  --wk-btn-ghost-hover: #eef3fb;
+  --wk-btn-danger: #dc2626;
+  --wk-btn-danger-hover: #b91c1c;
+  --wk-btn-on-danger: #ffffff;
+  --wk-btn-danger-shadow: 0 4px 14px rgba(220, 38, 38, 0.35);
+  --wk-btn-focus-ring: 0 0 0 3px rgba(51, 102, 204, 0.35);
+  --wk-btn-off-primary-bg: rgba(51, 102, 204, 0.15);
+  --wk-btn-off-primary-fg: rgba(51, 102, 204, 0.4);
+  --wk-btn-off-secondary-bg: rgba(51, 102, 204, 0.07);
+  --wk-btn-off-fg: rgba(51, 102, 204, 0.35);
+  --wk-btn-off-border: rgba(51, 102, 204, 0.3);
+  --wk-btn-off-danger-bg: #f87171;
+  --wk-btn-off-danger-fg: #ffffff;
+
+  /* Dois papéis de contorno, não um:
+     --wk-border        recorta um bloco (menu, tabela, prompt, painel)
+     --wk-field-border  desenha um controle (campo, caixa de seleção)
+     O controle precisa se ler como algo manipulável, então sua linha é
+     mais forte que a de um bloco. */
+  --wk-field-border: #ced4da;
+  --wk-logo-ink: #1e1e26;
+  --wk-scrollbar: #c7c7c7;
+  --wk-scrollbar-hover: #747776;
+  --wk-backdrop: rgba(17, 24, 39, 0.45);
+  --wk-shadow-composer: 0 1px 2px rgba(15, 23, 42, 0.05), 0 4px 12px rgba(15, 23, 42, 0.05);
+  /* Desfoque curto e deslocamento pequeno: o painel já tem borda de 1px,
+     então a sombra só precisa levantá-lo do fundo, não anunciá-lo. */
+  --wk-shadow-menu: 0 3px 10px rgba(15, 23, 42, 0.1);
+}
+
+:root[data-theme='dark'] {
+  /* Ação primária dark: #3366CC não tem contraste sobre #131314 */
+  --wk-primary: #8ab4f8;
+  --wk-primary-hover: #a4c4fa;
+  --wk-primary-strong: #8ab4f8;
+  --wk-primary-deep: #6ea1f5;
+  --wk-tint: #1e2d45;
+  --wk-tint-hover: #243450;
+  --wk-tint-soft: #22293a;
+
+  --wk-text: #eff0f0;
+  --wk-text-secondary: #d3d4d5;
+  --wk-text-muted: #b0b2b5;
+  --wk-text-icon: #b0b2b5;
+
+  --wk-user-bubble: #2d2e30;
+
+  --wk-canvas: #1a1b1c;
+  --wk-card-bg: #1a1b1c;
+  --wk-surface: #131314;
+  --wk-surface-subtle: #1a1b1c;
+  /* Véu da ação primária, não cinza sólido: 8% ao passar o mouse e 10%
+     quando selecionado — o estado escolhido tem de pesar mais que o
+     transitório, ou os dois se confundem. */
+  --wk-hover: rgba(138, 180, 248, 0.08);
+  --wk-hover-strong: #27292a;
+  --wk-menu-hover: rgba(138, 180, 248, 0.08);
+  /* Chip de filtro: no claro o hover escurece um passo; no escuro clareia,
+     seguindo a mesma convenção de profundidade do resto do tema. O tom é
+     o "Card fundo 1 hover escuro" do arquivo. */
+  --wk-filter-hover: #2d2e30;
+  --wk-list-hover: rgba(138, 180, 248, 0.1);
+  --wk-pill-active: rgba(138, 180, 248, 0.1);
+  --wk-chip-bg: #2d2e30;
+  --wk-chip-bg-hover: #37393d;
+  --wk-search-pill: #282a2c;
+  --wk-search-pill-light: #202122;
+  --wk-placeholder: #c4c7c5;
+  --wk-placeholder-soft: rgba(211, 212, 213, 0.75);
+
+  --wk-nav-active: rgba(138, 180, 248, 0.12);
+  --wk-nav-active-text: #8ab4f8;
+  --wk-nav-hover: rgba(138, 180, 248, 0.08);
+  --wk-nav-hover-text: #eff0f0;
+  --wk-nav-text: #d3d4d5;
+  --wk-nav-label: #b0b2b5;
+
+  /* Contorno do escuro: linha fechada, quase o tom da superfície. O
+     #37393d anterior desenhava demais — no escuro a borda separa por
+     diferença mínima, não por contraste. */
+  --wk-border: #2c323c;
+  --wk-border-strong: #1d1d20;
+
+  --wk-icon-hover: rgba(138, 180, 248, 0.08);
+  --wk-danger: #ab4444;
+
+/* Botões — mesma fonte, bloco "Dark theme" */
+  --wk-btn-on-primary: #0d1b2a;
+  --wk-btn-primary-shadow: 0 4px 14px rgba(91, 143, 217, 0.4);
+  --wk-btn-outlined-hover-bg: #26282a;
+  --wk-btn-outlined-hover-fg: #c8ddf5;
+  --wk-btn-outlined-shadow: none;
+  --wk-btn-ghost-hover: #26282a;
+  --wk-btn-danger: #d9604e;
+  --wk-btn-danger-hover: #e07060;
+  --wk-btn-on-danger: #ffffff;
+  --wk-btn-danger-shadow: 0 4px 14px rgba(217, 96, 78, 0.4);
+  --wk-btn-focus-ring: 0 0 0 3px rgba(77, 132, 226, 0.4);
+  --wk-btn-off-primary-bg: rgba(138, 180, 248, 0.2);
+  --wk-btn-off-primary-fg: rgba(138, 180, 248, 0.4);
+  --wk-btn-off-secondary-bg: rgba(138, 180, 248, 0.07);
+  --wk-btn-off-fg: rgba(138, 180, 248, 0.3);
+  --wk-btn-off-border: rgba(138, 180, 248, 0.25);
+  --wk-btn-off-danger-bg: #3a2420;
+  --wk-btn-off-danger-fg: #7a4a43;
+
+  --wk-field-border: #37393d;
+  --wk-logo-ink: #eff0f0;
+  --wk-scrollbar: #444746;
+  --wk-scrollbar-hover: #8e918f;
+  /* Fundo esmaecido do modal: preto a 80% — no escuro o véu claro não
+     separaria o modal do fundo, que já é quase preto. */
+  --wk-backdrop: rgba(0, 0, 0, 0.8);
+  /* Sombra sobre fundo escuro precisa ser preta e mais opaca: um véu
+     claro some, e sem ela o prompt encosta na folha sem se destacar. */
+  --wk-shadow-composer: 0 1px 2px rgba(0, 0, 0, 0.5), 0 10px 28px rgba(0, 0, 0, 0.45);
+  --wk-shadow-menu: 0 8px 24px rgba(0, 0, 0, 0.5);
+}
+
+/*
+ * Barra de rolagem: só o polegar, sem trilho e sem as setas das pontas.
+ * 8px é o mínimo para virar alvo de arrasto confortável — com 4px ela era
+ * decorativa. O raio é metade da largura, então o polegar fica em cápsula.
+ */
+/*
+ * As propriedades padrão (`scrollbar-width`/`scrollbar-color`) VENCEM os
+ * pseudo-elementos no Chrome: declarar as duas coisas faz ele desenhar a
+ * barra do sistema, com as setinhas das pontas. Por isso elas ficam escopadas
+ * a quem não tem os pseudos — na prática, o Firefox.
+ */
+@supports not selector(::-webkit-scrollbar) {
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--wk-scrollbar) transparent;
+  }
+}
+*::-webkit-scrollbar { width: 8px; height: 8px; }
+*::-webkit-scrollbar-track { background: transparent; }
+*::-webkit-scrollbar-button { display: none; width: 0; height: 0; }
+*::-webkit-scrollbar-corner { background: transparent; }
+*::-webkit-scrollbar-thumb {
+  background: var(--wk-scrollbar);
+  border-radius: 4px;
+}
+*::-webkit-scrollbar-thumb:hover { background: var(--wk-scrollbar-hover); }
+
+body {
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+  background: var(--wk-canvas);
+  color: var(--wk-text);
+}
+
+/*
+ * Irradiação: texto claro sobre fundo escuro espalha luz para os pixels
+ * vizinhos e o traço parece mais gordo — o peso é o mesmo 400 dos dois lados,
+ * é o olho que engorda. Suavização em escala de cinza afina a renderização e
+ * devolve a mesma leitura de peso do tema claro.
+ */
+:root[data-theme='dark'] body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/*
+ * Placeholder: fonte secundária a 75% é o padrão — buscas e campos de texto.
+ * O prompt é a exceção, com um tom mais apagado, e pede a classe.
+ *
+ * Escrito à mão de propósito: `placeholder-[var(--alguma-coisa)]` NÃO gera
+ * utilitária no Tailwind 4 (ele não infere o tipo de um var() puro) e some
+ * sem avisar — foi assim que estas cores se perderam antes.
+ */
+::placeholder { color: var(--wk-placeholder-soft); }
+.wk-ph-prompt::placeholder { color: var(--wk-placeholder); }
+
+@keyframes wk-fade-up {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: none; }
+}
+.wk-enter { animation: wk-fade-up .28s ease-out both; }
+
+/* Material Symbols — wght 200, GRAD 0, opsz 24 (espec. do design system) */
+.wk-icon {
+  font-family: 'Material Symbols Outlined';
+  font-weight: normal;
+  font-style: normal;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-feature-settings: 'liga';
+  font-feature-settings: 'liga';
+  vertical-align: middle;
+  -webkit-font-smoothing: antialiased;
+  user-select: none;
+}
+
+.wk-icon { transition: transform .18s ease; }
+.wk-flip { transform: rotate(180deg); }
+.wk-rot-neg90 { transform: rotate(-90deg); }
+
+/* Corte por esmaecimento no lugar de reticências (itens do menu lateral). */
+.wk-fade-r {
+  overflow: hidden;
+  white-space: nowrap;
+  -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 16px), transparent 100%);
+  mask-image: linear-gradient(to right, #000 calc(100% - 16px), transparent 100%);
+}
+
+/* Hover de botão de ícone — nó 3630:3689 (variante hover):
+   caixa do tamanho do ícone, raio 6, #3366CC a 8%. O ícone não muda de cor. */
+.wk-icon-btn {
+  border-radius: 6px;
+  transition: background-color .12s ease;
+}
+.wk-icon-btn:hover { background-color: var(--wk-icon-hover); }
+
+/* ---------------------------------------------------------------------------
+   Editor de fórmula — o que é próprio desta tela.
+--------------------------------------------------------------------------- */
+
+/*
+ * Código monoespaçado. O design system tem uma família só, Inter, mas fórmula
+ * é código: alinhamento de coluna e a distinção entre 1/l e 0/O são leitura,
+ * não estilo. Fica confinado ao editor e à lista de símbolos.
+ */
+:root {
+  --wk-mono: ui-monospace, 'SF Mono', 'JetBrains Mono', Menlo, Consolas, monospace;
+}
+
+html, body, #root { height: 100%; }
+
+/*
+ * Linha de árvore que rola na horizontal.
+ *
+ * O nome da variável pode ser mais largo que a coluna, e aí a linha inteira
+ * anda para o lado. A ação da linha não pode andar junto: ninguém vai rolar
+ * até o fim de um nome de 35 caracteres só para alcançar um botão. Ela fica
+ * presa à borda visível, e o nome passa por baixo dela.
+ *
+ * O esmaecimento antes do botão é o mesmo recurso do corte de rótulo do menu
+ * lateral: o texto se dissolve no fundo em vez de bater no ícone.
+ */
+.wk-tree-row {
+  --wk-row-bg: var(--wk-surface);
+}
+.wk-tree-row:hover {
+  --wk-row-bg: var(--wk-surface-subtle);
+  background: var(--wk-surface-subtle);
+}
+.wk-row-action {
+  position: sticky;
+  right: 0;
+  /* Estica na altura da linha: um recorte de 28 deixaria a parte de cima e
+     de baixo das letras altas aparecendo acima e abaixo do botão. */
+  align-self: stretch;
+  padding-inline: 4px;
+  background: var(--wk-row-bg);
+}
+/*
+ * O esmaecimento só existe quando o nome de fato passa por baixo do ícone.
+ * Ligado sempre, ele caía em cima de nomes curtos como `uf`, que cabem
+ * inteiros, e apagava as letras sem ter nada para esconder. Quem liga a
+ * classe é a linha, medindo a sobreposição ao receber o ponteiro e a cada
+ * rolagem enquanto ele está nela.
+ */
+.wk-row-action--cover::before {
+  content: '';
+  position: absolute;
+  right: 100%;
+  top: 0;
+  bottom: 0;
+  width: 32px;
+  background: linear-gradient(to right, transparent, var(--wk-row-bg));
+  pointer-events: none;
+}

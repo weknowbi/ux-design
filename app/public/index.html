@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Weknow · Protótipos</title>
+  <link rel="icon" href="/logo.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" />
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <!-- Sprite de icones (16px, stroke 1.5, currentColor) -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <symbol id="i-logo" viewBox="0 7.6 18 13">
+        <path d="M5.18807 8.11896L9.01109 11.8992L4.50507 16.3547L0.681946 12.5745C0.501136 12.3955 0.399513 12.1529 0.399414 11.8999C0.399414 11.6469 0.50094 11.4042 0.68175 11.2253L3.82324 8.11896C4.00425 7.94003 4.24971 7.83959 4.50565 7.83959C4.7616 7.83959 5.00706 7.94003 5.18807 8.11896Z" fill="#3366CC"/>
+        <path d="M14.2006 8.11956L17.3412 11.225C17.5222 11.404 17.6238 11.6467 17.6238 11.8998C17.6238 12.1528 17.5222 12.3955 17.3412 12.5745L13.5182 16.3547L9.0127 11.8998L12.8358 8.11956C13.0168 7.94063 13.2623 7.84019 13.5182 7.84019C13.7742 7.84019 14.0195 7.94063 14.2006 8.11956Z" fill="#5ADBDB"/>
+        <path d="M9.01129 11.9004L13.5167 16.3554L9.69371 20.1356C9.5127 20.3144 9.26724 20.415 9.01129 20.415C8.75535 20.415 8.50999 20.3144 8.32888 20.1356L4.50586 16.3554L9.01129 11.9004Z" fill="#30A7E2"/>
+      </symbol>
+      <symbol id="i-all" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3"><rect x="2.5" y="2.5" width="4.5" height="4.5" rx="1"/><rect x="9" y="2.5" width="4.5" height="4.5" rx="1"/><rect x="2.5" y="9" width="4.5" height="4.5" rx="1"/><rect x="9" y="9" width="4.5" height="4.5" rx="1"/></symbol>
+      <symbol id="i-clock" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><circle cx="8" cy="8" r="5.75"/><path d="M8 5v3.2l2 1.3"/></symbol>
+      <symbol id="i-running" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"><circle cx="8" cy="8" r="5.75"/><path d="M6.75 5.9v4.2L10.1 8z"/></symbol>
+      <symbol id="i-folder" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"><path d="M2.25 4.25c0-.55.45-1 1-1h3.1l1.4 1.5h5c.55 0 1 .45 1 1v6c0 .55-.45 1-1 1h-9.5c-.55 0-1-.45-1-1z"/></symbol>
+      <symbol id="i-folder-open" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"><path d="M2.25 11.75v-7.5c0-.55.45-1 1-1h3.1l1.4 1.5h4.5c.55 0 1 .45 1 1v1"/><path d="M2.25 11.75l1.6-4.3c.15-.4.5-.7.95-.7h8.45c.5 0 .85.5.7.95l-1.35 4.05c-.15.4-.5.7-.95.7H3.2c-.55 0-.95-.3-.95-.7z"/></symbol>
+      <symbol id="i-plus" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><path d="M8 3.5v9M3.5 8h9"/></symbol>
+      <symbol id="i-search" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><circle cx="7.25" cy="7.25" r="4.5"/><path d="M10.5 10.5l3 3"/></symbol>
+      <symbol id="i-chevron-down" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 6.5l3 3 3-3"/></symbol>
+      <symbol id="i-chevron-right" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 5l3 3-3 3"/></symbol>
+      <symbol id="i-grid" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3"><rect x="3" y="3" width="4" height="4" rx=".75"/><rect x="9" y="3" width="4" height="4" rx=".75"/><rect x="3" y="9" width="4" height="4" rx=".75"/><rect x="9" y="9" width="4" height="4" rx=".75"/></symbol>
+      <symbol id="i-list" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><path d="M6 4.5h7M6 8h7M6 11.5h7"/><circle cx="3.25" cy="4.5" r=".6" fill="currentColor"/><circle cx="3.25" cy="8" r=".6" fill="currentColor"/><circle cx="3.25" cy="11.5" r=".6" fill="currentColor"/></symbol>
+      <symbol id="i-refresh" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M13 8a5 5 0 1 1-1.46-3.54"/><path d="M13 3v2.5h-2.5"/></symbol>
+      <symbol id="i-more" viewBox="0 0 16 16" fill="currentColor"><circle cx="3.75" cy="8" r="1.1"/><circle cx="8" cy="8" r="1.1"/><circle cx="12.25" cy="8" r="1.1"/></symbol>
+      <symbol id="i-open" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"><path d="M5.5 4.25l6.5 3.75-6.5 3.75z"/></symbol>
+      <symbol id="i-external" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 2.75h3.75V6.5M13.25 2.75L7.5 8.5"/><path d="M11.5 9.5v2.75c0 .55-.45 1-1 1h-6.5c-.55 0-1-.45-1-1v-6.5c0-.55.45-1 1-1H6.5"/></symbol>
+      <symbol id="i-restart" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8a5 5 0 1 0 1.46-3.54"/><path d="M3 3v2.5h2.5"/></symbol>
+      <symbol id="i-stop" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"><rect x="4.25" y="4.25" width="7.5" height="7.5" rx="1.25"/></symbol>
+      <symbol id="i-edit" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"><path d="M10.25 3.25l2.5 2.5L6 12.5H3.5V10z"/></symbol>
+      <symbol id="i-move" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M2.25 11.75v-7.5c0-.55.45-1 1-1h3.1l1.4 1.5h5c.55 0 1 .45 1 1v1.5"/><path d="M9 11h5M12 9l2 2-2 2"/></symbol>
+      <symbol id="i-trash" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4.5h10M6.5 4.5V3h3v1.5M4.5 4.5l.6 8c.05.5.45.75.9.75h4c.45 0 .85-.3.9-.75l.6-8"/></symbol>
+      <symbol id="i-check" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 8.25l3 3 6-6.5"/></symbol>
+      <symbol id="i-close" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><path d="M4.5 4.5l7 7M11.5 4.5l-7 7"/></symbol>
+      <symbol id="i-app" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"><rect x="2.25" y="3" width="11.5" height="10" rx="1.5"/><path d="M2.25 6h11.5"/><path d="M6.25 8.25L4.75 9.5l1.5 1.25M9.75 8.25l1.5 1.25-1.5 1.25" stroke-linecap="round"/></symbol>
+      <symbol id="i-warning" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2.75l5.75 10H2.25z"/><path d="M8 6.75v2.5"/><circle cx="8" cy="11.1" r=".35" fill="currentColor"/></symbol>
+      <symbol id="i-arrow-left" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M12.5 8h-9M7 4.5L3.5 8 7 11.5"/></symbol>
+      <symbol id="i-inbox" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"><path d="M2.5 9l1.75-5.25h7.5L13.5 9v3.25c0 .55-.45 1-1 1h-9c-.55 0-1-.45-1-1z"/><path d="M2.5 9h3l.75 1.5h3.5L10.5 9h3"/></symbol>
+    </defs>
+  </svg>
+
+  <div class="app" id="app">
+    <!-- ================= Sidebar ================= -->
+    <aside class="sidebar" id="sidebar" aria-label="Navegação do workspace">
+      <div class="sidebar-header">
+        <a class="workspace-id" href="#/" aria-label="Weknow Protótipos — Todos os projetos">
+          <span class="workspace-avatar"><svg class="logo-mark"><use href="#i-logo"/></svg></span>
+          <span class="workspace-name">
+            <span class="workspace-title">Weknow</span>
+            <span class="workspace-sub">Protótipos</span>
+          </span>
+        </a>
+      </div>
+
+      <nav class="sidebar-section" aria-label="Workspace">
+        <a class="nav-item" href="#/" data-route="all">
+          <svg class="icon"><use href="#i-all"/></svg>
+          <span class="nav-label">Todos os projetos</span>
+        </a>
+        <a class="nav-item" href="#/recentes" data-route="recent">
+          <svg class="icon"><use href="#i-clock"/></svg>
+          <span class="nav-label">Recentes</span>
+        </a>
+        <a class="nav-item" href="#/rodando" data-route="running">
+          <svg class="icon"><use href="#i-running"/></svg>
+          <span class="nav-label">Rodando</span>
+          <span class="nav-count" id="running-count"></span>
+        </a>
+      </nav>
+
+      <div class="sidebar-divider" role="separator"></div>
+
+      <section class="sidebar-section sidebar-folders" aria-labelledby="folders-heading">
+        <div class="section-header">
+          <span id="folders-heading" class="section-title">Pastas</span>
+        </div>
+        <ul class="folder-list" id="folder-list"></ul>
+        <button class="nav-item nav-item-subtle" id="new-folder-btn">
+          <svg class="icon"><use href="#i-plus"/></svg>
+          <span class="nav-label">Nova pasta</span>
+        </button>
+      </section>
+    </aside>
+
+    <!-- ================= Navegacao de projetos ================= -->
+    <div class="main" id="browse-view">
+      <header class="toolbar">
+        <div class="toolbar-context" id="toolbar-context">
+          <h1 class="view-title" id="view-title">Todos os projetos</h1>
+        </div>
+        <div class="toolbar-actions">
+          <label class="search" for="search-input">
+            <svg class="icon"><use href="#i-search"/></svg>
+            <input id="search-input" type="search" placeholder="Buscar projetos…" autocomplete="off" spellcheck="false" aria-label="Buscar projetos" />
+            <kbd class="search-kbd" aria-hidden="true">/</kbd>
+          </label>
+        </div>
+      </header>
+
+      <div class="subbar">
+        <p class="view-count" id="view-count" aria-live="polite"></p>
+        <div class="subbar-actions">
+          <button class="btn btn-sm hidden" id="stop-all-btn">
+            <svg class="icon"><use href="#i-stop"/></svg>
+            <span>Parar todos</span>
+          </button>
+          <button class="select-btn" id="sort-btn" aria-haspopup="menu">
+            <span id="sort-label">Mais recentes</span>
+            <svg class="icon icon-xs"><use href="#i-chevron-down"/></svg>
+          </button>
+          <div class="segmented" role="group" aria-label="Modo de visualização">
+            <button class="icon-btn" data-layout="grid" data-tooltip="Grade" aria-label="Grade" aria-pressed="true">
+              <svg class="icon"><use href="#i-grid"/></svg>
+            </button>
+            <button class="icon-btn" data-layout="list" data-tooltip="Lista" aria-label="Lista" aria-pressed="false">
+              <svg class="icon"><use href="#i-list"/></svg>
+            </button>
+          </div>
+          <button class="icon-btn" id="refresh-btn" data-tooltip="Atualizar projetos" aria-label="Atualizar projetos">
+            <svg class="icon"><use href="#i-refresh"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <main class="content" id="content" tabindex="-1"></main>
+    </div>
+
+    <!-- ================= Projeto aberto ================= -->
+    <div class="project-view hidden" id="project-view">
+      <header class="project-bar">
+        <a class="icon-btn project-home" id="project-back" href="#/" data-tooltip="Voltar ao workspace" aria-label="Voltar ao workspace">
+          <svg class="logo-mark"><use href="#i-logo"/></svg>
+        </a>
+        <span class="project-bar-divider" aria-hidden="true"></span>
+        <nav class="breadcrumb" aria-label="Local">
+          <a class="breadcrumb-link" id="project-crumb-parent" href="#/">Todos os projetos</a>
+          <span class="breadcrumb-sep" aria-hidden="true">/</span>
+          <span class="breadcrumb-current" id="project-crumb-name"></span>
+        </nav>
+        <span class="status" id="project-bar-status"></span>
+        <div class="project-bar-actions">
+          <a class="icon-btn" id="project-external" target="_blank" rel="noopener" data-tooltip="Abrir em nova aba" aria-label="Abrir em nova aba">
+            <svg class="icon"><use href="#i-external"/></svg>
+          </a>
+          <button class="icon-btn" id="project-menu-btn" data-tooltip="Mais ações" aria-label="Mais ações" aria-haspopup="menu">
+            <svg class="icon"><use href="#i-more"/></svg>
+          </button>
+        </div>
+      </header>
+
+      <div class="project-stage">
+        <div class="project-state hidden" id="project-loading" role="status">
+          <span class="spinner" aria-hidden="true"></span>
+          <p class="project-state-title" id="project-loading-title">Iniciando projeto</p>
+          <p class="project-state-text" id="project-loading-text">Isso pode levar alguns segundos.</p>
+        </div>
+
+        <div class="project-state hidden" id="project-error" role="alert">
+          <span class="project-state-icon"><svg class="icon"><use href="#i-warning"/></svg></span>
+          <p class="project-state-title" id="project-error-title">Não foi possível iniciar o projeto</p>
+          <p class="project-state-text" id="project-error-text"></p>
+          <div class="project-state-actions">
+            <a class="btn" href="#/" id="project-error-back">Voltar</a>
+            <button class="btn btn-primary" id="project-retry">Tentar novamente</button>
+          </div>
+          <details class="logs" id="project-logs-wrap">
+            <summary>Ver últimas linhas de log</summary>
+            <pre id="project-logs"></pre>
+          </details>
+        </div>
+
+        <iframe id="project-frame" class="project-frame hidden" title="Protótipo"></iframe>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= Dialogos ================= -->
+  <dialog class="dialog" id="edit-dialog" aria-labelledby="edit-dialog-title">
+    <form method="dialog" class="dialog-form" id="edit-form">
+      <header class="dialog-header">
+        <h2 class="dialog-title" id="edit-dialog-title">Editar informações</h2>
+        <button type="button" class="icon-btn" data-dialog-close aria-label="Fechar"><svg class="icon"><use href="#i-close"/></svg></button>
+      </header>
+      <div class="dialog-body">
+        <label class="field">
+          <span class="field-label">Nome</span>
+          <input class="input" id="edit-name" type="text" maxlength="80" required />
+        </label>
+        <label class="field">
+          <span class="field-label">Descrição</span>
+          <textarea class="input" id="edit-description" maxlength="300" rows="3" placeholder="Opcional — também é usada na busca"></textarea>
+        </label>
+      </div>
+      <footer class="dialog-footer">
+        <button type="button" class="btn" data-dialog-close>Cancelar</button>
+        <button type="submit" class="btn btn-primary" value="save">Salvar</button>
+      </footer>
+    </form>
+  </dialog>
+
+  <dialog class="dialog" id="prompt-dialog" aria-labelledby="prompt-dialog-title">
+    <form method="dialog" class="dialog-form" id="prompt-form">
+      <header class="dialog-header">
+        <h2 class="dialog-title" id="prompt-dialog-title"></h2>
+        <button type="button" class="icon-btn" data-dialog-close aria-label="Fechar"><svg class="icon"><use href="#i-close"/></svg></button>
+      </header>
+      <div class="dialog-body">
+        <p class="dialog-text hidden" id="prompt-dialog-text"></p>
+        <label class="field" id="prompt-field">
+          <span class="field-label" id="prompt-label">Nome</span>
+          <input class="input" id="prompt-input" type="text" maxlength="60" />
+        </label>
+      </div>
+      <footer class="dialog-footer">
+        <button type="button" class="btn" data-dialog-close>Cancelar</button>
+        <button type="submit" class="btn btn-primary" id="prompt-confirm" value="ok">Confirmar</button>
+      </footer>
+    </form>
+  </dialog>
+
+  <div class="tooltip" id="tooltip" role="tooltip" hidden></div>
+  <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+  <script src="/app.js"></script>
+</body>
+</html>

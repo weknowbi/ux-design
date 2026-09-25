@@ -1,0 +1,17 @@
+node_modules/
+dist/
+build/
+.DS_Store
+.env
+.env.*
+*.local
+*.log
+.vite/
+*.tsbuildinfo
+
+# Estado de execucao local do workspace (PIDs, pastas, historico de acesso) --
+# nao faz sentido compartilhar entre maquinas diferentes.
+app/server/data/
+
+# Backup do historico git antigo do weknow_ask (ver mensagem de commit)
+weknow_ask-historico-antigo.bundle

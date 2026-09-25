@@ -1,0 +1,121 @@
+/* ---------------------------------------------------------------------------
+   A paleta, a tipografia e os utilitários (`wk-icon`, `wk-icon-btn`,
+   `wk-fade-r`, barra de rolagem) vêm inteiros do ASK. Nada é redefinido aqui:
+   se o token muda lá, esta página muda junto, é o mesmo arquivo.
+--------------------------------------------------------------------------- */
+@import '../../weknow_ask/src/index.css';
+
+/* O Tailwind procura classes a partir do CSS que importa `tailwindcss`, ou
+   seja, dentro do ASK. Estas duas linhas devolvem os dois projetos ao radar. */
+@source '../src';
+@source '../../weknow_ask/src';
+
+/* ---------------------------------------------------------------------------
+   Prosa da documentação.
+
+   Um documento é uma tela como outra qualquer: usa os mesmos tokens. O que
+   ele acrescenta é a escala de leitura longa, corpo 15/1.7 e uma medida de
+   ~72 caracteres, que é onde o olho ainda acha a linha seguinte sem esforço.
+--------------------------------------------------------------------------- */
+.wk-prose {
+  font-family: 'Inter', sans-serif;
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--wk-text);
+}
+.wk-prose > * + * { margin-top: 16px; }
+.wk-prose h2 {
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1.35;
+  margin-top: 40px;
+  padding-top: 24px;
+  border-top: 1px solid var(--wk-border);
+  scroll-margin-top: 80px;
+}
+.wk-prose h3 {
+  font-size: 16px;
+  font-weight: 600;
+  margin-top: 28px;
+  scroll-margin-top: 80px;
+}
+.wk-prose p { max-width: 72ch; }
+.wk-prose a { color: var(--wk-primary); text-decoration: underline; text-underline-offset: 2px; }
+.wk-prose strong { font-weight: 600; }
+.wk-prose ul, .wk-prose ol { max-width: 72ch; padding-left: 22px; }
+.wk-prose ul { list-style: disc; }
+.wk-prose ol { list-style: decimal; }
+.wk-prose li + li { margin-top: 6px; }
+.wk-prose li::marker { color: var(--wk-text-muted); }
+
+/* Código inline: peso 500 segura o traço da mono, que é mais fina que a Inter
+   no mesmo tamanho. O fundo é o do chip de tabela, já é o tom de "marcador"
+   do sistema, não vale inventar um segundo. */
+.wk-prose code {
+  font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.86em;
+  font-weight: 500;
+  padding: 2px 5px;
+  border-radius: 4px;
+  background: var(--wk-hover-strong);
+  color: var(--wk-text-secondary);
+}
+.wk-prose pre {
+  background: var(--wk-surface-subtle);
+  border: 1px solid var(--wk-border);
+  border-radius: 12px;
+  padding: 16px 20px;
+  overflow-x: auto;
+  max-width: 100%;
+}
+.wk-prose pre code { background: none; padding: 0; font-size: 12.5px; font-weight: 400; }
+
+/* Citação usada para a regra que não pode ser esquecida. A barra é a
+   primária: é a única cor que este documento usa para dizer "olhe aqui". */
+.wk-prose blockquote {
+  border-left: 3px solid var(--wk-primary);
+  padding: 4px 0 4px 16px;
+  color: var(--wk-text-secondary);
+  max-width: 72ch;
+}
+
+/* Tabela da prosa segue a espec. de `TABLE`: 12/600 no cabeçalho, 13/400 no
+   corpo, divisória só entre linhas. */
+.wk-prose table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.wk-prose th {
+  text-align: left;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--wk-text-secondary);
+  padding: 12px 20px 12px 0;
+  border-bottom: 1px solid var(--wk-border);
+}
+.wk-prose td {
+  padding: 12px 20px 12px 0;
+  border-bottom: 1px solid var(--wk-border);
+  vertical-align: top;
+}
+.wk-prose tr:last-child td { border-bottom: none; }
+.wk-prose hr { border: none; border-top: 1px solid var(--wk-border); }
+
+/* ---------------------------------------------------------------------------
+   Terceira coluna (sumário da página).
+
+   Os dois trilhos laterais são ancorados nas bordas e o texto se centra entre
+   eles. Quando o sumário sai, some junto o respiro que ele dava à direita, e
+   sem `.wk-reading` o texto passaria a encostar na janela. As duas regras são
+   um par: mexer numa sem a outra quebra a margem.
+
+   O corte é 1500, e sai de uma conta em vez de um degrau do Tailwind: aí o
+   conteúdo tem 1244, menos 272 do trilho esquerdo e 256 do direito, sobram
+   716 para o texto, praticamente os 745 que ele tinha logo abaixo do corte.
+   Cortar antes (1280, como estava) fazia o artigo encolher de 745 para 617 ao
+   ganhar o sumário, e o degrau aparecia.
+--------------------------------------------------------------------------- */
+.wk-toc-col { display: none; }
+.wk-reading { padding-right: 40px; }
+
+@media (min-width: 1500px) {
+  .wk-toc-col { display: block; }
+  .wk-reading { padding-right: 0; }
+}
