@@ -174,6 +174,17 @@ console.log("Construindo site estatico do Workspace de Prototipos...");
 fs.rmSync(SITE_ROOT, { recursive: true, force: true });
 fs.mkdirSync(SITE_ROOT, { recursive: true });
 
+// "design_system" faz typecheck (tsc) e importa componentes direto do
+// codigo-fonte de "weknow_ask" (alias "@" no vite.config.ts). Isso so
+// funciona se weknow_ask ja tiver as proprias dependencias instaladas --
+// num checkout limpo de CI, sem essa garantia, o tsc falha com "Cannot find
+// module 'react'" ao tentar resolver os arquivos importados de la.
+const askDeps = path.join(PROJECTS_ROOT, "weknow_ask");
+if (fs.existsSync(path.join(askDeps, "package.json")) && !fs.existsSync(path.join(askDeps, "node_modules"))) {
+  console.log("\n== instalando dependencias de weknow_ask (usadas pelo design_system via alias) ==");
+  run("npm install", askDeps);
+}
+
 const entries = fs.readdirSync(PROJECTS_ROOT, { withFileTypes: true }).filter((e) => e.isDirectory() && !e.name.startsWith("."));
 const projects = [];
 for (const entry of entries) {
