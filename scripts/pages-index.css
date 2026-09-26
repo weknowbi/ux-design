@@ -37,7 +37,7 @@ a { color: inherit; text-decoration: none; }
 }
 .brand { display: flex; align-items: center; gap: 10px; border-radius: 6px; padding: 4px 8px; margin-left: -8px; }
 .brand:hover { background: var(--color-bg-subtle); }
-.brand-logo { width: 22px; height: 16px; }
+.brand-logo { width: 26px; height: auto; flex-shrink: 0; }
 .brand-text { display: flex; flex-direction: column; line-height: 1.2; }
 .brand-text small { color: var(--color-text-secondary); font-size: 11px; }
 
