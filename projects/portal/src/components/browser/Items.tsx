@@ -308,19 +308,23 @@ const tileTitle = (item: Item, context?: string) => (context ? `${item.name} —
 const TILE_HEIGHT = 64
 
 /**
- * Estilo dos cards, em teste (alternado no menu "…"):
- * - atual: card preenchido de cinza — ícone, nome em até 2 linhas e estrela;
- * - limpoClaro e limpoTingido: a anatomia e a altura do atual, com o ícone
- *   dentro de um quadrado de 24px. São duas leituras do mesmo card, e a
- *   diferença entre elas é onde mora a cor (ver CLEAN_WHITE_CARD);
+ * Estilo dos cards. O primeiro é o que o portal abre; os outros ficam no menu
+ * "…" como alternativas numeradas, para comparar:
+ * - padrao: card branco recortado por sombra, com o ícone dentro de um
+ *   quadrado de 26px na cor da pasta, diluída;
+ * - atual: o card que está em produção hoje — preenchido de cinza, ícone solto;
  * - referencia: o card do modelo do Márcio, mais alto, com círculo cheio,
- *   título curto e o nome da pasta embaixo.
+ *   título curto e o nome da pasta embaixo;
+ * - tingido: o padrão com a cor no outro lugar — caixa azulada sem sombra e o
+ *   quadrado em cor cheia (ver CLEAN_WHITE_CARD).
+ *
+ * A ordem do array é a ordem do menu.
  */
-export type CardStyle = 'atual' | 'limpoClaro' | 'limpoTingido' | 'referencia'
-export const CARD_STYLES: CardStyle[] = ['atual', 'limpoClaro', 'limpoTingido', 'referencia']
-/** Os limpos e a Referência Márcio dividem o mesmo corpo de card; muda o traje. */
+export type CardStyle = 'padrao' | 'atual' | 'referencia' | 'tingido'
+export const CARD_STYLES: CardStyle[] = ['padrao', 'atual', 'referencia', 'tingido']
+/** Padrão, tingido e Referência Márcio dividem o mesmo corpo de card; muda o traje. */
 const isClean = (style: CardStyle) => style !== 'atual'
-export const CardStyleContext = createContext<CardStyle>('atual')
+export const CardStyleContext = createContext<CardStyle>('padrao')
 
 /** Altura do card de referência: círculo de 38px, título e duas linhas de nome. */
 const REFERENCE_TILE_HEIGHT = 100
@@ -331,12 +335,12 @@ const REFERENCE_CARD =
  * As duas leituras do card limpo, em teste lado a lado. A cor da pasta aparece
  * uma vez só em cada uma — o que muda é onde:
  *
- * - **claro**: a caixa é branca e recortada por uma sombra curta; a cor fica
+ * - **padrão**: a caixa é branca e recortada por uma sombra curta; a cor fica
  *   no ícone, diluída no quadrado e cheia no glifo;
- * - **tingido**: a caixa é o azulado do card atual, sem fio — é ela que
+ * - **tingido**: a caixa é o azulado do card atual, sem sombra — é ela que
  *   delimita; a cor sobe toda para o quadrado, com o glifo em branco.
  *
- * Ou seja: no claro a cor é um detalhe dentro de uma caixa neutra; no tingido
+ * Ou seja: no padrão a cor é um detalhe dentro de uma caixa neutra; no tingido
  * é uma marca cheia sobre uma caixa que já tem tom. Pôr as duas coisas fortes
  * ao mesmo tempo era o que deixava a grade poluída.
  */
@@ -344,9 +348,25 @@ const CLEAN_WHITE_CARD =
   'rounded-xl bg-[var(--wk-card-surface)] shadow-[var(--wk-clean-shadow)] hover:bg-[var(--wk-card-surface-hover)] hover:shadow-[var(--wk-clean-shadow-hover)] transition'
 const CLEAN_TINTED_CARD = 'rounded-xl bg-[var(--wk-canvas)] hover:bg-[var(--wk-card-hover)] transition-colors'
 const cleanCardClass = (style: CardStyle) =>
-  style === 'referencia' ? REFERENCE_CARD : style === 'limpoTingido' ? CLEAN_TINTED_CARD : CLEAN_WHITE_CARD
+  style === 'referencia' ? REFERENCE_CARD : style === 'tingido' ? CLEAN_TINTED_CARD : CLEAN_WHITE_CARD
 const cleanTileHeight = (style: CardStyle) => (style === 'referencia' ? REFERENCE_TILE_HEIGHT : TILE_HEIGHT)
 const FADE_FAST = 'transition-opacity duration-150'
+
+/**
+ * Estado dos ícones das pastas, alternado no menu "…". Não é um desenho de
+ * card: é o estágio do cadastro do cliente.
+ * - definidos: cada pasta traz o tema cadastrado (ícone e cor), como a tela
+ *   ficará depois que o cliente configurar as pastas dele;
+ * - indefinidos: nenhuma pasta tem tema — que é como a atualização entra no ar
+ *   no primeiro dia. Cai tudo no padrão do tipo: pasta genérica na cor padrão.
+ *
+ * O que o usuário personalizar continua valendo nos dois modos. Em
+ * "indefinidos" isso é justamente a graça: dá para ver a tela antes e depois
+ * de ele começar a definir as pastas.
+ */
+export type IconMode = 'definidos' | 'indefinidos'
+export const ICON_MODES: IconMode[] = ['definidos', 'indefinidos']
+export const IconModeContext = createContext<IconMode>('definidos')
 
 const DEFAULT_APPEARANCE: Record<Item['kind'], { icon: string; color: string }> = {
   folder: { icon: 'folder', color: APPEARANCE_COLORS[0] },
@@ -355,14 +375,23 @@ const DEFAULT_APPEARANCE: Record<Item['kind'], { icon: string; color: string }> 
   presentation: { icon: 'animated_images', color: APPEARANCE_COLORS[7] },
 }
 
-/** Ícone e cor do card limpo: o que o usuário escolheu, senão o tema do item, senão o do tipo. */
+/** Ícone e cor do card: o que o usuário escolheu, senão o tema do item, senão o do tipo. */
 function useResolvedAppearance(item: Item) {
   const custom = useAppearance(item.id)
-  const base = item.theme
-    ? { icon: item.theme.icon, color: APPEARANCE_COLORS[item.theme.tone % APPEARANCE_COLORS.length] }
+  // Em "indefinidos" o tema cadastrado é ignorado; o que o usuário escolheu, não.
+  const theme = useContext(IconModeContext) === 'indefinidos' ? undefined : item.theme
+  const base = theme
+    ? { icon: theme.icon, color: APPEARANCE_COLORS[theme.tone % APPEARANCE_COLORS.length] }
     : DEFAULT_APPEARANCE[item.kind]
-  return { icon: custom?.icon ?? base.icon, color: custom?.color ?? base.color }
+  const color = custom?.color ?? base.color
+  // Dashboard tem ícone fixo por ora: é sempre o gráfico de barras, venha de
+  // onde vier o resto. A cor continua livre.
+  if (fixedIcon(item)) return { icon: DEFAULT_APPEARANCE.dashboard.icon, color }
+  return { icon: custom?.icon ?? base.icon, color }
 }
+
+/** Itens cujo ícone não se escolhe — hoje, só os dashboards. */
+const fixedIcon = (item: Item) => item.kind === 'dashboard'
 
 /** ⋮ do card limpo: personalizar ícone e cor, e favoritar. Aparece no hover. */
 function CardMenu({
@@ -406,7 +435,11 @@ function CardMenu({
         {(close) =>
           !customizing ? (
             <>
-              <MenuAction icon="palette" label="Personalizar ícone e cor" onSelect={() => setCustomizing(true)} />
+              <MenuAction
+                icon="palette"
+                label={fixedIcon(item) ? 'Personalizar cor' : 'Personalizar ícone e cor'}
+                onSelect={() => setCustomizing(true)}
+              />
               <MenuAction
                 icon="star"
                 label={favorite ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
@@ -418,6 +451,9 @@ function CardMenu({
             </>
           ) : (
           <div className="flex flex-col gap-3 p-2" style={{ fontFamily: FONT }}>
+            {/* Dashboard não oferece a grade: o ícone dele é fixo. */}
+            {!fixedIcon(item) && (
+              <>
             <span className="text-[12px] font-semibold" style={{ color: COLOR.textMuted }}>
               Ícone
             </span>
@@ -440,6 +476,8 @@ function CardMenu({
                 </button>
               ))}
             </div>
+              </>
+            )}
             <span className="text-[12px] font-semibold" style={{ color: COLOR.textMuted }}>
               Cor
             </span>
@@ -511,6 +549,11 @@ function CleanTileBody({
 }) {
   const style = useContext(CardStyleContext)
   const { icon, color } = useResolvedAppearance(item)
+  // A cor da pasta com a luz que o tema pede: no claro é ela mesma, no escuro
+  // ela sobe (ver --wk-icon-lift). Vale para o glifo e para o quadrado, que é
+  // feito a partir dela — se só o glifo subisse, o quadrado ficaria fora de
+  // tom com o ícone que ele abriga.
+  const tone = `color-mix(in srgb, #fff var(--wk-icon-lift), ${color})`
 
   if (style === 'referencia') {
     const title = item.theme?.title ?? item.name
@@ -581,26 +624,33 @@ function CleanTileBody({
           é diluída no branco do card e só o glifo fica na cor cheia: sobre uma
           caixa neutra, o bloco saturado repetido em toda a grade pesava. */}
       <span
-        className="shrink-0 flex items-center justify-center pointer-events-none rounded-[7px]"
+        className="shrink-0 flex items-center justify-center rounded-lg pointer-events-none"
         style={{
-          width: 24,
-          height: 24,
+          width: 26,
+          height: 26,
           background:
-            style === 'limpoTingido'
+            style === 'tingido'
               ? color
-              : `color-mix(in srgb, ${color} var(--wk-icon-tint), var(--wk-card-surface))`,
+              : `color-mix(in srgb, ${tone} var(--wk-icon-tint), var(--wk-card-surface))`,
         }}
       >
+        {/* 20 num quadrado de 26. As duas medidas saíram de comparar 24/26/28 na
+            tela com o mesmo glifo, e a conta que importa não é font-size sobre
+            caixa: o glifo do Material Symbols tem recuo dentro da própria caixa
+            (o ~2px que LAYOUT.glyphInset documenta), então a 20px o desenho
+            visível mede ~18x12. Em 24 esses 18 de tinta ficavam a 0,75 da
+            caixa e encostavam no raio do canto; em 28 sobrava ar demais e o
+            quadrado virava um bloco com um glifo solto dentro. */}
         <Icon
           name={icon}
-          size={18}
-          weight={style === 'limpoTingido' ? 300 : 350}
-          color={style === 'limpoTingido' ? '#fff' : color}
+          size={20}
+          weight={style === 'tingido' ? 300 : 350}
+          color={style === 'tingido' ? '#fff' : tone}
         />
       </span>
       <span
         ref={tipRef}
-        className="pointer-events-none flex-1 min-w-0 line-clamp-2 break-words text-[14px] leading-[18px] font-medium"
+        className="pointer-events-none flex-1 min-w-0 line-clamp-2 break-words text-[14px] leading-[18px]"
         style={NAME_STYLE}
       >
         {item.name}
@@ -740,11 +790,12 @@ function ItemThumb({ entry: { item, context }, favorite, quietFavorite, onOpen, 
       // ele cobria as opções do menu que acabou de abrir.
       onPointerDown={tip.hide}
       onMouseLeave={tip.hide}
-      // No Expandido o card leva o fio do estilo atual em toda parte menos na
-      // Referência, que é sombra: sem ele a imagem sangrava para o fundo da
-      // página, sem nada dizendo onde o card acaba.
+      // O Expandido usa a MESMA caixa do Compacto em cada estilo — quem decide é
+      // cleanCardClass, um lugar só. Antes ele tinha fio fixo enquanto o
+      // Compacto já era sombra, e trocar de visualização mudava o material do
+      // card. Só o estilo 'atual' segue com fio, que é o card de produção.
       className={`group relative flex flex-col ${
-        style === 'referencia'
+        isClean(style)
           ? cleanCardClass(style)
           : 'rounded-xl border border-[var(--wk-card-border)] transition-colors bg-[var(--wk-card-surface)] hover:bg-[var(--wk-card-surface-hover)]'
       }`}
@@ -756,8 +807,14 @@ function ItemThumb({ entry: { item, context }, favorite, quietFavorite, onOpen, 
           branco do card, e o ícone no mesmo matiz — a grade ganha cor sem
           blocos cinza repetidos. */}
       <div
+        // O raio de cima acompanha o da caixa, e o fio de 1px desconta 1 do raio:
+        // sem fio o canto é o mesmo 12 do card; com fio, 11.
         className={`pointer-events-none aspect-[2/1] overflow-hidden flex items-center justify-center bg-[var(--wk-thumb-empty)] ${
-          style === 'referencia' ? 'rounded-t-[10px]' : 'rounded-t-[11px] border-b border-[var(--wk-card-border)]'
+          style === 'referencia'
+            ? 'rounded-t-[10px]'
+            : isClean(style)
+              ? 'rounded-t-xl border-b border-[var(--wk-card-border)]'
+              : 'rounded-t-[11px] border-b border-[var(--wk-card-border)]'
         }`}
         style={emptyStyle}
       >

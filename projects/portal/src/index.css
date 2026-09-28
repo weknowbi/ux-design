@@ -145,6 +145,9 @@
      (No limpo tingido o quadrado é cor cheia e não usa este token: lá quem
      segura a grade é o fundo do card, não o fio.) */
   --wk-icon-tint: 14%;
+  /* Clareamento da cor da pasta antes de ela virar ícone. No claro é zero: a
+     paleta já foi escolhida para funcionar sobre branco. */
+  --wk-icon-lift: 0%;
   /* Card limpo (modelo Indicadores Hospitalares): sem borda, sombra suave. */
   /* Card limpo claro: sem fio, quem recorta é a sombra. São três camadas, cada
      uma resolvendo um problema que apareceu ao testar as outras na tela:
@@ -291,21 +294,41 @@
      miniatura vazia sobe para ser lido sem gritar (~1,9:1 com o fundo). */
   --wk-thumb-empty: #24262a;
   --wk-thumb-icon: #4a4f57;
-  --wk-card-surface: #17181a;
-  --wk-card-surface-hover: #1d1f21;
+  --wk-card-surface: #191b1e;
+  --wk-card-surface-hover: #1e2124;
   --wk-card-border: #2a2d32;
   /* No escuro a mesma diluição some no fundo do card: a mistura sobe. */
   --wk-icon-tint: 24%;
-  /* No escuro a sombra quase não aparece: quem separa o card é o tom. */
-  /* Mesmo desenho de três camadas do claro, com alfa muito abaixo dele. A
-     folha já é #131314: não sobra faixa de luminância abaixo dela, então preto
-     a 0,4 não vira sombra, vira anel duro em volta do card. Quem separa aqui é
-     o tom — o card é MAIS CLARO que a folha, como manda o modo escuro —, e a
-     sombra só encosta o card na superfície. */
-  --wk-clean-shadow: 0 0 2px rgba(0, 0, 0, 0.18), 0 1px 2px rgba(0, 0, 0, 0.18),
-    0 3px 6px -3px rgba(0, 0, 0, 0.28);
-  --wk-clean-shadow-hover: 0 0 2px rgba(0, 0, 0, 0.22), 0 1px 2px rgba(0, 0, 0, 0.22),
-    0 6px 10px -4px rgba(0, 0, 0, 0.38);
+  /* No escuro a paleta precisa de luz, como --wk-primary precisou: #6d3fd3 dá
+     6,3:1 sobre branco e só 2,2:1 dentro do quadrado escuro. Escurecer o card
+     não resolveria — o fundo do quadrado é feito DA cor do card, então os dois
+     escurecem juntos e a razão entre glifo e quadrado mal se move (2,21 para
+     2,35:1). Quem não tem luz é a cor.
+
+     38% é o piso ditado pelo grafite #2f3542, a cor neutra da paleta e a mais
+     fraca aqui: com 32% ele parava em 2,77:1, abaixo do mínimo de 3:1 para
+     elemento gráfico. Subir além disso não compra nada e custa saturação — e
+     saturação, neste card, é o que distingue uma pasta da outra. */
+  --wk-icon-lift: 38%;
+  /* Aqui o desenho do claro NÃO serve, e não é questão de alfa. A camada de
+     contorno (0 0 2px) pinta escuro nos quatro lados; sobre uma folha que já é
+     #131314 não sobra faixa de luminância para ela virar degradê, então ela
+     satura e vira anel. Por isso o escuro não tem contorno: só contato e
+     queda, ambos deslocados para baixo.
+
+     Quem define a borda do card aqui é o TOM dele, mais claro que a folha —
+     elevação no escuro é clarear —, e o passo é o menor que ainda se sustenta:
+     #191b1e dá 1,06:1 com a folha, metade do que #1c1e21 dava.
+
+     Não dá para zerar esse passo e deixar a sombra separar, como o claro faz
+     (lá card e folha são os dois #ffffff). Sombra escurece, e #131314 já está
+     quase no fim da escala: mesmo preto puro só produziria uma borda de
+     1,12:1, e nessa intensidade ela deixa de ser degradê e vira halo em volta
+     de um card que continua invisível — testado lado a lado, é pior que o
+     passo de tom. Como o passo encurtou, a sombra subiu um pouco (0,18 para
+     0,24) para compensar. */
+  --wk-clean-shadow: 0 1px 2px rgba(0, 0, 0, 0.24), 0 3px 6px -3px rgba(0, 0, 0, 0.3);
+  --wk-clean-shadow-hover: 0 1px 2px rgba(0, 0, 0, 0.26), 0 6px 10px -4px rgba(0, 0, 0, 0.38);
   --wk-card-shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 6px 16px rgba(0, 0, 0, 0.25);
   --wk-card-shadow-hover: 0 2px 4px rgba(0, 0, 0, 0.45), 0 10px 24px rgba(0, 0, 0, 0.35);
   --wk-card-title: #eff0f0;

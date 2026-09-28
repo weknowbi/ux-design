@@ -42,7 +42,7 @@ function Section({
   aside?: ReactNode
   children: ReactNode
 }) {
-  // Só a Referência Márcio traz o título de seção do modelo; nos Cards limpos
+  // Só a Referência Márcio traz o título de seção do modelo; no Padrão e no tingido
   // ele é o mesmo do resto do portal — ali o card mudou, a seção não.
   const clean = useContext(CardStyleContext) === 'referencia'
   return (
