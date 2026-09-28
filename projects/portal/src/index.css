@@ -139,7 +139,34 @@
   --wk-card-surface: #ffffff;
   --wk-card-surface-hover: #f3f6fc;
   --wk-card-border: #e2e8f0;
+  /* Quadrado do ícone no card limpo claro: a cor da pasta diluída no branco
+     do card. Ali a caixa é neutra, então a cor cheia repetida em ~24 cards
+     virava ruído; diluída, o matiz ainda identifica e a grade fica quieta.
+     (No limpo tingido o quadrado é cor cheia e não usa este token: lá quem
+     segura a grade é o fundo do card, não o fio.) */
+  --wk-icon-tint: 14%;
   /* Card limpo (modelo Indicadores Hospitalares): sem borda, sombra suave. */
+  /* Card limpo claro: sem fio, quem recorta é a sombra. São três camadas, cada
+     uma resolvendo um problema que apareceu ao testar as outras na tela:
+
+       0 0 2px          contorno. Sem deslocamento, envolve os quatro lados,
+                        então o topo também tem limite. 2px de desfoque é o
+                        ponto: com 1px vira fio desenhado, com 8px a borda
+                        perde o pé e o card fica esfumaçado.
+       0 1px 2px        contato, logo abaixo da borda de baixo.
+       0 3px 6px -3px   queda. É só ela que se desloca, e o spread negativo a
+                        segura lateralmente, então ela cai embaixo sem abrir
+                        halo em volta.
+
+     O erro a evitar é tratar deslocamento e desfoque como a mesma coisa: o
+     deslocamento diz a que ALTURA o card está (curto = pousado), o desfoque
+     diz quão DIFUSA a sombra é. Encurtar os dois juntos dá uma sombra baixa
+     que parece borda; abrir os dois juntos dá fumaça. Aqui o deslocamento é
+     curto em todas as camadas e só o desfoque varia entre elas. */
+  --wk-clean-shadow: 0 0 2px rgba(16, 24, 40, 0.07), 0 1px 2px rgba(16, 24, 40, 0.06),
+    0 3px 6px -3px rgba(16, 24, 40, 0.1);
+  --wk-clean-shadow-hover: 0 0 2px rgba(16, 24, 40, 0.08), 0 1px 2px rgba(16, 24, 40, 0.07),
+    0 6px 10px -4px rgba(16, 24, 40, 0.14);
   --wk-card-shadow: 0 1px 2px rgba(16, 24, 40, 0.04), 0 6px 16px rgba(16, 24, 40, 0.06);
   --wk-card-shadow-hover: 0 2px 4px rgba(16, 24, 40, 0.05), 0 10px 24px rgba(16, 24, 40, 0.1);
   --wk-card-title: #1f2937;
@@ -267,7 +294,18 @@
   --wk-card-surface: #17181a;
   --wk-card-surface-hover: #1d1f21;
   --wk-card-border: #2a2d32;
+  /* No escuro a mesma diluição some no fundo do card: a mistura sobe. */
+  --wk-icon-tint: 24%;
   /* No escuro a sombra quase não aparece: quem separa o card é o tom. */
+  /* Mesmo desenho de três camadas do claro, com alfa muito abaixo dele. A
+     folha já é #131314: não sobra faixa de luminância abaixo dela, então preto
+     a 0,4 não vira sombra, vira anel duro em volta do card. Quem separa aqui é
+     o tom — o card é MAIS CLARO que a folha, como manda o modo escuro —, e a
+     sombra só encosta o card na superfície. */
+  --wk-clean-shadow: 0 0 2px rgba(0, 0, 0, 0.18), 0 1px 2px rgba(0, 0, 0, 0.18),
+    0 3px 6px -3px rgba(0, 0, 0, 0.28);
+  --wk-clean-shadow-hover: 0 0 2px rgba(0, 0, 0, 0.22), 0 1px 2px rgba(0, 0, 0, 0.22),
+    0 6px 10px -4px rgba(0, 0, 0, 0.38);
   --wk-card-shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 6px 16px rgba(0, 0, 0, 0.25);
   --wk-card-shadow-hover: 0 2px 4px rgba(0, 0, 0, 0.45), 0 10px 24px rgba(0, 0, 0, 0.35);
   --wk-card-title: #eff0f0;

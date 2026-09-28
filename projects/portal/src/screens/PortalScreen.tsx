@@ -37,7 +37,8 @@ const LAYOUTS: Layout[] = ['dinamico', 'padrao', 'compacto']
  */
 const CARD_STYLE_MENU: Record<CardStyle, { icon: string; label: string }> = {
   atual: { icon: 'grid_view', label: 'Cards atuais (teste)' },
-  limpo: { icon: 'auto_awesome', label: 'Cards limpos (teste)' },
+  limpoClaro: { icon: 'auto_awesome', label: 'Cards limpos · claro (teste)' },
+  limpoTingido: { icon: 'format_color_fill', label: 'Cards limpos · tingido (teste)' },
   referencia: { icon: 'palette', label: 'Referência Márcio (teste)' },
 }
 

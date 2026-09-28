@@ -310,14 +310,15 @@ const TILE_HEIGHT = 64
 /**
  * Estilo dos cards, em teste (alternado no menu "…"):
  * - atual: card preenchido de cinza — ícone, nome em até 2 linhas e estrela;
- * - limpo: mesma anatomia e altura do atual — ícone, nome em até 2 linhas e
- *   ações —, só que em card branco com fio e o ícone na cor do item;
+ * - limpoClaro e limpoTingido: a anatomia e a altura do atual, com o ícone
+ *   dentro de um quadrado de 24px. São duas leituras do mesmo card, e a
+ *   diferença entre elas é onde mora a cor (ver CLEAN_WHITE_CARD);
  * - referencia: o card do modelo do Márcio, mais alto, com círculo cheio,
  *   título curto e o nome da pasta embaixo.
  */
-export type CardStyle = 'atual' | 'limpo' | 'referencia'
-export const CARD_STYLES: CardStyle[] = ['atual', 'limpo', 'referencia']
-/** Limpo e Referência Márcio dividem o mesmo card; só o ícone muda. */
+export type CardStyle = 'atual' | 'limpoClaro' | 'limpoTingido' | 'referencia'
+export const CARD_STYLES: CardStyle[] = ['atual', 'limpoClaro', 'limpoTingido', 'referencia']
+/** Os limpos e a Referência Márcio dividem o mesmo corpo de card; muda o traje. */
 const isClean = (style: CardStyle) => style !== 'atual'
 export const CardStyleContext = createContext<CardStyle>('atual')
 
@@ -327,11 +328,23 @@ const REFERENCE_TILE_HEIGHT = 100
 const REFERENCE_CARD =
   'rounded-[10px] bg-[var(--wk-card-surface)] shadow-[var(--wk-card-shadow)] hover:shadow-[var(--wk-card-shadow-hover)] transition-shadow'
 /**
- * Limpo: as cores do card atual — fundo preenchido, sem sombra e sem fio, nos
- * dois temas. O que muda ali é o conteúdo (ícone colorido e ⋮), não a caixa.
+ * As duas leituras do card limpo, em teste lado a lado. A cor da pasta aparece
+ * uma vez só em cada uma — o que muda é onde:
+ *
+ * - **claro**: a caixa é branca e recortada por uma sombra curta; a cor fica
+ *   no ícone, diluída no quadrado e cheia no glifo;
+ * - **tingido**: a caixa é o azulado do card atual, sem fio — é ela que
+ *   delimita; a cor sobe toda para o quadrado, com o glifo em branco.
+ *
+ * Ou seja: no claro a cor é um detalhe dentro de uma caixa neutra; no tingido
+ * é uma marca cheia sobre uma caixa que já tem tom. Pôr as duas coisas fortes
+ * ao mesmo tempo era o que deixava a grade poluída.
  */
-const CLEAN_CARD = 'rounded-[10px] bg-[var(--wk-canvas)] hover:bg-[var(--wk-card-hover)] transition-colors'
-const cleanCardClass = (style: CardStyle) => (style === 'referencia' ? REFERENCE_CARD : CLEAN_CARD)
+const CLEAN_WHITE_CARD =
+  'rounded-xl bg-[var(--wk-card-surface)] shadow-[var(--wk-clean-shadow)] hover:bg-[var(--wk-card-surface-hover)] hover:shadow-[var(--wk-clean-shadow-hover)] transition'
+const CLEAN_TINTED_CARD = 'rounded-xl bg-[var(--wk-canvas)] hover:bg-[var(--wk-card-hover)] transition-colors'
+const cleanCardClass = (style: CardStyle) =>
+  style === 'referencia' ? REFERENCE_CARD : style === 'limpoTingido' ? CLEAN_TINTED_CARD : CLEAN_WHITE_CARD
 const cleanTileHeight = (style: CardStyle) => (style === 'referencia' ? REFERENCE_TILE_HEIGHT : TILE_HEIGHT)
 const FADE_FAST = 'transition-opacity duration-150'
 
@@ -562,8 +575,28 @@ function CleanTileBody({
   // e a grade, pesada.
   return (
     <>
-      <span className="shrink-0 flex items-center justify-center pointer-events-none" style={{ width: 24, height: 24 }}>
-        <Icon name={icon} size={23} weight={250} color={color} />
+      {/* Quadrado de 24px arredondado, na cor da pasta — o que muda entre os dois
+          limpos é o peso dessa cor. No tingido ela é cheia e o glifo sai em
+          branco, uma marca que se lê de longe sobre o card azulado. No claro ela
+          é diluída no branco do card e só o glifo fica na cor cheia: sobre uma
+          caixa neutra, o bloco saturado repetido em toda a grade pesava. */}
+      <span
+        className="shrink-0 flex items-center justify-center pointer-events-none rounded-[7px]"
+        style={{
+          width: 24,
+          height: 24,
+          background:
+            style === 'limpoTingido'
+              ? color
+              : `color-mix(in srgb, ${color} var(--wk-icon-tint), var(--wk-card-surface))`,
+        }}
+      >
+        <Icon
+          name={icon}
+          size={18}
+          weight={style === 'limpoTingido' ? 300 : 350}
+          color={style === 'limpoTingido' ? '#fff' : color}
+        />
       </span>
       <span
         ref={tipRef}
