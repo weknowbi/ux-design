@@ -257,9 +257,15 @@ export function DynamicHero({
 
       {/* Altura reservada e sem ponteiro: a parte vazia do bloco grudado não
           pode roubar o clique das linhas que passam por baixo dela. */}
+      {/* Sem margem acima: a faixa do título já tem 80px para uma linha de 36,
+          então ela sozinha entrega 22px de folga abaixo do texto. Os 20px de
+          mt-5 que havia aqui somavam a essa folga e desequilibravam o título —
+          28px acima da tinta contra 43 abaixo, medidos. Sem eles ficam 28 e 23:
+          um fio a menos embaixo, que é o certo para um título, porque ele
+          pertence à busca que vem logo depois. */}
       <div
         ref={rowRef}
-        className="sticky z-30 mt-5 pointer-events-none"
+        className="sticky z-30 pointer-events-none"
         style={{ top: STICK_TOP, height: ROW_HEIGHT }}
       >
         {/* Recolhida, a linha reserva a ponta direita: os controles moram na

@@ -10,7 +10,7 @@ import { CONTENT_TYPES, DynamicHero, FADE, Hero, type SectionId } from '@/compon
 import { ContentBrowser } from '@/components/browser/ContentBrowser'
 import { useBrowserPrefs, usePref } from '@/components/browser/prefs'
 import { BrowserControls } from '@/components/browser/BrowserControls'
-import { CARD_STYLES, CardStyleContext, type CardStyle } from '@/components/browser/Items'
+import { CARD_STYLES, CardStyleContext, ICON_MODES, IconModeContext, type CardStyle, type IconMode } from '@/components/browser/Items'
 import { PORTAL_ROOT, findFolderPath, initialFavorites, type Folder } from '@/data/portal'
 
 /**
@@ -39,20 +39,23 @@ type Layout = 'dinamico' | 'padrao' | 'compacto'
 const LAYOUTS: Layout[] = ['dinamico', 'padrao', 'compacto']
 
 /**
- * Alternância de teste nossa, não do cliente: mora no menu "…" com as outras
- * preferências, e a barra fica com o que o usuário realmente usa.
+ * O menu "…" alterna o estágio do cadastro do cliente, não o desenho do card:
+ * com as pastas já configuradas, ou como a atualização entra no ar, sem nenhum
+ * ícone definido ainda. Mostra sempre o modo em que você NÃO está.
+ *
+ * Os desenhos de card alternativos (o atual, o tingido e a Referência Márcio)
+ * saíram do menu, mas continuam no código: a preferência wk-portal-cards ainda
+ * os aceita pelo localStorage.
  */
-const CARD_STYLE_MENU: Record<CardStyle, { icon: string; label: string }> = {
-  atual: { icon: 'grid_view', label: 'Cards atuais (teste)' },
-  limpo: { icon: 'auto_awesome', label: 'Cards limpos (teste)' },
-  referencia: { icon: 'palette', label: 'Referência Márcio (teste)' },
+const ICON_MODE_MENU: Record<IconMode, { icon: string; label: string }> = {
+  definidos: { icon: 'palette', label: 'Ícones de pasta definidos' },
+  indefinidos: { icon: 'folder', label: 'Ícones de pasta não definidos' },
 }
 
-/** O menu oferece os outros dois estilos; o que está em uso fica de fora. */
-function cardStyleMenuItems(style: CardStyle, onChange: (s: CardStyle) => void): MenuItem[] {
-  return CARD_STYLES.filter((s) => s !== style).map((s) => ({
-    ...CARD_STYLE_MENU[s],
-    onClick: () => onChange(s),
+function iconModeMenuItems(mode: IconMode, onChange: (m: IconMode) => void): MenuItem[] {
+  return ICON_MODES.filter((m) => m !== mode).map((m) => ({
+    ...ICON_MODE_MENU[m],
+    onClick: () => onChange(m),
   }))
 }
 
@@ -71,7 +74,8 @@ export function PortalScreen({ onNavigate }: { onNavigate: (route: PortalRoute) 
   const [query, setQuery] = useState('')
   const [favorites, setFavorites] = useState(() => initialFavorites(PORTAL_ROOT))
   const [layout] = usePref<Layout>('wk-portal-layout', LAYOUTS, 'dinamico')
-  const [cardStyle, setCardStyle] = usePref<CardStyle>('wk-portal-cards', CARD_STYLES, 'atual')
+  const [cardStyle] = usePref<CardStyle>('wk-portal-cards', CARD_STYLES, 'padrao')
+  const [iconMode, setIconMode] = usePref<IconMode>('wk-portal-icones', ICON_MODES, 'definidos')
   const [heroCollapsed, setHeroCollapsed] = useState(false)
   const [section, setSection] = useState<SectionId>('pastas')
   const prefs = useBrowserPrefs()
@@ -175,18 +179,20 @@ export function PortalScreen({ onNavigate }: { onNavigate: (route: PortalRoute) 
 
   const browser = (
     <CardStyleContext.Provider value={cardStyle}>
-      <ContentBrowser
-        root={PORTAL_ROOT}
-        path={path}
-        query={query}
-        favorites={favorites}
-        prefs={prefs}
-        section={section}
-        controls={atRoot ? controls : undefined}
-        controlsHidden={dynamicHero && heroCollapsed}
-        onNavigate={navigate}
-        onToggleFavorite={toggleFavorite}
-      />
+      <IconModeContext.Provider value={iconMode}>
+        <ContentBrowser
+          root={PORTAL_ROOT}
+          path={path}
+          query={query}
+          favorites={favorites}
+          prefs={prefs}
+          section={section}
+          controls={atRoot ? controls : undefined}
+          controlsHidden={dynamicHero && heroCollapsed}
+          onNavigate={navigate}
+          onToggleFavorite={toggleFavorite}
+        />
+      </IconModeContext.Provider>
     </CardStyleContext.Provider>
   )
 
@@ -199,7 +205,7 @@ export function PortalScreen({ onNavigate }: { onNavigate: (route: PortalRoute) 
       <div className="flex shrink-0" style={{ paddingRight: LAYOUT.sheetMarginRight }}>
         <SidebarBrand collapsed={sidebar.collapsed} onToggle={sidebar.toggle} />
         <div className="flex-1 min-w-0">
-          <Header trail={trail} menuItems={cardStyleMenuItems(cardStyle, setCardStyle)} search={topbarSearch} />
+          <Header trail={trail} menuItems={iconModeMenuItems(iconMode, setIconMode)} search={topbarSearch} />
         </div>
       </div>
 
