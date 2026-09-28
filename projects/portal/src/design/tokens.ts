@@ -79,16 +79,21 @@ export const RADIUS = {
 export const LAYOUT = {
   headerHeight: 56,      // Top Bar
   sidebarWidth: 255,     // instance "sidebar white"
+  /**
+   * Menu recolhido: só a coluna de ícones. 16 de margem + item de 40 + 16:
+   * o item vira um quadrado e o ícone fica no mesmo x do menu aberto.
+   */
+  sidebarRailWidth: 72,
   sheetRadius: 16,       // cantos superiores da folha branca
   sheetMarginRight: 48,  // 1920 - 255 - 1617: o conteúdo não encosta na borda
   threadMaxWidth: 896,
   /* item de menu — nó "item camadas dashboard" */
-  navItemHeight: 44,   // padding 10px + 24 do ícone + 10px
-  navItemPadX: 12,
-  navItemGap: 12,
+  navItemHeight: 40,
+  navItemPadX: 8,
+  navItemGap: 8,
   navItemRadius: 8,
   navIconSize: 24,
-  sidebarPad: 8,       // .sidebar-nav e .sidebar-footer: padding-inline 8
+  sidebarPad: 16,
   /**
    * Os glifos do Material Symbols têm ~2px de recuo dentro da caixa de 24px.
    * O logo preenche a dele, então precisa desse mesmo recuo para a coluna

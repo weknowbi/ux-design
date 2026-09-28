@@ -1,8 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { COLOR, FONT, LAYOUT } from '@/design/tokens'
+import { useSidebar } from '@/design/sidebar'
 import { Header, type Crumb, type MenuItem } from '@/components/Header'
 import { Icon } from '@/components/icons'
 import { PortalSidebar } from '@/components/PortalSidebar'
+import { SidebarBrand } from '@/components/SidebarBrand'
 import { FolderHeader } from '@/components/FolderHeader'
 import { CONTENT_TYPES, DynamicHero, FADE, Hero, type SectionId } from '@/components/Hero'
 import { ContentBrowser } from '@/components/browser/ContentBrowser'
@@ -57,6 +59,7 @@ function readHash(): string | null {
 }
 
 export function PortalScreen() {
+  const sidebar = useSidebar()
   const [folderId, setFolderId] = useState(readHash)
   const [query, setQuery] = useState('')
   const [favorites, setFavorites] = useState(() => initialFavorites(PORTAL_ROOT))
@@ -178,13 +181,30 @@ export function PortalScreen() {
   )
 
   return (
-    <div className="flex" style={{ width: '100vw', height: '100vh', background: COLOR.canvas, fontFamily: FONT }}>
-      {/* As áreas de conteúdo saíram do menu lateral: os chips agora ficam
-          sempre à mão, na barra que gruda ao rolar a home. */}
-      <PortalSidebar active="portal" onNavigate={() => navigate(null)} />
+    <div
+      className="flex flex-col"
+      style={{ width: '100vw', height: '100vh', background: COLOR.canvas, fontFamily: FONT }}
+    >
+      {/* Faixa de topo inteira com a marca; só o menu de baixo recolhe. */}
+      <div className="flex shrink-0" style={{ paddingRight: LAYOUT.sheetMarginRight }}>
+        <SidebarBrand collapsed={sidebar.collapsed} onToggle={sidebar.toggle} />
+        <div className="flex-1 min-w-0">
+          <Header trail={trail} menuItems={cardStyleMenuItems(cardStyle, setCardStyle)} search={topbarSearch} />
+        </div>
+      </div>
 
-      <div className="flex-1 flex flex-col min-w-0 relative" style={{ minHeight: 0, paddingRight: LAYOUT.sheetMarginRight }}>
-        <Header trail={trail} menuItems={cardStyleMenuItems(cardStyle, setCardStyle)} search={topbarSearch} />
+      <div
+        className="flex flex-1 overflow-hidden relative"
+        style={{ minHeight: 0, paddingRight: LAYOUT.sheetMarginRight }}
+      >
+        {/* As áreas de conteúdo saíram do menu lateral: os chips ficam sempre
+            à mão, na barra que gruda ao rolar a home. Aqui só "Página inicial"
+            navega — Ask e SQL AI são outros apps. */}
+        <PortalSidebar
+          active="portal"
+          onNavigate={(route) => route === 'portal' && navigate(null)}
+          collapsed={sidebar.collapsed}
+        />
 
         <main
           ref={mainRef}
