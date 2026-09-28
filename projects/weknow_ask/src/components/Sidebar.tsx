@@ -1,13 +1,12 @@
-import { useMemo, useState } from 'react'
-import { COLOR, FONT, LAYOUT, TOPBAR } from '@/design/tokens'
+import { useMemo, useRef, useState } from 'react'
+import { COLOR, FONT, LAYOUT } from '@/design/tokens'
+import { SIDEBAR_TRANSITION } from '@/design/sidebar'
 import { Icon, IconNewChat, IconSearch } from '@/components/icons'
 import { ChatRowMenu } from '@/components/ChatRowMenu'
 import { FolderRowMenu } from '@/components/FolderRowMenu'
 import { MarqueeText } from '@/components/MarqueeText'
 import { PromptModal } from '@/components/PromptModal'
-import { WeknowLogo } from '@/components/WeknowLogo'
 import type { Conversation, Folder, FolderItem } from '@/data/conversation'
-import type { PortalRoute } from '@/components/PortalSidebar'
 
 /**
  * Menu lateral no estilo do portal (WP-832, nó "sidebar white"): sem borda e
@@ -22,36 +21,6 @@ const ROW_H = 34
 
 /** Itens visíveis antes do "Mostrar mais" — o mesmo corte que o ChatGPT usa. */
 const FOLDER_PREVIEW = 5
-
-function SectionHeader({
-  label,
-  action,
-}: {
-  label: string
-  action?: { title: string; icon: string; onClick?: () => void }
-}) {
-  return (
-    <div className="flex items-center justify-between h-[32px] pl-3 pr-1 mt-3">
-      <span
-        className="text-[11px] font-semibold uppercase tracking-wider"
-        style={{ fontFamily: FONT, color: COLOR.navLabel }}
-      >
-        {label}
-      </span>
-      {action && (
-        <button
-          onClick={action.onClick}
-          title={action.title}
-          aria-label={action.title}
-          className="wk-icon-btn w-7 h-7 flex items-center justify-center"
-          style={{ color: COLOR.navLabel }}
-        >
-          <Icon name={action.icon} size={18} />
-        </button>
-      )}
-    </div>
-  )
-}
 
 /** Linha genérica do menu. Sem ícone, o texto encosta na borda do padding. */
 function Row({
@@ -301,7 +270,6 @@ function FolderRow({
 }
 
 export function Sidebar({
-  onNavigate,
   conversations,
   folders: allFolders,
   activeId,
@@ -314,8 +282,16 @@ export function Sidebar({
   onRenameFolder,
   onDeleteFolder,
   onOpenFolder,
+  collapsed,
+  onExpand,
 }: {
-  onNavigate?: (route: PortalRoute) => void
+  /**
+   * Recolhido em trilho: ficam "Nova conversa" e a busca, que são as ações
+   * de toda hora. Pastas e chats não têm ícone próprio — a lista se apaga,
+   * mas continua montada, então as pastas voltam abertas como estavam.
+   */
+  collapsed: boolean
+  onExpand: () => void
   conversations: Conversation[]
   folders: Folder[]
   activeId: string
@@ -336,7 +312,15 @@ export function Sidebar({
   const [renaming, setRenaming] = useState<{ id: string; title: string } | null>(null)
   const [renamingFolder, setRenamingFolder] = useState<{ id: string; label: string } | null>(null)
   const [search, setSearch] = useState('')
+  const [searchHover, setSearchHover] = useState(false)
+  const searchRef = useRef<HTMLInputElement>(null)
   const term = search.trim().toLowerCase()
+
+  /** No trilho, a lupa abre o menu e já entrega o cursor no campo. */
+  const openSearch = () => {
+    onExpand()
+    searchRef.current?.focus()
+  }
 
   const folders = allFolders.filter(
     (f) =>
@@ -354,72 +338,108 @@ export function Sidebar({
 
   return (
     <aside
-      className="shrink-0 flex flex-col h-full"
+      className="shrink-0 flex flex-col h-full overflow-hidden"
       style={{
-        width: LAYOUT.sidebarWidth,
+        width: collapsed ? LAYOUT.sidebarRailWidth : LAYOUT.sidebarWidth,
+        transition: `width ${SIDEBAR_TRANSITION}`,
         background: COLOR.canvas,
         paddingInline: LAYOUT.sidebarPad,
         paddingBottom: 8,
       }}
     >
-      {/* Marca. Volta para o portal quando existe portal para voltar; sem
-          onNavigate ela é só a marca, sem afordância de clique.
-          O bloco tem a altura da barra de topo para os centros baterem; o
-          botão é menor, para o realce não encostar no topo da tela. */}
-      <div className="flex items-center shrink-0" style={{ height: TOPBAR.height }}>
-        {onNavigate ? (
-          <button
-            onClick={() => onNavigate('portal')}
-            title="Voltar ao portal"
-            className="wk-icon-btn flex items-center"
-            style={{
-              height: 40,
-              paddingLeft: LAYOUT.navItemPadX + LAYOUT.glyphInset,
-              paddingRight: LAYOUT.navItemPadX,
-            }}
-          >
-            <WeknowLogo />
-          </button>
-        ) : (
-          <div
-            className="flex items-center"
-            style={{
-              height: 40,
-              paddingLeft: LAYOUT.navItemPadX + LAYOUT.glyphInset,
-              paddingRight: LAYOUT.navItemPadX,
-            }}
-          >
-            <WeknowLogo />
-          </div>
-        )}
-      </div>
-
-      <div className="pb-1 shrink-0" style={{ paddingTop: 24 }}>
+      {/* A marca e o botão de recolher ficam na faixa de topo
+          (`SidebarBrand`). O menu começa na mesma altura do portal, para a
+          coluna não pular ao trocar de tela. */}
+      <div className="pb-1 shrink-0" style={{ paddingTop: 8 }}>
         <Row icon={<IconNewChat size={24} />} label="Nova conversa" onClick={onNewChat} />
       </div>
 
+      {/* A pílula de busca não é trocada por outro botão ao recolher: ela
+          perde o fundo, encolhe o recuo até a lupa cair na coluna dos
+          ícones, e o conjunto passa a se comportar como item do menu. */}
       <div className="pb-2 shrink-0">
         <div
-          className="flex items-center gap-2 rounded-full px-3 h-[36px] focus-within:shadow-[0_0_0_2px_rgba(51,102,204,0.18)] transition-shadow"
-          style={{ background: COLOR.searchPill }}
+          onClick={collapsed ? openSearch : undefined}
+          onKeyDown={
+            collapsed
+              ? (e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault()
+                    openSearch()
+                  }
+                }
+              : undefined
+          }
+          onMouseEnter={() => setSearchHover(true)}
+          onMouseLeave={() => setSearchHover(false)}
+          role={collapsed ? 'button' : undefined}
+          tabIndex={collapsed ? 0 : undefined}
+          title={collapsed ? 'Buscar conversas' : undefined}
+          aria-label={collapsed ? 'Buscar conversas' : undefined}
+          className="flex items-center gap-2 h-[36px] focus-within:shadow-[0_0_0_2px_rgba(51,102,204,0.18)]"
+          style={{
+            cursor: collapsed ? 'pointer' : undefined,
+            paddingInline: collapsed ? LAYOUT.navItemPadX : 12,
+            borderRadius: collapsed ? LAYOUT.navItemRadius : 18,
+            background: collapsed ? (searchHover ? COLOR.navHover : 'transparent') : COLOR.searchPill,
+            transition: `padding ${SIDEBAR_TRANSITION}, border-radius ${SIDEBAR_TRANSITION}, background-color 150ms ease, box-shadow 150ms ease`,
+          }}
         >
-          <IconSearch size={24} color={COLOR.navLabel} />
+          <IconSearch size={24} color={COLOR.navLabel} className="shrink-0" />
           <input
+            ref={searchRef}
             type="text"
             placeholder="Buscar conversas"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
+            tabIndex={collapsed ? -1 : undefined}
             className="flex-1 min-w-0 bg-transparent text-[14px] outline-none"
             style={{ fontFamily: FONT, color: COLOR.text }}
           />
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto -mr-2 pr-2">
-        <SectionHeader
-          label="Pastas"
-          action={{ title: 'Nova pasta', icon: 'create_new_folder', onClick: () => setNovaPasta(true) }}
+      {/* Em teste: sem os títulos "Pastas" e "Chats". "Nova pasta" vira a
+          primeira linha das pastas, no mesmo desenho delas (ícone no tom do
+          texto, não no cinza de ícone). Fica fora da lista rolável para
+          valer também no trilho, onde a lista se apaga.
+
+          Aberto, 12px a separam da busca e 2px das pastas, então ela lê como
+          parte do grupo. No trilho a margem vira -4: a busca deixa 8 embaixo
+          e os três itens precisam ficar a 4px um do outro. Abre o modal sem
+          expandir o menu: criar pasta não pede a lista. */}
+      <div
+        className="shrink-0"
+        style={{
+          marginTop: collapsed ? -4 : 4,
+          paddingBottom: 2,
+          transition: `margin ${SIDEBAR_TRANSITION}`,
+        }}
+      >
+        <Row
+          icon={
+            // No trilho ela está entre Nova conversa e a busca, não entre
+            // pastas: volta ao cinza de ícone deles.
+            <Icon name="create_new_folder" size={24} color={collapsed ? COLOR.navLabel : COLOR.navText} />
+          }
+          label="Nova pasta"
+          onClick={() => setNovaPasta(true)}
         />
+      </div>
+
+      {/* Some rápido ao recolher e volta com atraso ao abrir, quando já há
+          largura para o texto. `visibility` tira a lista do Tab e do leitor
+          de tela enquanto ela está apagada. */}
+      <div
+        className="flex-1 overflow-y-auto -mr-2 pr-2"
+        style={{
+          opacity: collapsed ? 0 : 1,
+          visibility: collapsed ? 'hidden' : 'visible',
+          transition: collapsed
+            ? 'opacity 100ms ease, visibility 0s linear 100ms'
+            : 'opacity 200ms ease 100ms',
+        }}
+      >
         <div className="flex flex-col gap-0.5">
           {folders.map((f) => (
             <FolderRow
@@ -439,8 +459,8 @@ export function Sidebar({
           ))}
         </div>
 
-        <SectionHeader label="Chats" />
-        <div className="flex flex-col gap-0.5">
+        {/* Sem título, quem separa pastas de chats é o espaço. */}
+        <div className="flex flex-col gap-0.5 mt-4">
           {chats.map((c) => (
             <ChatRow
               key={c.id}

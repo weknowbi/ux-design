@@ -1,8 +1,9 @@
 import { cloneElement, isValidElement, useState } from 'react'
-import { COLOR, FONT, LAYOUT, TOPBAR } from '@/design/tokens'
+import { COLOR, FONT, LAYOUT } from '@/design/tokens'
+import { SIDEBAR_TRANSITION } from '@/design/sidebar'
+import { useTheme } from '@/design/theme'
 import { Icon, IconWeknowAsk, type IconProps } from '@/components/icons'
 import { ThemeSwitch } from '@/components/ThemeSwitch'
-import { WeknowLogo } from '@/components/WeknowLogo'
 
 /**
  * Menu do portal — espec. do nó `sidebar white` (WP-832).
@@ -24,16 +25,6 @@ const FOOTER = [
   { label: 'Sair', icon: 'logout' },
 ]
 
-function GroupLabel({ children }: { children: React.ReactNode }) {
-  return (
-    <p
-      className="flex items-center h-[40px] px-4 text-[12px] font-semibold uppercase"
-      style={{ fontFamily: FONT, color: COLOR.navLabel }}
-    >
-      {children}
-    </p>
-  )
-}
 
 function NavRow({
   icon,
@@ -87,36 +78,37 @@ function NavRow({
 
 /** Alternador de tema — visual apenas, como no design. */
 
+/**
+ * A marca e o botão de recolher não moram aqui: ficam na faixa de topo
+ * (`SidebarBrand`), que não encolhe junto com o menu.
+ *
+ * Sem o rótulo "Menu": para um grupo só, de três itens, ele não organiza
+ * nada — só empurrava a lista para baixo.
+ */
 export function PortalSidebar({
   active,
   onNavigate,
+  collapsed,
 }: {
   active: PortalRoute
   onNavigate: (route: PortalRoute) => void
+  /** Recolhido em trilho: só os ícones, com o rótulo no `title`. */
+  collapsed: boolean
 }) {
+  const { toggle: toggleTheme } = useTheme()
+
   return (
     <aside
-      className="shrink-0 flex flex-col h-full"
+      className="shrink-0 flex flex-col h-full overflow-hidden"
       style={{
-        width: LAYOUT.sidebarWidth,
+        width: collapsed ? LAYOUT.sidebarRailWidth : LAYOUT.sidebarWidth,
+        transition: `width ${SIDEBAR_TRANSITION}`,
         background: COLOR.canvas,
         paddingInline: LAYOUT.sidebarPad,
         paddingBottom: 8,
       }}
     >
-      <div
-        className="flex items-center shrink-0"
-        style={{
-          height: TOPBAR.height,
-          paddingLeft: LAYOUT.navItemPadX + LAYOUT.glyphInset,
-          paddingRight: LAYOUT.navItemPadX,
-        }}
-      >
-        <WeknowLogo />
-      </div>
-
-      <div className="flex flex-col gap-1" style={{ paddingTop: 24 }}>
-        <GroupLabel>Menu</GroupLabel>
+      <div className="flex flex-col gap-1" style={{ paddingTop: 8 }}>
         {MENU.map((item) => (
           <NavRow
             key={item.id}
@@ -131,7 +123,13 @@ export function PortalSidebar({
       {/* Rodapé, colado na base */}
       <div className="flex-1 flex flex-col justify-end gap-1 pb-6">
         <NavRow icon={<Icon name="settings" size={24} />} label={FOOTER[0].label} />
-        <NavRow icon={<Icon name="palette" size={24} />} label="Tema" trailing={<ThemeSwitch />} />
+        {/* Recolhido não cabe a chave: o próprio ícone passa a alternar. */}
+        <NavRow
+          icon={<Icon name="palette" size={24} />}
+          label="Tema"
+          onClick={collapsed ? toggleTheme : undefined}
+          trailing={collapsed ? undefined : <ThemeSwitch />}
+        />
         <NavRow icon={<Icon name="help" size={24} />} label={FOOTER[1].label} />
         <NavRow icon={<Icon name="logout" size={24} />} label={FOOTER[2].label} />
       </div>

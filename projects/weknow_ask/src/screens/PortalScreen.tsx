@@ -1,202 +1,281 @@
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { COLOR, FONT, LAYOUT } from '@/design/tokens'
-import { Header } from '@/components/Header'
+import { useSidebar } from '@/design/sidebar'
+import { Header, type Crumb, type MenuItem } from '@/components/Header'
 import { Icon } from '@/components/icons'
 import { PortalSidebar, type PortalRoute } from '@/components/PortalSidebar'
+import { SidebarBrand } from '@/components/SidebarBrand'
+import { FolderHeader } from '@/components/FolderHeader'
+import { CONTENT_TYPES, DynamicHero, FADE, Hero, type SectionId } from '@/components/Hero'
+import { ContentBrowser } from '@/components/browser/ContentBrowser'
+import { useBrowserPrefs, usePref } from '@/components/browser/prefs'
+import { BrowserControls } from '@/components/browser/BrowserControls'
+import { CARD_STYLES, CardStyleContext, type CardStyle } from '@/components/browser/Items'
+import { PORTAL_ROOT, findFolderPath, initialFavorites, type Folder } from '@/data/portal'
 
 /**
  * Tela do portal — a que antecede o Weknow Ask.
  *
- * Espec. do frame `home` (WP-832): conteúdo de 1159px centrado na coluna de
- * 1617, cards de 375,67 × 230 com 16px de gap.
- *
- * Não é interativa: existe para situar de onde o Ask é aberto. O único
- * caminho ativo é o item "Weknow Ask" do menu.
+ * O conteúdo (saudação, busca, chips, pastas e dashboards) vem do projeto
+ * `portal`, que é onde essa navegação é desenhada. A moldura é a do Ask: faixa
+ * de topo com o botão do menu e a marca, e o menu lateral que recolhe.
  */
 
+/** Espec. do frame `home` (WP-832): conteúdo de 1159px centrado na coluna de 1617. */
 const CONTENT_WIDTH = 1159
+/** Largura total da folha; o teto só evita grades absurdas em ultrawide. */
+const WIDE_MAX_WIDTH = 1760
 
-type Card = { kind: 'folder' | 'dashboard'; breadcrumb: string; title: string; starred?: boolean }
+/**
+ * Layouts em teste. A alternância saiu do menu "…"; o que estiver salvo na
+ * preferência continua valendo, e o padrão é o dinâmico:
+ * - dinâmico: como a home do Drive — saudação, busca grande e chips no topo;
+ *   ao rolar, a busca sobe para a barra de topo. Dentro de pasta não há
+ *   saudação e a busca já nasce na barra;
+ * - padrão: saudação, busca grande e chips sempre, conteúdo em 1159px (nó `home`);
+ * - compacto: sem saudação e a busca sempre na barra de topo.
+ */
+type Layout = 'dinamico' | 'padrao' | 'compacto'
+const LAYOUTS: Layout[] = ['dinamico', 'padrao', 'compacto']
 
-const FAVORITOS: Card[] = [
-  { kind: 'folder', breadcrumb: 'Página inicial', title: 'Prontuário do Paciente', starred: true },
-  { kind: 'folder', breadcrumb: 'Página inicial', title: 'Controle de Leitos', starred: true },
-  { kind: 'folder', breadcrumb: 'Página inicial', title: 'Agendamento Cirúrgico', starred: true },
-  { kind: 'dashboard', breadcrumb: 'Página inicial', title: '5.1 IA - Análise Inteligente | Exemplos Soluções', starred: true },
-  { kind: 'dashboard', breadcrumb: 'Página inicial', title: '5.1 IA - Análise Inteligente | Exemplos Soluções', starred: true },
-  { kind: 'dashboard', breadcrumb: 'Página inicial', title: '5.1 IA - Análise Inteligente | Exemplos Soluções', starred: true },
-]
-
-const PASTAS: Card[] = [
-  { kind: 'folder', breadcrumb: 'Página inicial', title: 'Financeiro Hospitalar' },
-  { kind: 'folder', breadcrumb: 'Página inicial', title: 'Atendimento e Triagem' },
-  { kind: 'folder', breadcrumb: 'Página inicial', title: 'Materiais e Medicamentos' },
-]
-
-function Thumb({ kind }: { kind: Card['kind'] }) {
-  if (kind === 'folder') {
-    return (
-      <div
-        className="flex items-center justify-center rounded-lg"
-        style={{ height: 140, background: 'var(--wk-hover-strong)', color: 'var(--wk-text-icon)' }}
-      >
-        <Icon name="folder" size={44} filled />
-      </div>
-    )
-  }
-  return (
-    <div className="rounded-lg p-3 flex gap-2" style={{ height: 140, background: 'var(--wk-nav-hover)' }}>
-      <div className="flex-1 rounded-md bg-[var(--wk-surface)]/70 flex items-center justify-center" style={{ color: 'var(--wk-text-icon)' }}>
-        <Icon name="pie_chart" size={28} filled />
-      </div>
-      <div className="flex-1 flex flex-col gap-2">
-        <div className="flex-1 rounded-md bg-[var(--wk-surface)]/70 flex items-center justify-center" style={{ color: 'var(--wk-text-icon)' }}>
-          <Icon name="show_chart" size={24} />
-        </div>
-        <div className="flex-1 rounded-md bg-[var(--wk-surface)]/70 flex items-center justify-center" style={{ color: 'var(--wk-text-icon)' }}>
-          <Icon name="bar_chart" size={24} filled />
-        </div>
-      </div>
-    </div>
-  )
+/**
+ * Alternância de teste nossa, não do cliente: mora no menu "…" com as outras
+ * preferências, e a barra fica com o que o usuário realmente usa.
+ */
+const CARD_STYLE_MENU: Record<CardStyle, { icon: string; label: string }> = {
+  atual: { icon: 'grid_view', label: 'Cards atuais (teste)' },
+  limpo: { icon: 'auto_awesome', label: 'Cards limpos (teste)' },
+  referencia: { icon: 'palette', label: 'Referência Márcio (teste)' },
 }
 
-function CardItem({ card }: { card: Card }) {
-  return (
-    <div
-      className="rounded-xl bg-[var(--wk-surface)] p-3 transition-shadow hover:shadow-[0_2px_8px_rgba(15,23,42,0.08)]"
-      style={{ border: `1px solid ${COLOR.border}` }}
-    >
-      <Thumb kind={card.kind} />
-      <div className="flex items-start gap-2 mt-3 px-1">
-        <Icon name={card.kind === 'folder' ? 'folder' : 'dashboard'} size={20} filled color={COLOR.textMuted} className="shrink-0 mt-0.5" />
-        <div className="min-w-0 flex-1">
-          <p className="text-[11px]" style={{ fontFamily: FONT, color: COLOR.textMuted }}>
-            {card.breadcrumb}
-          </p>
-          <p
-            className="text-[13.5px] leading-snug line-clamp-2"
-            style={{ fontFamily: FONT, color: COLOR.text }}
-          >
-            {card.title}
-          </p>
-        </div>
-        {card.starred && (
-          <Icon name="star" size={20} filled color="#f59e0b" className="shrink-0 mt-0.5" />
-        )}
-      </div>
-    </div>
-  )
+/** O menu oferece os outros dois estilos; o que está em uso fica de fora. */
+function cardStyleMenuItems(style: CardStyle, onChange: (s: CardStyle) => void): MenuItem[] {
+  return CARD_STYLES.filter((s) => s !== style).map((s) => ({
+    ...CARD_STYLE_MENU[s],
+    onClick: () => onChange(s),
+  }))
 }
 
-function SectionTitle({ icon, label, tools }: { icon: string; label: string; tools?: boolean }) {
-  return (
-    <div className="flex items-center justify-between mb-4">
-      <div className="flex items-center gap-2">
-        <Icon name={icon} size={22} filled color={icon === 'star' ? '#f59e0b' : COLOR.textMuted} />
-        <span className="text-[15px] font-medium" style={{ fontFamily: FONT, color: COLOR.text }}>
-          {label}
-        </span>
-      </div>
-      {tools && (
-        <div className="flex items-center gap-2" style={{ color: COLOR.textMuted }}>
-          <Icon name="arrow_upward" size={20} />
-          <span className="text-[13px]" style={{ fontFamily: FONT }}>
-            Padrão
-          </span>
-          <Icon name="grid_view" size={20} />
-          <Icon name="keyboard_arrow_down" size={20} />
-        </div>
-      )}
-    </div>
-  )
+/**
+ * A pasta aberta vive na URL (`#/pasta/<id>`): o voltar do navegador sobe um
+ * nível e o link da pasta pode ser compartilhado.
+ */
+function readHash(): string | null {
+  const m = window.location.hash.match(/^#\/pasta\/([^/]+)$/)
+  return m ? decodeURIComponent(m[1]) : null
 }
 
 export function PortalScreen({ onNavigate }: { onNavigate: (route: PortalRoute) => void }) {
+  const sidebar = useSidebar()
+  const [folderId, setFolderId] = useState(readHash)
+  const [query, setQuery] = useState('')
+  const [favorites, setFavorites] = useState(() => initialFavorites(PORTAL_ROOT))
+  const [layout] = usePref<Layout>('wk-portal-layout', LAYOUTS, 'dinamico')
+  const [cardStyle, setCardStyle] = usePref<CardStyle>('wk-portal-cards', CARD_STYLES, 'atual')
+  const [heroCollapsed, setHeroCollapsed] = useState(false)
+  const [section, setSection] = useState<SectionId>('pastas')
+  const prefs = useBrowserPrefs()
+  const [toast, setToast] = useState<{ text: string; at: number } | null>(null)
+  const mainRef = useRef<HTMLElement>(null)
+  const browserRef = useRef<HTMLDivElement>(null)
+
+  const navigate = useCallback((id: string | null) => {
+    setQuery('')
+    if (id) window.location.hash = `/pasta/${encodeURIComponent(id)}`
+    else if (window.location.hash) window.history.pushState(null, '', window.location.pathname + window.location.search)
+    setFolderId(id)
+  }, [])
+
+  /* Trocar de área volta para a raiz: Tarefas e Apresentações não têm pasta,
+     e voltar depois para Pastas dentro de uma subpasta antiga seria confuso. */
+  const openSection = useCallback(
+    (id: SectionId) => {
+      setSection(id)
+      navigate(null)
+    },
+    [navigate],
+  )
+
+  const path = (folderId && findFolderPath(PORTAL_ROOT, folderId)) || []
+  const atRoot = path.length === 0
+  const current = atRoot ? null : path[path.length - 1]
+  const dynamicHero = layout === 'dinamico' && atRoot
+
+  // Aviso curto de favorito, como no Weknow: aparece, fica ~2,5s e some.
+  useEffect(() => {
+    if (!toast) return
+    const t = setTimeout(() => setToast(null), 2500)
+    return () => clearTimeout(t)
+  }, [toast])
+
+  useEffect(() => {
+    const sync = () => setFolderId(readHash())
+    window.addEventListener('hashchange', sync)
+    window.addEventListener('popstate', sync)
+    return () => {
+      window.removeEventListener('hashchange', sync)
+      window.removeEventListener('popstate', sync)
+    }
+  }, [])
+
+  // Ao trocar de pasta, o conteúdo precisa ficar à vista — mas sem voltar ao
+  // topo se ele já estiver na tela.
+  useEffect(() => {
+    const main = mainRef.current
+    const nav = browserRef.current
+    if (main && nav && nav.getBoundingClientRect().top < main.getBoundingClientRect().top) {
+      nav.scrollIntoView({ block: 'start' })
+    }
+  }, [folderId])
+
+  const toggleFavorite = useCallback((id: string) => {
+    setFavorites((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      setToast({ text: next.has(id) ? 'Item adicionado aos favoritos' : 'Item removido dos favoritos', at: Date.now() })
+      return next
+    })
+  }, [])
+
+  /* Caminho na barra de topo, no padrão do design (nó 5132:3761):
+     [ícone do item do menu] › subitem › páginas.
+     Nome de pasta de cliente é longo e a barra tem uma linha só: só a pasta
+     atual aparece por extenso, e os níveis acima dela recolhem em "…", que
+     lista os nomes completos.
+     Na home não há caminho a mostrar — o breadcrumb só aparece depois que o
+     usuário entra em alguma pasta. */
+  const toCrumb = (f: Folder): Crumb => ({ label: f.name, onClick: () => navigate(f.id) })
+  const hidden = path.length > 1 ? path.slice(0, -1) : []
+  const trail: Crumb[] = path.length === 0 ? [] : [
+    { label: 'Portal', icon: <Icon name="home" size={24} />, iconOnly: true, onClick: () => navigate(null) },
+    ...(hidden.length
+      ? [{ label: '…', collapsed: hidden.map((f) => ({ label: f.name, onClick: () => navigate(f.id) })) }]
+      : []),
+    ...path.slice(hidden.length).map(toCrumb),
+  ]
+
+  const searchScope = `Pesquise em ${CONTENT_TYPES.find((t) => t.id === section)!.label}`
+
+  /* A barra de topo fica com a busca geral do Weknow — a que procura além do
+     que está listado — sempre que a tela já tem uma busca própria: na home do
+     layout dinâmico (que leva a dela para a barra recolhida ao rolar) e na do
+     padrão. Dentro de pasta a tela não tem busca, então a da barra assume e
+     diz em que pasta procura. */
+  const topbarSearch =
+    dynamicHero || (layout === 'padrao' && atRoot)
+      ? undefined
+      : {
+          value: query,
+          onChange: setQuery,
+          placeholder: current ? `Pesquise em ${current.name}` : searchScope,
+        }
+
+  const controls = <BrowserControls prefs={prefs} />
+
+  const browser = (
+    <CardStyleContext.Provider value={cardStyle}>
+      <ContentBrowser
+        root={PORTAL_ROOT}
+        path={path}
+        query={query}
+        favorites={favorites}
+        prefs={prefs}
+        section={section}
+        controls={atRoot ? controls : undefined}
+        controlsHidden={dynamicHero && heroCollapsed}
+        onNavigate={navigate}
+        onToggleFavorite={toggleFavorite}
+      />
+    </CardStyleContext.Provider>
+  )
+
   return (
     <div
-      className="flex"
+      className="flex flex-col"
       style={{ width: '100vw', height: '100vh', background: COLOR.canvas, fontFamily: FONT }}
     >
-      <PortalSidebar active="portal" onNavigate={onNavigate} />
+      {/* Faixa de topo inteira com a marca; só o menu de baixo recolhe. */}
+      <div className="flex shrink-0" style={{ paddingRight: LAYOUT.sheetMarginRight }}>
+        <SidebarBrand collapsed={sidebar.collapsed} onToggle={sidebar.toggle} />
+        <div className="flex-1 min-w-0">
+          <Header trail={trail} menuItems={cardStyleMenuItems(cardStyle, setCardStyle)} search={topbarSearch} />
+        </div>
+      </div>
 
       <div
-        className="flex-1 flex flex-col min-w-0"
+        className="flex flex-1 overflow-hidden relative"
         style={{ minHeight: 0, paddingRight: LAYOUT.sheetMarginRight }}
       >
-        <Header trail={[{ label: 'Portal', icon: <Icon name="home" size={24} />, iconOnly: true }]} />
+        {/* "Portal" no menu volta para a raiz das pastas; os outros itens
+            trocam de tela. */}
+        <PortalSidebar
+          active="portal"
+          onNavigate={(route) => (route === 'portal' ? navigate(null) : onNavigate(route))}
+          collapsed={sidebar.collapsed}
+        />
 
         <main
-          className="flex-1 overflow-y-auto bg-[var(--wk-surface)] min-w-0"
-          style={{
-            borderTopLeftRadius: LAYOUT.sheetRadius,
-            borderTopRightRadius: LAYOUT.sheetRadius,
-          }}
+          ref={mainRef}
+          className="flex-1 overflow-y-auto [scrollbar-gutter:stable] bg-[var(--wk-surface)] min-w-0"
+          style={{ borderTopLeftRadius: LAYOUT.sheetRadius, borderTopRightRadius: LAYOUT.sheetRadius }}
         >
-          <div className="mx-auto px-6 py-16" style={{ maxWidth: CONTENT_WIDTH }}>
-            <h1
-              className="text-[28px] font-semibold text-center mb-8"
-              style={{ fontFamily: FONT, color: COLOR.text }}
+          {dynamicHero ? (
+            <div className="mx-auto flex flex-col px-8 pb-24" style={{ maxWidth: WIDE_MAX_WIDTH }}>
+              <DynamicHero
+                query={query}
+                onQuery={setQuery}
+                placeholder={searchScope}
+                section={section}
+                onSection={openSection}
+                scrollRef={mainRef}
+                onCollapsedChange={setHeroCollapsed}
+                controls={controls}
+              />
+              {/* Mais folga entre os chips e a lista: grudada, a busca ocupa
+                  a faixa do título, e a lista encostada nela ficava apertada. */}
+              <div ref={browserRef} className="mt-12 scroll-mt-24">
+                {browser}
+              </div>
+            </div>
+          ) : (
+            <div
+              className={`mx-auto flex flex-col gap-8 pb-24 ${layout === 'padrao' ? 'px-6 pt-16' : 'px-8 pt-8'}`}
+              style={{ maxWidth: layout === 'padrao' ? CONTENT_WIDTH : WIDE_MAX_WIDTH }}
             >
-              Olá, bem vindo ao Weknow
-            </h1>
-
-            {/* Busca — 800px, centrada, como no design */}
-            <div className="flex justify-center mb-6">
-              <div
-                className="flex items-center gap-3 rounded-full px-5 h-[48px] w-full"
-                style={{ maxWidth: 800, background: COLOR.searchPillLight }}
-              >
-                <Icon name="search" size={22} color={COLOR.textMuted} />
-                <input
-                  type="text"
-                  placeholder="Pesquise em Pastas"
-                  className="flex-1 min-w-0 bg-transparent text-[15px] outline-none"
-                  style={{ fontFamily: FONT, color: COLOR.text }}
+              {layout === 'padrao' && atRoot && (
+                <Hero
+                  query={query}
+                  onQuery={setQuery}
+                  placeholder={searchScope}
+                  section={section}
+                  onSection={openSection}
                 />
+              )}
+              {current && (
+                <FolderHeader
+                  name={current.name}
+                  onBack={() => navigate(path.length > 1 ? path[path.length - 2].id : null)}
+                  aside={controls}
+                />
+              )}
+              <div ref={browserRef} className="scroll-mt-8">
+                {browser}
               </div>
             </div>
-
-            {/* Filtros */}
-            <div className="flex justify-center gap-3 mb-14">
-              {[
-                { icon: 'folder', label: 'Pastas', on: true },
-                { icon: 'task_alt', label: 'Tarefas', on: false },
-                { icon: 'slideshow', label: 'Apresentações', on: false },
-              ].map(({ icon, label, on }) => (
-                <span
-                  key={label}
-                  className="inline-flex items-center gap-2 rounded-full px-4 h-[36px] text-[14px]"
-                  style={{
-                    fontFamily: FONT,
-                    background: on ? COLOR.tintSoft : COLOR.canvas,
-                    color: on ? COLOR.primary : COLOR.textSecondary,
-                  }}
-                >
-                  <Icon name={icon} size={20} filled={on} />
-                  {label}
-                </span>
-              ))}
-            </div>
-
-            <section className="mb-12">
-              <SectionTitle icon="star" label="Favoritos" tools />
-              <div className="grid grid-cols-3 gap-4">
-                {FAVORITOS.map((c, i) => (
-                  <CardItem key={i} card={c} />
-                ))}
-              </div>
-            </section>
-
-            <section>
-              <SectionTitle icon="folder" label="Pastas" />
-              <div className="grid grid-cols-3 gap-4">
-                {PASTAS.map((c, i) => (
-                  <CardItem key={i} card={c} />
-                ))}
-              </div>
-            </section>
-          </div>
+          )}
         </main>
+
+        <div
+          role="status"
+          aria-live="polite"
+          className={`pointer-events-none absolute bottom-8 left-1/2 -translate-x-1/2 rounded-lg px-4 py-3 ${FADE} ${
+            toast ? 'opacity-100' : 'opacity-0'
+          }`}
+          style={{ background: 'var(--wk-toast-bg)', color: 'var(--wk-toast-text)', fontFamily: FONT, fontSize: 14 }}
+        >
+          {toast?.text}
+        </div>
       </div>
     </div>
   )

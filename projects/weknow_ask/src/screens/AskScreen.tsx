@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { COLOR, FONT, LAYOUT } from '@/design/tokens'
+import { useSidebar } from '@/design/sidebar'
 import { Chip } from '@/components/Chip'
 import { Composer } from '@/components/Composer'
 import { MetadataTab } from '@/components/MetadataTab'
@@ -8,6 +9,7 @@ import { FolderScreen } from '@/components/FolderScreen'
 import { Header } from '@/components/Header'
 import { Icon } from '@/components/icons'
 import { Sidebar } from '@/components/Sidebar'
+import { SidebarBrand } from '@/components/SidebarBrand'
 import { Thread } from '@/components/Thread'
 import { AI_FALLBACK, AI_PROVIDERS, CONVERSATIONS, FOLDERS } from '@/data/conversation'
 import type { Conversation, FilterChip, Folder, MetaContext, Message } from '@/data/conversation'
@@ -39,6 +41,7 @@ export function AskScreen({ onNavigate }: { onNavigate?: (route: PortalRoute) =>
   /** Pasta aberta por inteiro — ocupa a área principal no lugar da conversa. */
   const [openFolderId, setOpenFolderId] = useState<string | null>(null)
   const bottomRef = useRef<HTMLDivElement>(null)
+  const sidebar = useSidebar()
 
   const active = useMemo(
     () => conversations.find((c) => c.id === activeId) ?? conversations[0],
@@ -198,125 +201,133 @@ export function AskScreen({ onNavigate }: { onNavigate?: (route: PortalRoute) =>
 
   return (
     <div
-      className="flex"
+      className="flex flex-col"
       style={{ width: '100vw', height: '100vh', background: COLOR.canvas, fontFamily: FONT }}
     >
-      {/* Shell do protótipo: o menu ocupa a altura inteira e carrega a marca;
-          a barra de topo cobre só a coluna de conteúdo. */}
-      <Sidebar
-        onNavigate={onNavigate}
-        conversations={conversations}
-        folders={folders}
-        activeId={active.id}
-        onSelect={(id) => {
-          setActiveId(id)
-          setTab('conversa')
-          setOpenFolderId(null)
-        }}
-        onNewChat={handleNewChat}
-        onMoveToFolder={handleMoveToFolder}
-        onRenameChat={handleRenameChat}
-        onDeleteChat={handleDeleteChat}
-        onCreateFolder={handleCreateFolder}
-        onRenameFolder={handleRenameFolder}
-        onDeleteFolder={handleDeleteFolder}
-        onOpenFolder={setOpenFolderId}
-      />
+      {/* Shell do protótipo: a faixa de topo atravessa a tela inteira e leva
+          a marca; o menu fica embaixo dela e é só ele que recolhe. */}
+      <div className="flex shrink-0" style={{ paddingRight: LAYOUT.sheetMarginRight }}>
+        <SidebarBrand
+          collapsed={sidebar.collapsed}
+          onToggle={sidebar.toggle}
+          onLogoClick={onNavigate ? () => onNavigate('portal') : undefined}
+        />
+        <div className="flex-1 min-w-0">
+          <Header
+            trail={[
+              {
+                label: 'Portal',
+                icon: <Icon name="home" size={24} />,
+                iconOnly: true,
+                // A casa continua na trilha mesmo embutido: sem ela o topo
+                // fica órfão. O que some é o link. O Header só vira botão
+                // quando a migalha tem onClick, então basta não passar um.
+                onClick: onNavigate ? () => onNavigate('portal') : undefined,
+              },
+              { label: 'Weknow Ask' },
+            ]}
+          />
+        </div>
+      </div>
 
       <div
-        className="flex-1 flex flex-col min-w-0"
+        className="flex flex-1 overflow-hidden"
         style={{ minHeight: 0, paddingRight: LAYOUT.sheetMarginRight }}
       >
-        <Header
-          trail={[
-            {
-              label: 'Portal',
-              icon: <Icon name="home" size={24} />,
-              iconOnly: true,
-              // A casa continua na trilha mesmo embutido: sem ela o topo
-              // fica órfão. O que some é o link. O Header só vira botão
-              // quando a migalha tem onClick, então basta não passar um.
-              onClick: onNavigate ? () => onNavigate('portal') : undefined,
-            },
-            { label: 'Weknow Ask' },
-          ]}
+        <Sidebar
+          conversations={conversations}
+          folders={folders}
+          activeId={active.id}
+          onSelect={(id) => {
+            setActiveId(id)
+            setTab('conversa')
+            setOpenFolderId(null)
+          }}
+          onNewChat={handleNewChat}
+          onMoveToFolder={handleMoveToFolder}
+          onRenameChat={handleRenameChat}
+          onDeleteChat={handleDeleteChat}
+          onCreateFolder={handleCreateFolder}
+          onRenameFolder={handleRenameFolder}
+          onDeleteFolder={handleDeleteFolder}
+          onOpenFolder={setOpenFolderId}
+          collapsed={sidebar.collapsed}
+          onExpand={sidebar.expand}
         />
 
-        <div className="flex flex-1 overflow-hidden">
-          <main
-            className="flex-1 flex flex-col overflow-hidden bg-[var(--wk-surface)] min-w-0"
-            style={{
-              borderTopLeftRadius: LAYOUT.sheetRadius,
-              borderTopRightRadius: LAYOUT.sheetRadius,
-            }}
-          >
-            {/* A pasta aberta ocupa a área inteira: nesse estado não há
-                conversa nem metadado para alternar, então as abas somem. */}
-            {openFolder ? (
-              <FolderScreen
-                folder={openFolder}
-                onOpenChat={(id) => {
-                  setActiveId(id)
-                  setTab('conversa')
-                  setOpenFolderId(null)
-                }}
-                onNewChat={handleNewChat}
-                onRenameChat={handleRenameChat}
-                onDeleteChat={handleDeleteChat}
-              />
+        <main
+          className="flex-1 flex flex-col overflow-hidden bg-[var(--wk-surface)] min-w-0"
+          style={{
+            borderTopLeftRadius: LAYOUT.sheetRadius,
+            borderTopRightRadius: LAYOUT.sheetRadius,
+          }}
+        >
+          {/* A pasta aberta ocupa a área inteira: nesse estado não há
+              conversa nem metadado para alternar, então as abas somem. */}
+          {openFolder ? (
+            <FolderScreen
+              folder={openFolder}
+              onOpenChat={(id) => {
+                setActiveId(id)
+                setTab('conversa')
+                setOpenFolderId(null)
+              }}
+              onNewChat={handleNewChat}
+              onRenameChat={handleRenameChat}
+              onDeleteChat={handleDeleteChat}
+            />
+          ) : (
+            <>
+          {/* Abas — nav-pills, mesmo padrão do Weknow Insight */}
+          <div className="shrink-0 flex items-center gap-1 px-3 pt-2 pb-2">
+            {TABS.map(({ id, label }) => {
+              const on = tab === id
+              return (
+                <button
+                  key={id}
+                  onClick={() => setTab(id)}
+                  className={`px-3 py-1.5 mb-2 text-[13px] rounded-md font-medium transition-colors ${
+                    on ? '' : 'hover:bg-[var(--wk-hover)]'
+                  }`}
+                  style={{
+                    fontFamily: FONT,
+                    background: on ? COLOR.pillActive : 'transparent',
+                    color: on ? COLOR.text : COLOR.textSecondary,
+                  }}
+                >
+                  {label}
+                </button>
+              )
+            })}
+          </div>
+
+          {tab === 'conversa' ? (
+            needsContext ? (
+              /* Conversa nova: escolher metadado e provedor antes de começar. */
+              <NewConversation onCreate={handleCreateConversation} />
+            ) : active.messages.length === 0 && !loading ? (
+              /* Sem mensagens: contexto, saudação e composer formam um bloco
+                 só, a ~25% do topo — o composer não vai para o rodapé. */
+              <Greeting context={active.context} onOpenMetadata={() => setTab('metadado')}>
+                {makeComposer(true)}
+              </Greeting>
             ) : (
               <>
-            {/* Abas — nav-pills, mesmo padrão do Weknow Insight */}
-            <div className="shrink-0 flex items-center gap-1 px-3 pt-2 pb-2">
-              {TABS.map(({ id, label }) => {
-                const on = tab === id
-                return (
-                  <button
-                    key={id}
-                    onClick={() => setTab(id)}
-                    className={`px-3 py-1.5 mb-2 text-[13px] rounded-md font-medium transition-colors ${
-                      on ? '' : 'hover:bg-[var(--wk-hover)]'
-                    }`}
-                    style={{
-                      fontFamily: FONT,
-                      background: on ? COLOR.pillActive : 'transparent',
-                      color: on ? COLOR.text : COLOR.textSecondary,
-                    }}
-                  >
-                    {label}
-                  </button>
-                )
-              })}
-            </div>
-
-            {tab === 'conversa' ? (
-              needsContext ? (
-                /* Conversa nova: escolher metadado e provedor antes de começar. */
-                <NewConversation onCreate={handleCreateConversation} />
-              ) : active.messages.length === 0 && !loading ? (
-                /* Sem mensagens: contexto, saudação e composer formam um bloco
-                   só, a ~25% do topo — o composer não vai para o rodapé. */
-                <Greeting context={active.context} onOpenMetadata={() => setTab('metadado')}>
-                  {makeComposer(true)}
-                </Greeting>
-              ) : (
-                <>
-                  <Thread
-                    messages={active.messages}
-                    loading={loading}
-                    bottomRef={bottomRef}
-                    onSuggest={handleSend}
-                  />
-                  {makeComposer()}
-                </>
-              )
-            ) : (
-              <MetadataTab name={active.context?.label} />
-            )}
+                <Thread
+                  messages={active.messages}
+                  loading={loading}
+                  bottomRef={bottomRef}
+                  onSuggest={handleSend}
+                />
+                {makeComposer()}
               </>
-            )}
-          </main>
-        </div>
+            )
+          ) : (
+            <MetadataTab name={active.context?.label} />
+          )}
+            </>
+          )}
+        </main>
       </div>
     </div>
   )

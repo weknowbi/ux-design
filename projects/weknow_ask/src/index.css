@@ -100,6 +100,57 @@
   /* Desfoque curto e deslocamento pequeno: o painel já tem borda de 1px,
      então a sombra só precisa levantá-lo do fundo, não anunciá-lo. */
   --wk-shadow-menu: 0 3px 10px rgba(15, 23, 42, 0.1);
+
+  /* -------------------------------------------------------------------------
+     Portal: pastas e dashboards. Vem do projeto `portal`, que é onde essa
+     navegação é desenhada. Três tokens de lá têm o mesmo nome e outro valor
+     aqui (chip, hover de lista): ganharam nome próprio para o Ask não mudar.
+  ------------------------------------------------------------------------- */
+  --wk-home-chip-bg: #edf0f3;
+  --wk-home-chip-bg-hover: #e3e8ed;
+  --wk-portal-list-hover: rgba(51, 102, 204, 0.045);
+  --wk-chip-active-bg: rgba(138, 180, 248, 0.25);
+  --wk-chip-active-text: #3366cc;
+  --wk-folder-icon: #79879b;   /* ícone da lista: mais presença que o cinza de ícone */
+  --wk-control-label: #475569; /* rótulo da ordenação ("Padrão"), como no Weknow claro */
+  /* Variações de pasta nos cards limpos: matizes dessaturados e a 60% — dão
+     um pouco de cor sem virar arco-íris. Sem rosa, que é do dashboard. */
+  --wk-folder-tone-1: rgba(106, 132, 186, 0.6);
+  --wk-folder-tone-2: rgba(95, 150, 146, 0.6);
+  --wk-folder-tone-3: rgba(136, 122, 186, 0.6);
+  --wk-folder-tone-4: rgba(122, 158, 116, 0.6);
+  --wk-folder-tone-5: rgba(190, 154, 98, 0.6);
+  --wk-folder-tone-6: rgba(122, 136, 158, 0.6);
+  /* Fundo da miniatura de pasta sem imagem: o mesmo matiz, bem diluído. */
+  --wk-folder-tint-1: rgba(106, 132, 186, 0.12);
+  --wk-folder-tint-2: rgba(95, 150, 146, 0.12);
+  --wk-folder-tint-3: rgba(136, 122, 186, 0.12);
+  --wk-folder-tint-4: rgba(122, 158, 116, 0.12);
+  --wk-folder-tint-5: rgba(190, 154, 98, 0.12);
+  --wk-folder-tint-6: rgba(122, 136, 158, 0.12);
+  /* Navegação de pastas e dashboards — cores do Weknow em produção */
+  --wk-star: #fec03c;
+  --wk-star-idle: rgba(140, 152, 168, 0.8);
+  --wk-star-hover: rgba(254, 192, 60, 0.8);
+  --wk-dashboard-icon: #eaa6a6;
+  --wk-dashboard-icon-soft: #f0cccc;
+  --wk-toast-bg: #323232;
+  --wk-toast-text: #ffffff;
+  --wk-card-hover: #e9eef7;
+  /* Fio entre linhas da lista: só um guia para o olho, quase invisível. */
+  --wk-row-divider: #eef1f5;
+  /* Área de miniatura sem imagem: um passo abaixo do fundo do card. */
+  --wk-thumb-empty: #ebeff6;
+  --wk-thumb-icon: #cdd5e0;
+  /* Card com contorno (Expandido e Compacto limpo). No claro ele é branco
+     como a página e o fio faz o recorte. */
+  --wk-card-surface: #ffffff;
+  --wk-card-surface-hover: #f3f6fc;
+  --wk-card-border: #e2e8f0;
+  /* Card limpo (modelo Indicadores Hospitalares): sem borda, sombra suave. */
+  --wk-card-shadow: 0 1px 2px rgba(16, 24, 40, 0.04), 0 6px 16px rgba(16, 24, 40, 0.06);
+  --wk-card-shadow-hover: 0 2px 4px rgba(16, 24, 40, 0.05), 0 10px 24px rgba(16, 24, 40, 0.1);
+  --wk-card-title: #1f2937;
 }
 
 :root[data-theme='dark'] {
@@ -189,6 +240,49 @@
      claro some, e sem ela o prompt encosta na folha sem se destacar. */
   --wk-shadow-composer: 0 1px 2px rgba(0, 0, 0, 0.5), 0 10px 28px rgba(0, 0, 0, 0.45);
   --wk-shadow-menu: 0 8px 24px rgba(0, 0, 0, 0.5);
+
+  /* Portal: pastas e dashboards (ver o bloco do tema claro). */
+  --wk-home-chip-bg: #282a2c;
+  --wk-home-chip-bg-hover: #212324;
+  --wk-portal-list-hover: rgba(138, 180, 248, 0.06);
+  --wk-chip-active-bg: rgba(138, 180, 248, 0.25);
+  --wk-chip-active-text: #8ab4f8;
+  --wk-folder-icon: #b0b2b5;
+  --wk-control-label: #d3d4d5; /* como no Weknow escuro: texto claro, ícones em #b0b2b5 */
+  --wk-folder-tone-1: rgba(140, 165, 215, 0.7);
+  --wk-folder-tone-2: rgba(125, 185, 178, 0.7);
+  --wk-folder-tone-3: rgba(170, 158, 220, 0.7);
+  --wk-folder-tone-4: rgba(150, 190, 142, 0.7);
+  --wk-folder-tone-5: rgba(214, 184, 130, 0.7);
+  --wk-folder-tone-6: rgba(170, 178, 192, 0.7);
+  --wk-folder-tint-1: rgba(140, 165, 215, 0.1);
+  --wk-folder-tint-2: rgba(125, 185, 178, 0.1);
+  --wk-folder-tint-3: rgba(170, 158, 220, 0.1);
+  --wk-folder-tint-4: rgba(150, 190, 142, 0.1);
+  --wk-folder-tint-5: rgba(214, 184, 130, 0.1);
+  --wk-folder-tint-6: rgba(170, 178, 192, 0.1);
+  --wk-star: #fec03c;
+  --wk-star-idle: rgba(176, 178, 181, 0.7);
+  --wk-star-hover: rgba(254, 192, 60, 0.8);
+  --wk-dashboard-icon: #c98b8b;
+  --wk-dashboard-icon-soft: #6b4d4d;
+  --wk-toast-bg: #e8eaed;
+  --wk-toast-text: #1f2023;
+  --wk-card-hover: #222326;
+  --wk-row-divider: #222427;
+  /* Escuro, em camadas: página #131314 < card #1a1b1c < miniatura #24262a.
+     No escuro quem separa é o tom — elevação é clarear —, e o fio só
+     acompanha: #1d1d20 dava 1,1:1 com a página e sumia. O ícone da
+     miniatura vazia sobe para ser lido sem gritar (~1,9:1 com o fundo). */
+  --wk-thumb-empty: #24262a;
+  --wk-thumb-icon: #4a4f57;
+  --wk-card-surface: #17181a;
+  --wk-card-surface-hover: #1d1f21;
+  --wk-card-border: #2a2d32;
+  /* No escuro a sombra quase não aparece: quem separa o card é o tom. */
+  --wk-card-shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 6px 16px rgba(0, 0, 0, 0.25);
+  --wk-card-shadow-hover: 0 2px 4px rgba(0, 0, 0, 0.45), 0 10px 24px rgba(0, 0, 0, 0.35);
+  --wk-card-title: #eff0f0;
 }
 
 /*
@@ -293,3 +387,12 @@ body {
   transition: background-color .12s ease;
 }
 .wk-icon-btn:hover { background-color: var(--wk-icon-hover); }
+
+/* Dica: aparece por opacidade, sem deslizar — o movimento chamaria mais atenção que o texto. */
+@keyframes wk-tip-in {
+  from { opacity: 0 }
+  to { opacity: 1 }
+}
+.wk-tip {
+  animation: wk-tip-in 120ms ease-out both;
+}

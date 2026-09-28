@@ -79,6 +79,11 @@ export const RADIUS = {
 export const LAYOUT = {
   headerHeight: 56,      // Top Bar
   sidebarWidth: 255,     // instance "sidebar white"
+  /**
+   * Menu recolhido: só a coluna de ícones. 16 de margem + item de 40 + 16:
+   * o item vira um quadrado e o ícone fica no mesmo x do menu aberto.
+   */
+  sidebarRailWidth: 72,
   sheetRadius: 16,       // cantos superiores da folha branca
   sheetMarginRight: 48,  // 1920 - 255 - 1617: o conteúdo não encosta na borda
   threadMaxWidth: 896,

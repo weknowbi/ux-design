@@ -2,6 +2,7 @@ import { Fragment, useEffect, useRef, useState } from 'react'
 import { BREADCRUMB, COLOR, FONT, TOPBAR } from '@/design/tokens'
 import { Icon } from '@/components/icons'
 import { ThemeRow } from '@/components/ThemeSwitch'
+import { Dropdown, MenuAction as DropdownAction } from '@/components/browser/Menu'
 import avatar from '@/assets/avatar.png'
 
 /**
@@ -29,6 +30,8 @@ export type Crumb = {
    * onde leva.
    */
   iconOnly?: boolean
+  /** Níveis recolhidos: o item vira "…" e abre um menu com os nomes completos. */
+  collapsed?: { label: string; onClick: () => void }[]
 }
 
 function Breadcrumb({ trail }: { trail: Crumb[] }) {
@@ -78,27 +81,80 @@ function Breadcrumb({ trail }: { trail: Crumb[] }) {
           </span>
         )
 
+        /* A barra tem altura fixa, então nome longo de pasta precisa caber numa
+           linha: cada nível tem um piso de largura para nunca sumir, e o pai
+           encolhe antes do atual. O nome inteiro vai no tooltip.
+           O piso só vale para rótulo que pode ser cortado — em "Pastas" ele
+           sobrava dentro da caixa de hover e virava espaço vazio. */
+        const truncable = crumb.label.length > 12
+        const width = crumb.iconOnly || !truncable
+          ? 'shrink-0'
+          : last
+            ? 'min-w-[120px] shrink'
+            : 'min-w-[72px] max-w-[220px] shrink-[3]'
+
+        const separator = i > 0 && (
+          <Icon name="chevron_right" size={BREADCRUMB.iconSize} color={BREADCRUMB.iconColor} className="shrink-0" />
+        )
+
+        if (crumb.collapsed) {
+          return (
+            <Fragment key={`${i}-collapsed`}>
+              {separator}
+              <Dropdown
+                align="left"
+                minWidth={280}
+                trigger={({ open, toggle }) => (
+                  <button
+                    type="button"
+                    onClick={toggle}
+                    aria-haspopup="menu"
+                    aria-expanded={open}
+                    aria-label="Mostrar pastas intermediárias"
+                    title={crumb.collapsed!.map((c) => c.label).join(' › ')}
+                    className="wk-icon-btn shrink-0 flex items-center justify-center"
+                    style={{ width: 28, height: 28, background: open ? 'var(--wk-icon-hover)' : undefined }}
+                  >
+                    <Icon name="more_horiz" size={20} color={BREADCRUMB.iconColor} />
+                  </button>
+                )}
+              >
+                {(close) =>
+                  crumb.collapsed!.map((c) => (
+                    <DropdownAction
+                      key={c.label}
+                      icon="folder"
+                      label={c.label}
+                      onSelect={() => {
+                        close()
+                        c.onClick()
+                      }}
+                    />
+                  ))
+                }
+              </Dropdown>
+            </Fragment>
+          )
+        }
+
         return (
-          <Fragment key={crumb.label}>
-            {i > 0 && (
-              <Icon
-                name="chevron_right"
-                size={BREADCRUMB.iconSize}
-                color={BREADCRUMB.iconColor}
-                className="shrink-0"
-              />
-            )}
+          <Fragment key={`${i}-${crumb.label}`}>
+            {separator}
             {crumb.onClick && !last ? (
               <button
                 onClick={crumb.onClick}
-                title={`Ir para ${crumb.label}`}
-                className="wk-icon-btn flex items-center py-1"
+                title={crumb.label}
+                className={`wk-icon-btn flex items-center h-7 ${width}`}
                 style={{ paddingInline: HOVER_PAD_X, marginInline: -HOVER_PAD_X }}
               >
                 {content}
               </button>
             ) : (
-              <span className="flex items-center" aria-current={last ? 'page' : undefined}>
+              <span
+                className={`flex items-center ${width}`}
+                title={crumb.label}
+                aria-current={last ? 'page' : undefined}
+              >
                 {content}
               </span>
             )}
@@ -130,7 +186,8 @@ function MenuAction({ icon, label, onClick }: { icon: string; label: string; onC
       role="menuitem"
       onClick={onClick}
       className="w-full flex items-center gap-2 rounded-md transition-colors hover:bg-[var(--wk-menu-hover)]"
-      style={{ height: 40, paddingInline: 8 }}
+      // minHeight, não height: rótulo de duas linhas cresce a linha em vez de vazar dela.
+      style={{ minHeight: 40, paddingBlock: 6, paddingInline: 8 }}
     >
       <Icon name={icon} size={24} color={COLOR.navLabel} className="shrink-0" />
       <span
@@ -143,11 +200,16 @@ function MenuAction({ icon, label, onClick }: { icon: string; label: string; onC
   )
 }
 
+/** Linha que a tela injeta no menu "…" (ver `Header.menuItems`). */
+export type MenuItem = { icon: string; label: string; onClick?: () => void }
+
 /**
  * Menu "…" da barra de topo: suporte e tema. É o lugar onde ações e
- * preferências que não merecem um ícone próprio na barra se acumulam.
+ * preferências que não merecem um ícone próprio na barra se acumulam —
+ * inclusive o que a tela manda em `menuItems`, que entra antes das opções
+ * fixas e separado delas por um fio.
  */
-function OverflowMenu() {
+function OverflowMenu({ items }: { items?: MenuItem[] }) {
   const [open, setOpen] = useState(false)
   const rootRef = useRef<HTMLDivElement>(null)
 
@@ -192,6 +254,10 @@ function OverflowMenu() {
           }}
           role="menu"
         >
+          {items?.map((item) => (
+            <MenuAction key={item.label} icon={item.icon} label={item.label} onClick={item.onClick} />
+          ))}
+          {!!items?.length && <div className="my-1 h-px" style={{ background: COLOR.border }} />}
           <MenuAction icon="support_agent" label="Suporte" />
           <ThemeRow />
         </div>
@@ -200,7 +266,21 @@ function OverflowMenu() {
   )
 }
 
-export function Header({ trail }: { trail?: Crumb[] }) {
+export function Header({
+  trail,
+  menuItems,
+  search,
+}: {
+  trail?: Crumb[]
+  /** Linhas extras no menu "…", vindas da tela. */
+  menuItems?: MenuItem[]
+  /**
+   * Busca controlada pela tela; sem ela, a barra mostra a busca global do Weknow.
+   * `hidden`: a busca está visível em outro lugar da tela (layout dinâmico).
+   * O espaço fica reservado para o caminho à esquerda não pular.
+   */
+  search?: { value: string; onChange: (q: string) => void; placeholder: string; hidden?: boolean }
+}) {
   const S = TOPBAR.search
 
   return (
@@ -219,9 +299,13 @@ export function Header({ trail }: { trail?: Crumb[] }) {
       <div className="flex-1" />
 
       <div
-        className="hidden md:flex items-center focus-within:shadow-[0_0_0_2px_rgba(51,102,204,0.18)] transition-shadow"
+        // 328px (espec.) a partir de 1536px; abaixo cede espaço ao caminho, que carrega nome longo de pasta.
+        // Quando a busca é da tela (como no Drive), ela ganha mais largura: é a busca principal.
+        className={`hidden md:flex shrink-0 items-center focus-within:shadow-[0_0_0_2px_rgba(51,102,204,0.18)] transition-[opacity,visibility,box-shadow] duration-300 ease-[cubic-bezier(0.4,0,0,1)] ${
+          search ? 'w-[300px] xl:w-[380px] 2xl:w-[440px]' : 'w-[240px] 2xl:w-[328px]'
+        } ${search?.hidden ? 'opacity-0 invisible' : 'opacity-100 visible'}`}
+        aria-hidden={search?.hidden || undefined}
         style={{
-          width: S.width,
           height: S.height,
           gap: S.gap,
           paddingLeft: S.padLeft,
@@ -233,7 +317,11 @@ export function Header({ trail }: { trail?: Crumb[] }) {
         <Icon name="search" size={TOPBAR.iconSize} color={COLOR.navLabel} />
         <input
           type="text"
-          placeholder="Pesquise no Weknow"
+          placeholder={search?.placeholder ?? 'Pesquise no Weknow'}
+          tabIndex={search?.hidden ? -1 : undefined}
+          value={search?.value}
+          onChange={search ? (e) => search.onChange(e.target.value) : undefined}
+          onKeyDown={search ? (e) => e.key === 'Escape' && search.onChange('') : undefined}
           className="flex-1 min-w-0 bg-transparent outline-none"
           style={{
             fontFamily: FONT,
@@ -242,9 +330,21 @@ export function Header({ trail }: { trail?: Crumb[] }) {
             color: COLOR.text,
           }}
         />
+        {search?.value && (
+          <button
+            type="button"
+            onClick={() => search.onChange('')}
+            aria-label="Limpar busca"
+            title="Limpar busca"
+            className="wk-icon-btn shrink-0 flex items-center justify-center"
+            style={{ width: 24, height: 24 }}
+          >
+            <Icon name="close" size={20} color={COLOR.navLabel} />
+          </button>
+        )}
       </div>
 
-      <OverflowMenu />
+      <OverflowMenu items={menuItems} />
       <TopIcon name="expand_content" title="Expandir" />
 
       {/* Avatar — foto de 36px, recortada como no nó 3630:4012 */}
