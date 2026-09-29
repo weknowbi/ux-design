@@ -5,15 +5,15 @@ import { useTheme } from '@/design/theme'
 /**
  * Alternador de tema — espec. do nó 5121:2948 (linha "Tema" do menu lateral):
  *
- *   grupo   gap 8: ícone `light_mode` · chave · ícone `dark_mode`
+ *   grupo   gap 8: ícone `light_mode` (FILL 1) · chave · ícone `dark_mode`
  *   chave   36 × 20, raio total, botão de 16 com 2 de folga
  *
  * A chave é um `role="switch"` de verdade, não uma caixa decorativa: quem
  * navega por teclado precisa ouvir "ligado/desligado", e os dois ícones ao
  * lado dizem para que lado é cada estado.
  *
- * Os dois ícones ficam sempre em 20px no tom de ícone, sem preenchimento e
- * sem realce: no app quem diz o estado é a chave, não eles.
+ * O ícone do lado ativo acende no tom primário e vem preenchido; o outro fica
+ * em traço, no tom de ícone. Os dois têm 24px, como os demais ícones do menu.
  */
 
 const SWITCH = { width: 36, height: 20, knob: 16, inset: 2 } as const
@@ -24,7 +24,13 @@ export function ThemeSwitch() {
 
   return (
     <span className="inline-flex items-center shrink-0" style={{ gap: 8 }}>
-      <Icon name="light_mode" size={20} color={COLOR.navLabel} className="shrink-0" />
+      <Icon
+        name="light_mode"
+        size={24}
+        filled={!dark}
+        color={dark ? COLOR.navLabel : COLOR.primary}
+        className="shrink-0"
+      />
 
       <button
         type="button"
@@ -36,7 +42,7 @@ export function ThemeSwitch() {
         style={{
           width: SWITCH.width,
           height: SWITCH.height,
-          background: dark ? COLOR.primary : COLOR.border,
+          background: dark ? COLOR.primary : COLOR.borderStrong,
         }}
       >
         <span
@@ -51,7 +57,13 @@ export function ThemeSwitch() {
         />
       </button>
 
-      <Icon name="dark_mode" size={20} color={COLOR.navLabel} className="shrink-0" />
+      <Icon
+        name="dark_mode"
+        size={24}
+        filled={dark}
+        color={dark ? COLOR.primary : COLOR.navLabel}
+        className="shrink-0"
+      />
     </span>
   )
 }

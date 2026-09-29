@@ -14,7 +14,11 @@ import { ThemeSwitch } from '@/components/ThemeSwitch'
 export type PortalRoute = 'portal' | 'ask' | 'sql'
 
 const MENU: { id: PortalRoute; label: string; icon: React.ReactNode }[] = [
-  { id: 'portal', label: 'Página inicial', icon: <Icon name="home" size={24} /> },
+  // "Portal", não "Página inicial": é o nome do nó `sidebar white` (WP-832) e
+  // é o que mantém os três itens falando a mesma língua — os outros dois são
+  // nomes de aplicativo, e o menu é o mesmo dentro do Ask e do SQL AI, onde
+  // "página inicial" seria a home de qual dos três?
+  { id: 'portal', label: 'Portal', icon: <Icon name="home" size={24} /> },
   { id: 'ask', label: 'Weknow Ask', icon: <IconWeknowAsk size={24} /> },
   { id: 'sql', label: 'SQL AI', icon: <Icon name="database" size={24} /> },
 ]
