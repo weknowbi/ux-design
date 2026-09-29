@@ -57,7 +57,10 @@
 
   --wk-nav-active: #e4e9f1;
   --wk-nav-active-text: #3366cc;
-  --wk-nav-hover: rgba(51, 102, 204, 0.08);
+  /* Cinza, e não véu da ação primária: a 8% sobre o canvas o véu resolve em
+     #e4eaf8, que é o mesmo #e4e9f1 do item selecionado — passar o mouse ficava
+     igual a estar ali. O cinza é mais claro que o ativo e separa os dois. */
+  --wk-nav-hover: #ebeef5;
   --wk-nav-hover-text: #334155;
   --wk-nav-text: #475569;
   --wk-nav-label: #8c98a8;
@@ -218,8 +221,16 @@
   --wk-placeholder-soft: rgba(211, 212, 213, 0.75);
 
   --wk-nav-active: rgba(138, 180, 248, 0.12);
-  --wk-nav-active-text: #cad7f2;
-  --wk-nav-hover: rgba(138, 180, 248, 0.10);
+  /* O azul claro do tema, o mesmo que o chip ativo usa — e o mesmo que já está
+     no véu atrás deste item. O #cad7f2 que havia aqui tinha a luminância do
+     texto inativo (0,68 contra 0,66): 1,03:1 entre selecionado e não
+     selecionado, ou seja, o estado só existia no fundo. Contra o fundo
+     composto (#272d36) o azul dá 6,4:1, bem acima do mínimo de 4,5 — o que se
+     perde em contraste absoluto se ganha em dizer qual item está aberto. */
+  --wk-nav-active-text: #8ab4f8;
+  /* 8% contra os 12% do selecionado: com os 10% que havia aqui, o estado
+     transitório e o escolhido quase empatavam. */
+  --wk-nav-hover: rgba(138, 180, 248, 0.08);
   --wk-nav-hover-text: #eff0f0;
   --wk-nav-text: #d3d4d5;
   --wk-nav-label: #b0b2b5;
