@@ -108,13 +108,25 @@ function ContentTypeChips({
   active,
   onSelect,
   compact = false,
+  scroll = false,
 }: {
   active: SectionId
   onSelect: (id: SectionId) => void
   compact?: boolean
+  /**
+   * No celular os três chips somam ~330px e encostam nas bordas de uma tela
+   * de 375. Em vez de encolher a letra ou quebrar em duas linhas, a fileira
+   * rola na horizontal — e sangra 16px para os lados, para o chip cortado
+   * aparecer meio fora da margem e anunciar que há mais.
+   */
+  scroll?: boolean
 }) {
   return (
-    <div className={`flex justify-center ${compact ? 'gap-2' : 'gap-3'}`}>
+    <div
+      className={`flex ${scroll ? 'justify-start overflow-x-auto wk-no-scrollbar -mx-4 px-4' : 'justify-center'} ${
+        compact ? 'gap-2' : 'gap-3'
+      }`}
+    >
       {CONTENT_TYPES.map((t) => (
         <FilterChip
           key={t.id}
@@ -283,6 +295,53 @@ export function DynamicHero({
         </div>
       </div>
     </>
+  )
+}
+
+/**
+ * Topo da home no celular — base no protótipo mobile do redesign (nó
+ * 4454:8158), com três decisões novas:
+ *
+ * - **sem a saudação.** Em 812px de altura, "Olá, bem vindo ao Weknow"
+ *   custava uma faixa de 80px para dizer o que a marca na barra já diz — e
+ *   empurrava o conteúdo para fora da primeira tela. Na mesa ela cabe; aqui
+ *   não paga o aluguel.
+ * - **busca de 48px, não os 36 do protótipo.** 36 fica abaixo do alvo mínimo
+ *   de toque, e a letra de 14px faz o iOS dar zoom sozinho ao focar o campo —
+ *   a tela inteira salta. Com 16px de letra ele não dá.
+ * - **grudada no topo.** A busca e os chips são a única navegação da home; num
+ *   acervo de dezenas de pastas eles não podem ficar a uma rolagem de
+ *   distância.
+ */
+export function MobileHero({
+  query,
+  onQuery,
+  placeholder,
+  section,
+  onSection,
+}: {
+  query: string
+  onQuery: (q: string) => void
+  placeholder: string
+  /**
+   * Os chips só existem na raiz. Dentro de uma pasta a busca vem sozinha —
+   * na versão de mesa ela se muda para a barra de topo, e no celular a barra
+   * já está ocupada pelo menu, pela marca e pela conta. Sem ela ali, uma
+   * pasta com dezenas de dashboards só se percorre rolando.
+   */
+  section?: SectionId
+  onSection?: (id: SectionId) => void
+}) {
+  return (
+    <div
+      // pt-4 = o raio da folha: com menos que isso a busca entrava na curva do
+      // canto e o campo parecia torto em relação à borda.
+      className="sticky top-0 z-20 -mx-4 px-4 pt-4 pb-3 flex flex-col gap-3"
+      style={{ background: COLOR.surface }}
+    >
+      <SearchField query={query} onQuery={onQuery} placeholder={placeholder} />
+      {section && onSection && <ContentTypeChips active={section} onSelect={onSection} scroll />}
+    </div>
   )
 }
 

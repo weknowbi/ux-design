@@ -1,12 +1,14 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { COLOR, FONT, LAYOUT } from '@/design/tokens'
 import { useSidebar } from '@/design/sidebar'
+import { useIsMobile } from '@/design/viewport'
 import { Header, type Crumb, type MenuItem } from '@/components/Header'
 import { Icon } from '@/components/icons'
 import { PortalSidebar } from '@/components/PortalSidebar'
 import { SidebarBrand } from '@/components/SidebarBrand'
 import { FolderHeader } from '@/components/FolderHeader'
-import { CONTENT_TYPES, DynamicHero, FADE, Hero, type SectionId } from '@/components/Hero'
+import { CONTENT_TYPES, DynamicHero, FADE, Hero, MobileHero, type SectionId } from '@/components/Hero'
+import { MobileDrawer, MobileTopBar } from '@/components/MobileNav'
 import { ContentBrowser } from '@/components/browser/ContentBrowser'
 import { useBrowserPrefs, usePref } from '@/components/browser/prefs'
 import { BrowserControls } from '@/components/browser/BrowserControls'
@@ -63,6 +65,8 @@ function readHash(): string | null {
 
 export function PortalScreen() {
   const sidebar = useSidebar()
+  const isMobile = useIsMobile()
+  const [drawerOpen, setDrawerOpen] = useState(false)
   const [folderId, setFolderId] = useState(readHash)
   const [query, setQuery] = useState('')
   const [favorites, setFavorites] = useState(() => initialFavorites(PORTAL_ROOT))
@@ -165,7 +169,7 @@ export function PortalScreen() {
           placeholder: current ? `Pesquise em ${current.name}` : searchScope,
         }
 
-  const controls = <BrowserControls prefs={prefs} />
+  const controls = <BrowserControls prefs={prefs} mobile={isMobile} />
 
   const browser = (
     <CardStyleContext.Provider value={cardStyle}>
@@ -179,12 +183,108 @@ export function PortalScreen() {
           section={section}
           controls={atRoot ? controls : undefined}
           controlsHidden={dynamicHero && heroCollapsed}
+          mobile={isMobile}
           onNavigate={navigate}
           onToggleFavorite={toggleFavorite}
         />
       </IconModeContext.Provider>
     </CardStyleContext.Provider>
   )
+
+  const toastBox = (
+    <div
+      role="status"
+      aria-live="polite"
+      className={`pointer-events-none fixed bottom-8 left-1/2 -translate-x-1/2 z-50 rounded-lg px-4 py-3 ${FADE} ${
+        toast ? 'opacity-100' : 'opacity-0'
+      }`}
+      style={{ background: 'var(--wk-toast-bg)', color: 'var(--wk-toast-text)', fontFamily: FONT, fontSize: 14 }}
+    >
+      {toast?.text}
+    </div>
+  )
+
+  /**
+   * Celular: uma coluna só, sem menu ao lado.
+   *
+   * A folha mantém os cantos arredondados do topo, como na versão de mesa: é
+   * o que separa a barra — que é da aplicação — do conteúdo, que é do
+   * cliente. O que ela larga é a margem lateral, que ali só comeria largura.
+   * A barra de topo fica, porque é ela que carrega o menu, a marca e a conta
+   * (protótipo mobile, nó 5121:3576).
+   *
+   * `100dvh` e não `100vh`: no celular a barra de endereço do navegador
+   * entra e sai, e com `vh` a última linha da lista fica permanentemente
+   * escondida atrás dela.
+   */
+  if (isMobile) {
+    return (
+      <div
+        className="flex flex-col"
+        style={{ width: '100%', height: '100dvh', background: COLOR.canvas, fontFamily: FONT }}
+      >
+        <MobileTopBar onMenu={() => setDrawerOpen(true)} />
+
+        <main
+          ref={mainRef}
+          className="flex-1 overflow-y-auto min-h-0"
+          style={{
+            background: COLOR.surface,
+            borderTopLeftRadius: LAYOUT.sheetRadius,
+            borderTopRightRadius: LAYOUT.sheetRadius,
+          }}
+        >
+          {/* pb-16: a lista termina acima da borda, e não colada nela — no
+              celular o último item cai na área do gesto de voltar do sistema. */}
+          <div className="flex flex-col px-4 pb-16">
+            {atRoot ? (
+              <MobileHero
+                query={query}
+                onQuery={setQuery}
+                placeholder={searchScope}
+                section={section}
+                onSection={openSection}
+              />
+            ) : (
+              current && (
+                <>
+                  {/* O nome da pasta rola junto com o conteúdo e a busca gruda
+                      em cima dele: ao descer numa pasta longa, o que precisa
+                      ficar à mão é o campo, não o título — para voltar basta
+                      subir, e o gesto do sistema continua valendo. */}
+                  <div className="pt-4">
+                    <FolderHeader
+                      name={current.name}
+                      onBack={() => navigate(path.length > 1 ? path[path.length - 2].id : null)}
+                      aside={controls}
+                      compact
+                    />
+                  </div>
+                  <MobileHero query={query} onQuery={setQuery} placeholder={`Pesquise em ${current.name}`} />
+                </>
+              )
+            )}
+            <div ref={browserRef} className="scroll-mt-4">
+              {browser}
+            </div>
+          </div>
+        </main>
+
+        <MobileDrawer open={drawerOpen} onClose={() => setDrawerOpen(false)}>
+          <PortalSidebar
+            active="portal"
+            onNavigate={(route) => {
+              setDrawerOpen(false)
+              if (route === 'portal') navigate(null)
+            }}
+            collapsed={false}
+          />
+        </MobileDrawer>
+
+        {toastBox}
+      </div>
+    )
+  }
 
   return (
     <div
@@ -267,16 +367,7 @@ export function PortalScreen() {
           )}
         </main>
 
-        <div
-          role="status"
-          aria-live="polite"
-          className={`pointer-events-none absolute bottom-8 left-1/2 -translate-x-1/2 rounded-lg px-4 py-3 ${FADE} ${
-            toast ? 'opacity-100' : 'opacity-0'
-          }`}
-          style={{ background: 'var(--wk-toast-bg)', color: 'var(--wk-toast-text)', fontFamily: FONT, fontSize: 14 }}
-        >
-          {toast?.text}
-        </div>
+        {toastBox}
       </div>
     </div>
   )

@@ -22,29 +22,44 @@ export function FolderHeader({
   name,
   onBack,
   aside,
+  compact = false,
 }: {
   name: string
   /** Sobe um nível: a pasta de cima, ou a raiz quando já está no primeiro. */
   onBack: () => void
   aside?: ReactNode
+  /**
+   * Celular. Cai para 17px e larga o ícone de pasta: numa coluna de 375px os
+   * 22px de título e os 28+12 do ícone deixavam o nome — que é o dado — com
+   * menos da metade da linha. A seta continua, porque ali ela é a única
+   * saída: não há caminho na barra de topo para voltar.
+   */
+  compact?: boolean
 }) {
   const tip = useEllipsisTooltip<HTMLHeadingElement>(name)
   return (
-    <div className="flex items-center gap-3 mb-4" style={{ height: 32 }} onMouseEnter={tip.show} onMouseLeave={tip.hide}>
+    <div
+      className={`flex items-center gap-3 ${compact ? 'mb-2' : 'mb-4'}`}
+      style={{ height: compact ? 40 : 32 }}
+      onMouseEnter={tip.show}
+      onMouseLeave={tip.hide}
+    >
       <button
         type="button"
         onClick={onBack}
         aria-label="Voltar um nível"
         title="Voltar"
         className="wk-icon-btn shrink-0 flex items-center justify-center"
-        style={{ width: 32, height: 32 }}
+        style={{ width: compact ? 40 : 32, height: compact ? 40 : 32 }}
       >
         <Icon name="arrow_back" size={24} color={COLOR.navLabel} />
       </button>
-      <Icon name="folder" size={28} filled color={COLOR.navLabel} className="shrink-0" />
+      {!compact && <Icon name="folder" size={28} filled color={COLOR.navLabel} className="shrink-0" />}
       <h2
         ref={tip.ref}
-        className="flex-1 min-w-0 truncate text-[22px] leading-[30px] font-medium tracking-[-0.3px]"
+        className={`flex-1 min-w-0 truncate font-medium tracking-[-0.3px] ${
+          compact ? 'text-[17px] leading-[24px]' : 'text-[22px] leading-[30px]'
+        }`}
         style={{ fontFamily: FONT, color: COLOR.text }}
       >
         {name}
