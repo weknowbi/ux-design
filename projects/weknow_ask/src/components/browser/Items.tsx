@@ -90,12 +90,13 @@ function FavoriteToggle({
       aria-pressed={favorite}
       aria-label={`${label}: ${item.name}`}
       title={label}
-      className={`group/star relative z-10 shrink-0 flex items-center justify-center transition-opacity ${
+      // 40px no celular, 28 na mesa: no toque o alvo é o dedo, e a estrela
+      // fica entre o nome e o menu — errar nela abre o item.
+      className={`group/star relative z-10 shrink-0 flex items-center justify-center transition-opacity size-10 md:size-7 ${
         favorite && !quiet
           ? ''
           : 'opacity-0 group-hover:opacity-100 focus-visible:opacity-100 [@media(hover:none)]:opacity-100'
       }`}
-      style={{ width: 28, height: 28 }}
     >
       <Icon
         name="star"
@@ -130,8 +131,14 @@ const CONTEXT_STYLE = { fontFamily: FONT, color: COLOR.textMuted }
 // Proporção em vez de largura fixa: o metadado acompanha o nome em vez de
 // ficar na borda direita com um vazio no meio. Cerca de 42% / 18% / 29% / 11% — a
 // alteração leva data, hora e nome, e é ela que precisa de mais largura.
+//
+// Abaixo de lg a grade tem TRÊS colunas, não cinco com duas zeradas: as duas
+// colunas de metadado são `hidden` ali, e elemento escondido sai da grade —
+// as ações caíam na terceira coluna, que media 0px, e a estrela ia parar em
+// cima do nome. Colunas de menos, e não larguras de zero, é o que mantém cada
+// coisa na sua.
 const LIST_COLS =
-  '[grid-template-columns:20px_minmax(0,1fr)_0px_0px_auto] lg:[grid-template-columns:20px_minmax(0,42fr)_minmax(0,18fr)_minmax(0,29fr)_minmax(92px,11fr)]'
+  '[grid-template-columns:20px_minmax(0,1fr)_auto] lg:[grid-template-columns:20px_minmax(0,42fr)_minmax(0,18fr)_minmax(0,29fr)_minmax(92px,11fr)]'
 
 /** "13/08/2026 14:49" — os segundos do rodapé dos cadastros não ajudam a varrer a lista. */
 const MODIFIED_FORMAT = new Intl.DateTimeFormat('pt-BR', {
@@ -205,8 +212,8 @@ function RowMenu({ item, favorite, onOpen, onToggleFavorite }: Omit<ItemProps, '
             aria-expanded={open}
             aria-label={`Ações de ${item.name}`}
             title="Mais ações"
-            className="wk-icon-btn flex items-center justify-center"
-            style={{ width: 28, height: 28, background: open ? 'var(--wk-icon-hover)' : undefined }}
+            className="wk-icon-btn flex items-center justify-center size-10 md:size-7"
+            style={{ background: open ? 'var(--wk-icon-hover)' : undefined }}
           >
             <Icon name="more_vert" size={20} color={COLOR.navLabel} />
           </button>
@@ -245,7 +252,13 @@ function RowMenu({ item, favorite, onOpen, onToggleFavorite }: Omit<ItemProps, '
   )
 }
 
-function ItemRow({ entry: { item, meta }, favorite, onOpen, onToggleFavorite }: ItemProps) {
+function ItemRow({
+  entry: { item, meta },
+  favorite,
+  metaLabel,
+  onOpen,
+  onToggleFavorite,
+}: ItemProps & { metaLabel?: string }) {
   const tip = useEllipsisTooltip(item.name)
   return (
     <div
@@ -255,12 +268,34 @@ function ItemRow({ entry: { item, meta }, favorite, onOpen, onToggleFavorite }: 
       // ele cobria as opções do menu que acabou de abrir.
       onPointerDown={tip.hide}
       onMouseLeave={tip.hide}
-      className={`group relative grid items-center h-11 transition-colors hover:bg-[var(--wk-portal-list-hover)] ${LIST_PAD} ${LIST_COLS}`}
+      /* 56px no celular contra 44 na mesa: é o piso de alvo de toque, e é o
+         que deixa o nome ocupar duas linhas mais o código sem apertar o texto
+         contra as bordas. Descrição de tarefa tem 40, 60 caracteres — numa
+         coluna de 375px, uma linha só cortaria quase todas no meio da
+         primeira palavra útil. */
+      className={`group relative grid items-center min-h-[56px] md:h-11 transition-colors hover:bg-[var(--wk-portal-list-hover)] active:bg-[var(--wk-portal-list-hover)] ${LIST_PAD} ${LIST_COLS}`}
     >
       <button type="button" onClick={() => onOpen(item)} aria-label={item.name} className={OVERLAY} />
       <ItemIcon item={item} />
-      <span ref={tip.ref} className="pointer-events-none min-w-0 truncate text-[14px] leading-[20px]" style={NAME_STYLE}>
-        {item.name}
+      <span className="pointer-events-none min-w-0 flex flex-col justify-center py-1.5 md:py-0">
+        <span
+          ref={tip.ref}
+          className="min-w-0 text-[14px] leading-[20px] line-clamp-2 md:truncate md:line-clamp-none"
+          style={NAME_STYLE}
+        >
+          {item.name}
+        </span>
+        {/* Abaixo de lg a coluna do metadado não existe, e nela mora o código
+            que o cliente usa para citar a tarefa ou a apresentação — o dado
+            que ele lê para o telefone. Aqui ele desce para uma segunda linha
+            em vez de sumir, e leva junto o nome da coluna: sem o cabeçalho
+            para explicá-lo, um "03" solto embaixo do título não é dado
+            nenhum. */}
+        {meta && (
+          <span className="lg:hidden truncate text-[12px] leading-[16px] mt-0.5" style={CONTEXT_STYLE}>
+            {metaLabel ? `${metaLabel} ${meta}` : meta}
+          </span>
+        )}
       </span>
       <span className="pointer-events-none hidden lg:block truncate text-[13px] leading-[20px]" style={CONTEXT_STYLE}>
         {meta}
@@ -280,7 +315,14 @@ function ItemRow({ entry: { item, meta }, favorite, onOpen, onToggleFavorite }: 
         {(favoritable(item) || item.kind === 'presentation') && (
           <RowMenu item={item} favorite={favorite} onOpen={onOpen} onToggleFavorite={onToggleFavorite} />
         )}
-        <span className={`pointer-events-none ml-2 w-5 flex justify-end ${item.kind === 'folder' ? REVEAL : 'invisible'}`}>
+        {/* No celular o chevron sai: lá o toque na linha é a única forma de
+            abrir, então ele não avisa nada que o dedo não saiba — e os 28px
+            dele fazem falta no nome, que é o que se lê. */}
+        <span
+          className={`pointer-events-none ml-2 w-5 hidden md:flex justify-end ${
+            item.kind === 'folder' ? REVEAL : 'invisible'
+          }`}
+        >
           <Icon name="chevron_right" size={20} color={COLOR.textMuted} />
         </span>
       </div>
@@ -425,8 +467,10 @@ function CardMenu({
             aria-expanded={open}
             aria-label={`Ações de ${item.name}`}
             title="Mais ações"
-            className="wk-icon-btn flex items-center justify-center"
-            style={{ width: 28, height: 28, background: open ? 'var(--wk-icon-hover)' : undefined }}
+            // 40px no celular, 28 na mesa — o mesmo piso de toque da estrela,
+            // que fica logo ao lado.
+            className="wk-icon-btn flex items-center justify-center size-10 md:size-7"
+            style={{ background: open ? 'var(--wk-icon-hover)' : undefined }}
           >
             <Icon name="more_vert" size={20} color={COLOR.navLabel} />
           </button>
@@ -896,7 +940,10 @@ export function ItemCollection({
 
   if (view === 'grid') {
     return (
-      <div role="list" className="grid gap-4" style={CARD_COLUMNS}>
+      // 12px entre cards no celular contra os 16 da mesa: ali a grade tem uma
+      // coluna só, então o vão não separa colunas — só empilha ar entre um
+      // card e o seguinte, e cada 4px custa meio item por tela.
+      <div role="list" className="grid gap-3 md:gap-4" style={CARD_COLUMNS}>
         {entries.map((e) => (
           <ItemTile key={e.item.id} entry={e} favorite={favorites.has(e.item.id)} {...common} />
         ))}
@@ -909,7 +956,13 @@ export function ItemCollection({
     <div role="list" className="flex flex-col -mx-3 divide-y divide-[var(--wk-row-divider)]">
       {showHeader && <ListHeader columns={columns} aside={headerAside} />}
       {entries.map((e) => (
-        <ItemRow key={e.item.id} entry={e} favorite={favorites.has(e.item.id)} {...common} />
+        <ItemRow
+          key={e.item.id}
+          entry={e}
+          favorite={favorites.has(e.item.id)}
+          metaLabel={columns.meta}
+          {...common}
+        />
       ))}
     </div>
   )

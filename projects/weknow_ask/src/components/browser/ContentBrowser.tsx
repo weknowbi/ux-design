@@ -105,6 +105,7 @@ export function ContentBrowser({
   section,
   controls,
   controlsHidden,
+  mobile = false,
   onNavigate,
   onToggleFavorite,
 }: {
@@ -119,12 +120,21 @@ export function ContentBrowser({
   controls?: ReactNode
   /** Os controles subiram para a barra do topo; aqui eles só esmaecem. */
   controlsHidden?: boolean
+  /** Celular: uma só visualização, o Compacto (ver `view` abaixo). */
+  mobile?: boolean
   onNavigate: (id: string | null) => void
   onToggleFavorite: (id: string) => void
 }) {
   const all = useMemo(() => flatten(root), [root])
   const q = normalize(query.trim())
   const current = path.length ? path[path.length - 1] : root
+  /* No celular a visualização não é escolha: Expandido põe um card de 260px
+     de altura por linha e transforma dez pastas em cinco telas de rolagem.
+     Compacto é o mesmo card sem a imagem — mantém o ícone e a cor da pasta,
+     que é o que identifica cada uma de relance, e cabe onze por tela. A
+     escolha de mesa continua guardada e volta a valer quando a janela
+     cresce. */
+  const view: ViewMode = mobile ? 'grid' : prefs.view
 
   const open = (item: Item) => {
     if (item.kind === 'folder') onNavigate(item.id)
@@ -182,47 +192,64 @@ export function ContentBrowser({
     ? all.filter((e) => normalize(e.item.name).includes(q))
     : current.children.map((item) => ({ item, path }))
   const withContext = Boolean(q)
-  /* Conteúdo todo junto, sem separar pasta de dashboard: dentro de pasta
-     sempre, como no Weknow, e na Lista também na raiz — ali o ícone, a coluna
-     Detalhes e o chevron já dizem o que é cada linha, e dois blocos só
-     afastavam o usuário do que ele procura. Nas visualizações de card a raiz
-     mantém as seções, que ali fazem o papel de sumário; a busca também, porque
-     o resultado vem de pastas diferentes. */
-  const flat = !q && (path.length > 0 || prefs.view === 'list')
-  /* Na Lista não há seção de Favoritos: eles ficam no meio da própria lista,
-     marcados pela estrela. Uma faixa de cards em cima repetia os mesmos itens
-     que apareciam logo abaixo e empurrava a tabela para fora da tela. Nas
-     visualizações de card a seção continua, porque ali ela é o atalho. */
-  const folders = toListed(entries.filter((e) => e.item.kind === 'folder'), withContext, prefs.view)
-  const dashboards = toListed(entries.filter((e) => e.item.kind === 'dashboard'), withContext, prefs.view)
+  /* Dentro de pasta o conteúdo vai todo junto, sem separar pasta de dashboard
+     — é o que o Weknow faz, e dois blocos só afastavam o usuário do que ele
+     procura. Na raiz as seções ficam, porque ali elas fazem o papel de
+     sumário; na busca também, porque o resultado vem de pastas diferentes. */
+  const flat = !q && path.length > 0
+  const folders = toListed(entries.filter((e) => e.item.kind === 'folder'), withContext, view)
+  const dashboards = toListed(entries.filter((e) => e.item.kind === 'dashboard'), withContext, view)
+  /* Favoritos segue a visualização escolhida, como o resto da tela: em
+     Expandido a pasta favorita aparece com a imagem que o cliente cadastrou,
+     que é justamente o que ele escolheu ver. Uma seção em outra densidade
+     seria uma exceção que só o código conhece. */
   const favs =
-    !q && path.length === 0 && prefs.view !== 'list'
-      ? toListed(all.filter((e) => favorites.has(e.item.id)), true, prefs.view)
+    !q && path.length === 0 && !flat
+      ? toListed(all.filter((e) => favorites.has(e.item.id)), true, view)
       : []
 
   const collection = { favorites, onOpen: open, onToggleFavorite }
 
-  type Group = { label?: string; icon?: string; iconColor?: string; entries: Listed[]; view: ViewMode }
+  type Group = { id?: string; label?: string; icon?: string; iconColor?: string; entries: Listed[]; view: ViewMode }
+
+  /* Com Favoritos na frente, o bloco de baixo não é "Pastas" em oposição a
+     nada — na raiz não há dashboard solto, então ele é o acervo inteiro, a
+     favorita inclusive. O rótulo passa a dizer isso, em vez de repetir o chip
+     ativo do topo e o texto da busca ("Pesquise em Pastas"): assim a pasta que
+     aparece duas vezes na tela se explica, em vez de parecer engano. */
+  const allRest = favs.length > 0
 
   const sections: Group[] = flat
-    ? [{ entries: toListed(entries, withContext, prefs.view), view: prefs.view }]
+    ? [{ entries: toListed(entries, withContext, view), view }]
     : (
         [
-          { label: 'Favoritos', icon: 'star', iconColor: 'var(--wk-star)', entries: favs, view: prefs.view },
-          { label: 'Pastas', icon: 'folder', iconColor: COLOR.navLabel, entries: folders, view: prefs.view },
           {
-            label: 'Dashboards',
+            id: 'favoritos',
+            label: 'Favoritos',
+            icon: 'star',
+            iconColor: 'var(--wk-star)',
+            entries: favs,
+            view,
+          },
+          {
+            id: 'pastas',
+            label: allRest ? 'Todas as pastas' : 'Pastas',
+            icon: 'folder',
+            iconColor: COLOR.navLabel,
+            entries: folders,
+            view,
+          },
+          {
+            id: 'dashboards',
+            label: allRest ? 'Todos os dashboards' : 'Dashboards',
             icon: 'dashboard',
             iconColor: 'var(--wk-dashboard-icon)',
             entries: dashboards,
-            view: prefs.view,
+            view,
           },
         ] as Group[]
       ).filter((s) => s.entries.length > 0)
 
-  const firstList = sections.findIndex((s) => s.view === 'list')
-  /** Há título de seção para receber os controles? Na Lista solta, não há. */
-  const titled = sections.some((s) => s.label)
   const empty = folders.length + dashboards.length === 0
 
   return (
@@ -237,26 +264,22 @@ export function ContentBrowser({
       )}
 
       <div className="flex flex-col gap-10">
-        {/* Os controles ficam na primeira linha de seção; sem seção nenhuma
-            — a Lista solta, sem títulos —, eles vão para a linha do cabeçalho
-            de colunas. Nos dois casos sem gastar uma faixa própria de altura. */}
+        {/* Os controles moram na primeira linha de seção, sem gastar uma faixa
+            de altura própria. Dentro de pasta não há seção nenhuma — e nem
+            controles: ali eles ficam na linha do nome da pasta. */}
         {sections.map((s, i) => {
-          // Cabeçalho de colunas uma vez só: as seções seguintes continuam
-          // dentro da mesma grade, como divisores.
           const items = (
             <ItemCollection
               entries={s.entries}
               view={s.view}
-              showHeader={i === firstList}
-              headerAside={!titled && i === firstList ? asideControls : undefined}
-              quietFavorites={favs.length > 0 && s.label !== 'Favoritos'}
+              quietFavorites={favs.length > 0 && s.id !== 'favoritos'}
               {...collection}
             />
           )
           if (!s.label) return <Fragment key="tudo">{items}</Fragment>
           return (
             <Section
-              key={s.label}
+              key={s.id}
               label={s.label}
               icon={s.icon!}
               iconColor={s.iconColor!}

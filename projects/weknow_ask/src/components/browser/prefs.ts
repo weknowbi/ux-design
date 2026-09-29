@@ -2,8 +2,19 @@ import { useCallback, useState } from 'react'
 import type { Item } from '@/data/portal'
 
 export type ViewMode = 'list' | 'grid' | 'thumbs'
-/** Ordem do menu: do mais visual ao mais denso. */
-export const VIEW_MODES: ViewMode[] = ['thumbs', 'grid', 'list']
+/**
+ * Ordem do menu: do mais visual ao mais denso.
+ *
+ * A Lista saiu das opções. Ela era uma tabela — cabeçalho de colunas,
+ * "Detalhes", "Última alteração" —, e tabela se lê como relatório, não como
+ * acervo: ali o ícone do tipo cabia em 20px e voltava a ser a pasta cinza
+ * genérica, sem o ícone nem a cor que o cliente cadastrou. Eram duas telas
+ * para o mesmo conteúdo, e a mais densa era justamente a que dizia menos.
+ *
+ * O renderer de lista continua no código, mas só onde ele é mesmo uma
+ * tabela: Tarefas e Apresentações, que têm descrição e código em coluna.
+ */
+export const VIEW_MODES: ViewMode[] = ['thumbs', 'grid']
 export type SortKey = 'default' | 'name' | 'updated'
 export type SortDir = 'asc' | 'desc'
 

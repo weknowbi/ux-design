@@ -457,3 +457,23 @@ body {
 .wk-tip {
   animation: wk-tip-in 120ms ease-out both;
 }
+
+/* ---------------------------------------------------------------------------
+   Celular. O portal troca de layout abaixo de 768px (ver design/viewport.ts);
+   estas duas regras são o que não dá para dizer em classe de componente.
+--------------------------------------------------------------------------- */
+
+/* Fileira que rola na horizontal (os chips de área): a barra de rolagem
+   aparecendo por cima dos chips somava uma linha de ruído a cada toque, e no
+   celular ninguém arrasta uma barra de 3px — arrasta o conteúdo. */
+.wk-no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.wk-no-scrollbar::-webkit-scrollbar { display: none; }
+
+/* O véu cinza que o WebKit pinta sobre tudo que se toca. Como cada linha da
+   lista já tem o próprio estado de toque, ele só atrasava o retorno visual. */
+@media (hover: none) {
+  * { -webkit-tap-highlight-color: transparent; }
+}

@@ -4,12 +4,24 @@ import { Dropdown, MenuOption } from '@/components/browser/Menu'
 import { SORT_LABEL, VIEW_ICON, VIEW_LABEL, VIEW_MODES, type BrowserPrefs, type SortKey } from '@/components/browser/prefs'
 
 /**
- * Controles do cabeçalho "Favoritos" do design (↑ Padrão · ícone de
- * visualização ▾). Baixa prioridade visual: só texto apagado e ícones, sem
+ * Controles do cabeçalho "Favoritos" do design: ordem (↑ Padrão) e
+ * visualização. Baixa prioridade visual — só texto apagado e ícones, sem
  * caixa até o hover.
+ *
+ * A visualização era um menu de três opções; com a Lista fora, sobraram duas
+ * e ela virou uma chave de um toque (ver abaixo).
  */
-export function BrowserControls({ prefs }: { prefs: BrowserPrefs }) {
+export function BrowserControls({
+  prefs,
+  mobile = false,
+}: {
+  prefs: BrowserPrefs
+  /** Celular: só a ordenação. Lá a visualização é sempre Compacto (ver ContentBrowser). */
+  mobile?: boolean
+}) {
   const { view, setView, sort, setSort, dir, setDir } = prefs
+  /** A outra visualização — a que a chave oferece. */
+  const other = VIEW_MODES.find((v) => v !== view) ?? view
 
   return (
     <div className="flex items-center gap-1 shrink-0">
@@ -57,37 +69,21 @@ export function BrowserControls({ prefs }: { prefs: BrowserPrefs }) {
         }
       </Dropdown>
 
-      <Dropdown
-        trigger={({ open, toggle }) => (
-          <button
-            type="button"
-            onClick={toggle}
-            aria-haspopup="menu"
-            aria-expanded={open}
-            aria-label={`Visualização: ${VIEW_LABEL[view]}`}
-            title="Visualização"
-            className="wk-icon-btn flex items-center h-[28px] pl-1 pr-0.5 ml-1"
-            style={{ background: open ? 'var(--wk-icon-hover)' : undefined }}
-          >
-            <Icon name={VIEW_ICON[view]} size={20} color={COLOR.navLabel} />
-            <Icon name="keyboard_arrow_down" size={20} color={COLOR.navLabel} />
-          </button>
-        )}
-      >
-        {(close) =>
-          VIEW_MODES.map((v) => (
-            <MenuOption
-              key={v}
-              checked={view === v}
-              label={VIEW_LABEL[v]}
-              onSelect={() => {
-                setView(v)
-                close()
-              }}
-            />
-          ))
-        }
-      </Dropdown>
+      {/* Com duas visualizações, o menu virou chave: um toque troca, em vez de
+          um toque para abrir a lista e outro para escolher a única alternativa.
+          O ícone mostra para onde o botão leva, não onde você está — é o que o
+          rótulo diz, e é a leitura certa para um botão que age. */}
+      {!mobile && (
+        <button
+          type="button"
+          onClick={() => setView(other)}
+          aria-label={`Ver em ${VIEW_LABEL[other]}`}
+          title={`Ver em ${VIEW_LABEL[other]}`}
+          className="wk-icon-btn flex items-center justify-center h-[28px] w-[28px] ml-1"
+        >
+          <Icon name={VIEW_ICON[other]} size={20} color={COLOR.navLabel} />
+        </button>
+      )}
     </div>
   )
 }
