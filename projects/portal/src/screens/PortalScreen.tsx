@@ -229,9 +229,13 @@ export function PortalScreen() {
                 onCollapsedChange={setHeroCollapsed}
                 controls={controls}
               />
-              {/* Mais folga entre os chips e a lista: grudada, a busca ocupa
-                  a faixa do título, e a lista encostada nela ficava apertada. */}
-              <div ref={browserRef} className="mt-12 scroll-mt-24">
+              {/* 32 e não 40, o vão que separa uma seção da outra: ali os 40
+                  separam uma grade densa de cards do título seguinte, aqui
+                  separam três pílulas leves. Vão igual ao lado de elemento leve
+                  lê maior, então 32 é o que *parece* igual — com os 48 que havia
+                  antes, o herói não lia como bloco à parte, lia como mais uma
+                  seção com folga sobrando. */}
+              <div ref={browserRef} className="mt-8 scroll-mt-24">
                 {browser}
               </div>
             </div>
