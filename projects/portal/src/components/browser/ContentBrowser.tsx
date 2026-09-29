@@ -195,23 +195,52 @@ export function ContentBrowser({
      visualizações de card a seção continua, porque ali ela é o atalho. */
   const folders = toListed(entries.filter((e) => e.item.kind === 'folder'), withContext, prefs.view)
   const dashboards = toListed(entries.filter((e) => e.item.kind === 'dashboard'), withContext, prefs.view)
+  /* Favoritos é atalho, não acervo: vai sempre em Compacto, mesmo com o resto
+     em Expandido. Com a mesma anatomia dos cards de baixo — e a pasta favorita
+     repetida ali logo em seguida —, os dois blocos liam como uma lista só,
+     repetida; e cinco favoritos em Expandido enchiam a tela antes do primeiro
+     item do acervo. Denso, ele lê como faixa de atalho e tem altura previsível
+     até numa coluna estreita. */
+  const favView: ViewMode = 'grid'
   const favs =
     !q && path.length === 0 && prefs.view !== 'list'
-      ? toListed(all.filter((e) => favorites.has(e.item.id)), true, prefs.view)
+      ? toListed(all.filter((e) => favorites.has(e.item.id)), true, favView)
       : []
 
   const collection = { favorites, onOpen: open, onToggleFavorite }
 
-  type Group = { label?: string; icon?: string; iconColor?: string; entries: Listed[]; view: ViewMode }
+  type Group = { id?: string; label?: string; icon?: string; iconColor?: string; entries: Listed[]; view: ViewMode }
+
+  /* Com Favoritos na frente, o bloco de baixo não é "Pastas" em oposição a
+     nada — na raiz não há dashboard solto, então ele é o acervo inteiro, a
+     favorita inclusive. O rótulo passa a dizer isso, em vez de repetir o chip
+     ativo do topo e o texto da busca ("Pesquise em Pastas"): assim a pasta que
+     aparece duas vezes na tela se explica, em vez de parecer engano. */
+  const allRest = favs.length > 0
 
   const sections: Group[] = flat
     ? [{ entries: toListed(entries, withContext, prefs.view), view: prefs.view }]
     : (
         [
-          { label: 'Favoritos', icon: 'star', iconColor: 'var(--wk-star)', entries: favs, view: prefs.view },
-          { label: 'Pastas', icon: 'folder', iconColor: COLOR.navLabel, entries: folders, view: prefs.view },
           {
-            label: 'Dashboards',
+            id: 'favoritos',
+            label: 'Favoritos',
+            icon: 'star',
+            iconColor: 'var(--wk-star)',
+            entries: favs,
+            view: favView,
+          },
+          {
+            id: 'pastas',
+            label: allRest ? 'Todas as pastas' : 'Pastas',
+            icon: 'folder',
+            iconColor: COLOR.navLabel,
+            entries: folders,
+            view: prefs.view,
+          },
+          {
+            id: 'dashboards',
+            label: allRest ? 'Todos os dashboards' : 'Dashboards',
             icon: 'dashboard',
             iconColor: 'var(--wk-dashboard-icon)',
             entries: dashboards,
@@ -249,14 +278,14 @@ export function ContentBrowser({
               view={s.view}
               showHeader={i === firstList}
               headerAside={!titled && i === firstList ? asideControls : undefined}
-              quietFavorites={favs.length > 0 && s.label !== 'Favoritos'}
+              quietFavorites={favs.length > 0 && s.id !== 'favoritos'}
               {...collection}
             />
           )
           if (!s.label) return <Fragment key="tudo">{items}</Fragment>
           return (
             <Section
-              key={s.label}
+              key={s.id}
               label={s.label}
               icon={s.icon!}
               iconColor={s.iconColor!}
