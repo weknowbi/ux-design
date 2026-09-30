@@ -342,19 +342,26 @@ export const FILTER_TREE: FilterGroup[] = [
 
 /* ── Contexto de dados e provedor de IA ───────────────────────────────────── */
 
-/** Metadado que dá contexto à conversa. Agrupado pela origem. */
-export type MetaContext = { id: string; label: string; group: string }
+/**
+ * Metadado que dá contexto à conversa. `group` é a área de negócio, `id` o
+ * código e `name` a descrição — três atributos separados, porque cada tela
+ * mostra uma combinação diferente deles.
+ */
+export type MetaContext = { id: string; name: string; group: string }
+
+/** Como o metadado é citado em lista, chip e título de conversa: "código - nome". */
+export const contextLabel = (c: MetaContext) => `${c.id} - ${c.name}`
 
 export const META_CONTEXTS: MetaContext[] = [
-  { id: '38', label: '38 - 2.2 - Fraturas', group: '2.2 - Sample Data (SQLite)' },
-  { id: '39', label: '39 - 2.2 - Persons (39)', group: '2.2 - Sample Data (SQLite)' },
-  { id: '36', label: '36 - Empresas', group: '2.2 - Sample Data (SQLite)' },
-  { id: '107', label: '107 - Itens das vendas', group: '2.2 - Sample Data (SQLite)' },
-  { id: '34', label: '34 - Vendas', group: '2.2 - Sample Data (SQLite)' },
-  { id: '98', label: '98 - Contas Pendentes', group: '2024 Maicon' },
-  { id: '90', label: '90 - Contas Pendentes', group: '2024 Maicon' },
-  { id: '12', label: '12 - Beneficiários', group: 'ANS' },
-  { id: '15', label: '15 - Procedimentos', group: 'ANS' },
+  { id: '38', name: '2.2 - Fraturas', group: '2.2 - Sample Data (SQLite)' },
+  { id: '39', name: '2.2 - Persons (39)', group: '2.2 - Sample Data (SQLite)' },
+  { id: '36', name: 'Empresas', group: '2.2 - Sample Data (SQLite)' },
+  { id: '107', name: 'Itens das vendas', group: '2.2 - Sample Data (SQLite)' },
+  { id: '34', name: 'Vendas', group: '2.2 - Sample Data (SQLite)' },
+  { id: '98', name: 'Contas Pendentes', group: '2024 Maicon' },
+  { id: '90', name: 'Contas Pendentes', group: '2024 Maicon' },
+  { id: '12', name: 'Beneficiários', group: 'ANS' },
+  { id: '15', name: 'Procedimentos', group: 'ANS' },
 ]
 
 export type AiProvider = { id: string; label: string }

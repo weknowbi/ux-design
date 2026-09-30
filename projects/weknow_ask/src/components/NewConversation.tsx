@@ -3,7 +3,7 @@ import { COLOR, FONT } from '@/design/tokens'
 import { Btn } from '@/components/Btn'
 import { FormField, Select, fieldBoxStyle, fieldTextStyle } from '@/components/Field'
 import { Icon } from '@/components/icons'
-import { CONFIGURED_PROVIDERS, META_CONTEXTS, type MetaContext } from '@/data/conversation'
+import { CONFIGURED_PROVIDERS, META_CONTEXTS, contextLabel, type MetaContext } from '@/data/conversation'
 
 /**
  * Tela de nova conversa: escolher o metadado que dá contexto e o provedor de
@@ -69,7 +69,7 @@ export function NewConversation({
   /** Opções filtradas, preservando a ordem dos grupos de origem. */
   const groups = useMemo(() => {
     const term = query.trim().toLowerCase()
-    const found = META_CONTEXTS.filter((c) => c.label.toLowerCase().includes(term))
+    const found = META_CONTEXTS.filter((c) => contextLabel(c).toLowerCase().includes(term))
     const order: string[] = []
     const byGroup = new Map<string, MetaContext[]>()
     for (const c of found) {
@@ -84,7 +84,7 @@ export function NewConversation({
 
   const choose = (c: MetaContext) => {
     setPicked(c)
-    setQuery(c.label)
+    setQuery(contextLabel(c))
     setOpen(false)
     setInvalid(false)
   }
@@ -182,7 +182,7 @@ export function NewConversation({
                         className="w-full text-left px-4 transition-colors hover:bg-[var(--wk-menu-hover)]"
                         style={{ height: 36, fontFamily: FONT, fontSize: 14, color: COLOR.text }}
                       >
-                        {c.label}
+                        {contextLabel(c)}
                       </button>
                     ))}
                   </div>

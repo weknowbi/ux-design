@@ -11,7 +11,7 @@ import { Icon } from '@/components/icons'
 import { Sidebar } from '@/components/Sidebar'
 import { SidebarBrand } from '@/components/SidebarBrand'
 import { Thread } from '@/components/Thread'
-import { AI_FALLBACK, AI_PROVIDERS, CONVERSATIONS, FOLDERS } from '@/data/conversation'
+import { AI_FALLBACK, AI_PROVIDERS, CONVERSATIONS, FOLDERS, contextLabel } from '@/data/conversation'
 import type { Conversation, FilterChip, Folder, MetaContext, Message } from '@/data/conversation'
 import type { PortalRoute } from '@/components/PortalSidebar'
 
@@ -157,7 +157,7 @@ export function AskScreen({ onNavigate }: { onNavigate?: (route: PortalRoute) =>
   const handleCreateConversation = (context: MetaContext, provider: string) => {
     setConversations((prev) =>
       prev.map((c) =>
-        c.id === active.id ? { ...c, context, provider, title: context.label } : c,
+        c.id === active.id ? { ...c, context, provider, title: contextLabel(context) } : c,
       ),
     )
   }
@@ -323,7 +323,7 @@ export function AskScreen({ onNavigate }: { onNavigate?: (route: PortalRoute) =>
               </>
             )
           ) : (
-            <MetadataTab name={active.context?.label} />
+            <MetadataTab context={active.context} />
           )}
             </>
           )}
@@ -374,7 +374,7 @@ function Greeting({
       >
         {context && (
           <Chip icon="database" onClick={onOpenMetadata} title="Ver o metadado desta conversa">
-            {context.label}
+            {contextLabel(context)}
           </Chip>
         )}
 

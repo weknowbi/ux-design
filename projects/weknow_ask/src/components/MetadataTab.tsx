@@ -2,17 +2,19 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { COLOR, FONT, LAYOUT } from '@/design/tokens'
 import { Table, TableChip, type Column, type SortDir } from '@/components/Table'
 import { Icon, IconDatabase, IconSearch } from '@/components/icons'
-import { DATASET, type MetaField } from '@/data/conversation'
+import { DATASET, type MetaContext, type MetaField } from '@/data/conversation'
 
 /** Largura da coluna "Tipo". */
 const TYPE_COL = 140
 
 /**
- * `name` vem do contexto escolhido na conversa — o chip de metadado leva
- * para cá, então o título precisa ser o mesmo que o chip mostra. Sem
- * contexto, cai no nome do conjunto de exemplo.
+ * `context` é o metadado escolhido na conversa — o chip leva para cá. O
+ * título é o nome, e área de negócio e código ficam numa linha logo abaixo:
+ * são atributos do metadado inteiro, os mesmos que a pessoa viu ao escolhê-lo,
+ * e não cabem como colunas da tabela (repetiriam o mesmo valor em toda linha).
+ * Sem contexto, cai no nome do conjunto de exemplo.
  */
-export function MetadataTab({ name }: { name?: string }) {
+export function MetadataTab({ context }: { context?: MetaContext }) {
   const [filter, setFilter] = useState('')
   const [sortKey, setSortKey] = useState('title')
   const [sortDir, setSortDir] = useState<SortDir>('asc')
@@ -91,12 +93,27 @@ export function MetadataTab({ name }: { name?: string }) {
               color: COLOR.text,
             }}
           >
-            {name ?? DATASET.name}
+            {context?.name ?? DATASET.name}
           </h1>
           <TableChip>
             {total} {total === 1 ? 'campo' : 'campos'}
           </TableChip>
         </div>
+
+        {/* Área e código, com o mesmo rótulo e a mesma ordem da seleção. */}
+        {context && (
+          <p
+            className="text-[13px] flex flex-wrap items-center gap-x-6"
+            style={{ fontFamily: FONT, color: COLOR.textSecondary, lineHeight: 1.6 }}
+          >
+            <span>
+              <span style={{ color: COLOR.textMuted }}>Área de negócio:</span> {context.group}
+            </span>
+            <span>
+              <span style={{ color: COLOR.textMuted }}>Código:</span> {context.id}
+            </span>
+          </p>
+        )}
 
         {/* Documentação cortada em duas linhas. O corte é por altura, não por
             número de caracteres — assim vale em qualquer largura de tela. */}

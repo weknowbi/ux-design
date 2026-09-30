@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { COLOR, FONT, LAYOUT, RADIUS, SHADOW } from '@/design/tokens'
 import { IconArrowUp, IconAttach, IconMic } from '@/components/icons'
+import { ExperimentalNotice } from '@/components/ExperimentalNotice'
 import { FilterChipEditable } from '@/components/FilterChipTag'
 import { FilterModal } from '@/components/FilterModal'
 import { FilterValueModal } from '@/components/FilterValueModal'
@@ -118,7 +119,7 @@ export function Composer({
       style={{
         background: COLOR.surface,
         paddingTop: inline ? 0 : 8,
-        paddingBottom: inline ? 0 : 24,
+        paddingBottom: inline ? 0 : 12,
       }}
     >
       <div className="mx-auto" style={{ maxWidth: LAYOUT.threadMaxWidth + 80 }}>
@@ -154,6 +155,11 @@ export function Composer({
               {sendBtn}
             </div>
           </div>
+        </div>
+
+        {/* Justo embaixo do campo, como no produto: 8px acima do aviso. */}
+        <div style={{ marginTop: 8 }}>
+          <ExperimentalNotice />
         </div>
       </div>
 
