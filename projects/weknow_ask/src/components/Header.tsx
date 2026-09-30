@@ -3,7 +3,7 @@ import { BREADCRUMB, COLOR, FONT, TOPBAR } from '@/design/tokens'
 import { Icon } from '@/components/icons'
 import { ThemeRow } from '@/components/ThemeSwitch'
 import { Dropdown, MenuAction as DropdownAction } from '@/components/browser/Menu'
-import avatar from '@/assets/avatar.png'
+import avatar from '@/assets/avatar.jpg'
 
 /**
  * Barra de topo — medidas do nó `Frame 427319838` (WP-832, 4454:7125):
