@@ -89,7 +89,7 @@ export function ExperimentalNotice() {
           </div>
         )}
       </span>
-      . Por favor, verifique as respostas.
+      {' '}de IA. Por favor, verifique as respostas.
     </p>
   )
 }
