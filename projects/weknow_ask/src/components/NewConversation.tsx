@@ -3,6 +3,7 @@ import { COLOR, FONT } from '@/design/tokens'
 import { Btn } from '@/components/Btn'
 import { FormField, Select, fieldBoxStyle, fieldTextStyle } from '@/components/Field'
 import { Icon } from '@/components/icons'
+import { ExperimentalNotice } from '@/components/ExperimentalNotice'
 import { CONFIGURED_PROVIDERS, META_CONTEXTS, contextLabel, type MetaContext } from '@/data/conversation'
 
 /**
@@ -236,6 +237,10 @@ export function NewConversation({
         </div>
       </div>
       <div style={{ flex: SPACE_BELOW, marginTop: LIFT_PX }} />
+      {/* Na base da área, onde o aviso fica também na conversa. */}
+      <div className="shrink-0" style={{ marginBottom: -12 }}>
+        <ExperimentalNotice short />
+      </div>
     </div>
   )
 }

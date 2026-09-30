@@ -5,12 +5,13 @@ import { MENU_PANEL } from '@/components/browser/Menu'
 /**
  * Aviso de funcionalidade experimental, sob o campo de pergunta.
  *
- * Fica na tela o tempo todo, então é só texto pequeno e cinza: "Saiba mais"
- * leva tracejado em vez de cor de link, para avisar que dá para clicar sem
- * chamar atenção. O clique abre uma explicação curta, para cima, porque o
+ * Fica na tela o tempo todo, então é só texto pequeno e cinza: o trecho
+ * sublinhado avisa que dá para clicar sem chamar atenção. O clique abre uma
+ * explicação curta, para cima, porque o
  * aviso mora na borda de baixo da tela.
  */
-export function ExperimentalNotice() {
+/** `short` tira "Por favor, verifique as respostas": onde ainda não há resposta, a frase não tem a que se referir. */
+export function ExperimentalNotice({ short }: { short?: boolean }) {
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLSpanElement>(null)
 
@@ -89,7 +90,7 @@ export function ExperimentalNotice() {
           </div>
         )}
       </span>
-      {' '}de IA. Por favor, verifique as respostas.
+      {' '}de IA.{short ? null : ' Por favor, verifique as respostas.'}
     </p>
   )
 }
