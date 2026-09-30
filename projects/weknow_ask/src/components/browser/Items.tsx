@@ -853,11 +853,18 @@ function ItemThumb({ entry: { item, context }, favorite, quietFavorite, onOpen, 
       <div
         // O raio de cima acompanha o da caixa, e o fio de 1px desconta 1 do raio:
         // sem fio o canto é o mesmo 12 do card; com fio, 11.
+        //
+        // Nos cards limpos não há fio aqui. Eles não têm contorno em volta —
+        // quem os recorta é a sombra —, então um traço solto embaixo da imagem
+        // não fechava nada: era um resquício do card 'atual', que tem contorno
+        // e ali o fio de fato divide a caixa em duas células. Separar a imagem
+        // da faixa do nome continua sendo trabalho do tom de fundo, como diz o
+        // comentário acima, e da própria foto quando ela existe.
         className={`pointer-events-none aspect-[2/1] overflow-hidden flex items-center justify-center bg-[var(--wk-thumb-empty)] ${
           style === 'referencia'
             ? 'rounded-t-[10px]'
             : isClean(style)
-              ? 'rounded-t-xl border-b border-[var(--wk-card-border)]'
+              ? 'rounded-t-xl'
               : 'rounded-t-[11px] border-b border-[var(--wk-card-border)]'
         }`}
         style={emptyStyle}
