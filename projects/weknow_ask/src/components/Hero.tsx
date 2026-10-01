@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
-import { COLOR, FONT } from '@/design/tokens'
+import { COLOR, FONT, TOPBAR } from '@/design/tokens'
 import { Icon } from '@/components/icons'
 
 export const CONTENT_TYPES = [
@@ -48,12 +48,16 @@ function FilterChip({
 /**
  * Busca "pesquisar home" (nó 4454:7055): pílula de 48px, fundo #edf0f3.
  *
- * `compact` é o mesmo campo encolhido, não outro componente: a altura, o ícone
- * e a letra caem para a medida da pílula da barra de topo, e a transição leva
- * o campo de um estado ao outro à vista do usuário, em vez de trocar uma busca
- * por outra. O fundo não muda — trocar a cor faria parecer outro campo.
+ * `compact` é o mesmo campo encolhido, não outro componente: cai para a altura
+ * da pílula da barra de topo, e a transição leva o campo de um estado ao outro
+ * à vista do usuário, em vez de trocar uma busca por outra. O fundo não muda —
+ * trocar a cor faria parecer outro campo.
+ *
+ * Ícone, letra e recuos são os da busca da barra de topo (`TOPBAR.search`) nos
+ * dois estados: recolhida, ela tinha ícone de 20 e letra de 14, e a tela
+ * mostrava três buscas de medidas diferentes. Agora só a altura muda.
  */
-function SearchField({
+export function SearchField({
   query,
   onQuery,
   placeholder = 'Pesquise em Pastas',
@@ -66,25 +70,29 @@ function SearchField({
 }) {
   return (
     <div
-      className="flex items-center gap-2 rounded-full w-full focus-within:shadow-[0_0_0_2px_rgba(51,102,204,0.18)] transition-[height,padding,box-shadow] duration-[400ms] ease-[cubic-bezier(0.4,0,0,1)]"
+      className="flex items-center rounded-full w-full focus-within:shadow-[0_0_0_2px_rgba(51,102,204,0.18)] transition-[height,box-shadow] duration-[400ms] ease-[cubic-bezier(0.4,0,0,1)]"
       style={{
-        height: compact ? 36 : 48,
-        paddingLeft: compact ? 12 : 16,
-        paddingRight: compact ? 8 : 12,
+        height: compact ? TOPBAR.search.height : 48,
+        gap: TOPBAR.search.gap,
+        paddingLeft: TOPBAR.search.padLeft,
+        paddingRight: TOPBAR.search.padRight,
         background: COLOR.searchPillLight,
       }}
     >
-      <Icon name="search" size={compact ? 20 : 24} color={COLOR.navLabel} className="shrink-0" />
+      <Icon name="search" size={TOPBAR.iconSize} color={COLOR.navLabel} className="shrink-0" />
       <input
         type="text"
         value={query}
         onChange={(e) => onQuery(e.target.value)}
         onKeyDown={(e) => e.key === 'Escape' && onQuery('')}
         placeholder={placeholder}
-        className={`flex-1 min-w-0 bg-transparent leading-[20px] outline-none transition-[font-size] duration-[400ms] ${
-          compact ? 'text-[14px]' : 'text-[16px]'
-        }`}
-        style={{ fontFamily: FONT, color: COLOR.text }}
+        className="flex-1 min-w-0 bg-transparent outline-none"
+        style={{
+          fontFamily: FONT,
+          fontSize: TOPBAR.search.fontSize,
+          lineHeight: `${TOPBAR.search.lineHeight}px`,
+          color: COLOR.text,
+        }}
       />
       {query && (
         <button
@@ -160,11 +168,25 @@ export const HIDDEN = 'opacity-0 invisible'
  * os controles à direita. Como centralizar exige folga igual dos dois lados, a
  * conta usa 2 × a maior vaga. Assim nada se sobrepõe sem precisar deslocar a
  * busca — e o teto segue sendo os 800px da espec.
+ *
+ * Abaixo de 896px de folha (2 × 288 de vaga + 320 de busca) não há como
+ * centralizar sem cobrir os chips: a busca passa a ocupar a largura toda numa
+ * linha própria, abaixo de chips e controles. A medida é a da folha
+ * (`@container` no pai), não a da janela — recolher o menu também conta.
+ *
+ * As classes ficam escritas por extenso porque o Tailwind só gera o que
+ * encontra literalmente no código.
  */
-const SIDE_RESERVE = 288
-const SEARCH_WIDTH = `clamp(320px, calc(100% - ${SIDE_RESERVE * 2}px), 800px)`
-/** Onde a linha da busca gruda: (80 − 36) / 2, centrada na faixa do título. */
-const STICK_TOP = 22
+const SEARCH_WIDTH = 'w-full @min-[896px]:w-[clamp(320px,calc(100%_-_576px),800px)]'
+/**
+ * Onde a linha da busca gruda. Larga: (80 − 36) / 2, centrada na faixa do
+ * título. Estreita: abaixo da linha de chips (16 + 32 + 12).
+ */
+const STICK_TOP = 'top-[60px] @min-[896px]:top-[22px]'
+/** Faixa do título: 80 na larga; na estreita cabem chips e busca (16 + 32 + 12 + 36 + 12). */
+const BAND_HEIGHT = 'h-[108px] @min-[896px]:h-[80px]'
+/** Chips e controles da faixa recolhida: centrados na larga, na primeira linha na estreita. */
+const BAND_SLOT = 'top-4 h-8 @min-[896px]:inset-y-0 @min-[896px]:h-auto'
 /** Altura reservada para busca + chips: 48 + 16 + 36. */
 const ROW_HEIGHT = 100
 
@@ -214,10 +236,14 @@ export function DynamicHero({
     let frame = 0
     const measure = () => {
       frame = 0
-      const edge = root.getBoundingClientRect().top + STICK_TOP
+      const row = rowRef.current
+      if (!row) return
+      // O ponto de grudar muda com a largura da folha (ver STICK_TOP): lê o
+      // que está valendo em vez de supor um número.
+      const edge = root.getBoundingClientRect().top + parseFloat(getComputedStyle(row).top)
       // +1: a linha grudada para exatamente na borda, e o arredondamento do
       // navegador pode devolver 21,99.
-      setCollapsed((rowRef.current?.getBoundingClientRect().top ?? edge + 2) <= edge + 1)
+      setCollapsed(row.getBoundingClientRect().top <= edge + 1)
     }
     const schedule = () => {
       if (!frame) frame = requestAnimationFrame(measure)
@@ -240,7 +266,7 @@ export function DynamicHero({
 
   return (
     <>
-      <div className="sticky top-0 z-20 -mx-8 px-8 bg-[var(--wk-surface)]" style={{ height: 80 }}>
+      <div className={`sticky top-0 z-20 -mx-8 px-8 bg-[var(--wk-surface)] ${BAND_HEIGHT}`}>
         <div className="relative h-full">
           <h1
             className={`absolute inset-0 flex items-center justify-center text-[30px] font-medium tracking-[-0.5px] leading-[36px] ${FADE} ${
@@ -254,12 +280,12 @@ export function DynamicHero({
               eles sumiam junto com o resto do topo, e trocar de área exigia
               voltar lá em cima. Controles à direita e, no meio, a busca
               grudada, que vem de fora e passa por cima desta barra. */}
-          <div className={`absolute inset-y-0 left-0 flex items-center ${FADE} ${collapsed ? '' : HIDDEN}`}>
+          <div className={`absolute left-0 flex items-center ${BAND_SLOT} ${FADE} ${collapsed ? '' : HIDDEN}`}>
             <ContentTypeChips active={section} onSelect={onSection} compact />
           </div>
           {controls && (
             <div
-              className={`absolute inset-y-0 right-0 flex items-center ${FADE} ${collapsed ? '' : HIDDEN}`}
+              className={`absolute right-0 flex items-center ${BAND_SLOT} ${FADE} ${collapsed ? '' : HIDDEN}`}
             >
               {controls}
             </div>
@@ -277,8 +303,8 @@ export function DynamicHero({
           pertence à busca que vem logo depois. */}
       <div
         ref={rowRef}
-        className="sticky z-30 pointer-events-none"
-        style={{ top: STICK_TOP, height: ROW_HEIGHT }}
+        className={`sticky z-30 pointer-events-none ${STICK_TOP}`}
+        style={{ height: ROW_HEIGHT }}
       >
         {/* Recolhida, a linha reserva a ponta direita: os controles moram na
             barra de baixo e o grupo não pode passar por cima deles. */}
@@ -286,7 +312,7 @@ export function DynamicHero({
             barra inteira, e só a busca e os chips podem receber clique — senão
             eles engolem os controles que ficam por baixo, na barra. */}
         <div className="flex flex-col items-center gap-4">
-          <div className="pointer-events-auto" style={{ width: SEARCH_WIDTH }}>
+          <div className={`pointer-events-auto ${SEARCH_WIDTH}`}>
             <SearchField query={query} onQuery={onQuery} placeholder={placeholder} compact={collapsed} />
           </div>
           <div className={`pointer-events-auto ${FADE} ${collapsed ? HIDDEN : ''}`}>
@@ -295,6 +321,58 @@ export function DynamicHero({
         </div>
       </div>
     </>
+  )
+}
+
+/**
+ * Topo da pasta no layout dinâmico. É a barra da home já recolhida,
+ * como se o usuário tivesse rolado: chips à esquerda, busca no meio, ordem e
+ * visualização à direita, grudada no alto da folha. Entrar numa pasta não
+ * troca de ferramenta; a busca e os chips continuam onde estavam.
+ *
+ * Mesma altura, mesma busca e mesma largura de busca da home recolhida, para
+ * a passagem de uma para a outra não mexer em nada além do conteúdo.
+ *
+ * Quando a folha fica estreita demais para os três na mesma linha (menos de
+ * 2 × 288 de vaga + 320 de busca), a busca desce para uma linha própria, na
+ * largura toda, com chips e controles em cima — o mesmo empilhamento da home
+ * aberta. A medida é a da folha, não a da janela: recolher o menu também
+ * muda o espaço.
+ */
+export function FolderBar({
+  query,
+  onQuery,
+  placeholder,
+  section,
+  onSection,
+  controls,
+}: {
+  query: string
+  onQuery: (q: string) => void
+  placeholder: string
+  section: SectionId
+  onSection: (id: SectionId) => void
+  controls?: ReactNode
+}) {
+  /* Larga: três colunas, as das pontas iguais, então a busca fica no centro
+     com a largura de `SEARCH_WIDTH` — a mesma conta da home recolhida.
+     Estreita: chips e controles na primeira linha, busca na segunda. */
+  return (
+    <div className="@container sticky top-0 z-20 -mx-8 px-8 bg-[var(--wk-surface)]">
+      <div className="grid grid-cols-[1fr_auto] items-center gap-y-3 pt-4 pb-3 @min-[896px]:grid-cols-[1fr_clamp(320px,calc(100%_-_576px),800px)_1fr] @min-[896px]:h-[80px] @min-[896px]:py-0">
+        <div className="col-start-1 row-start-1 flex items-center">
+          <ContentTypeChips active={section} onSelect={onSection} compact />
+        </div>
+        <div className="col-span-2 row-start-2 @min-[896px]:col-span-1 @min-[896px]:col-start-2 @min-[896px]:row-start-1">
+          <SearchField query={query} onQuery={onQuery} placeholder={placeholder} compact />
+        </div>
+        {controls && (
+          <div className="col-start-2 row-start-1 justify-self-end flex items-center @min-[896px]:col-start-3">
+            {controls}
+          </div>
+        )}
+      </div>
+    </div>
   )
 }
 
@@ -325,8 +403,8 @@ export function MobileHero({
   placeholder: string
   /**
    * Os chips só existem na raiz. Dentro de uma pasta a busca vem sozinha —
-   * na versão de mesa ela se muda para a barra de topo, e no celular a barra
-   * já está ocupada pelo menu, pela marca e pela conta. Sem ela ali, uma
+   * na versão de mesa ela fica na linha do título da pasta, e no celular
+   * essa linha não tem espaço para ela. Sem ela ali, uma
    * pasta com dezenas de dashboards só se percorre rolando.
    */
   section?: SectionId

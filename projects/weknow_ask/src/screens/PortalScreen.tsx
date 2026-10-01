@@ -7,12 +7,12 @@ import { Icon } from '@/components/icons'
 import { PortalSidebar, type PortalRoute } from '@/components/PortalSidebar'
 import { SidebarBrand } from '@/components/SidebarBrand'
 import { FolderHeader } from '@/components/FolderHeader'
-import { CONTENT_TYPES, DynamicHero, FADE, Hero, MobileHero, type SectionId } from '@/components/Hero'
+import { CONTENT_TYPES, DynamicHero, FADE, FolderBar, Hero, MobileHero, SearchField, type SectionId } from '@/components/Hero'
 import { MobileDrawer, MobileTopBar } from '@/components/MobileNav'
 import { ContentBrowser } from '@/components/browser/ContentBrowser'
 import { useBrowserPrefs, usePref } from '@/components/browser/prefs'
 import { BrowserControls } from '@/components/browser/BrowserControls'
-import { CARD_STYLES, CardStyleContext, ICON_MODES, IconModeContext, type CardStyle, type IconMode } from '@/components/browser/Items'
+import { CardStyleContext, ICON_MODES, IconModeContext, type CardStyle, type IconMode } from '@/components/browser/Items'
 import { PORTAL_ROOT, findFolderPath, initialFavorites, type Folder } from '@/data/portal'
 
 /**
@@ -46,8 +46,8 @@ const LAYOUTS: Layout[] = ['dinamico', 'padrao', 'compacto']
  * ícone definido ainda. Mostra sempre o modo em que você NÃO está.
  *
  * Os desenhos de card alternativos (o atual, o tingido e a Referência Márcio)
- * saíram do menu, mas continuam no código: a preferência wk-portal-cards ainda
- * os aceita pelo localStorage.
+ * saíram do menu e continuam no código, mas a tela não lê mais a preferência
+ * wk-portal-cards: usa sempre o padrão (ver `cardStyle`).
  */
 const ICON_MODE_MENU: Record<IconMode, { icon: string; label: string }> = {
   definidos: { icon: 'palette', label: 'Ícones de pasta definidos' },
@@ -78,7 +78,11 @@ export function PortalScreen({ onNavigate }: { onNavigate: (route: PortalRoute) 
   const [query, setQuery] = useState('')
   const [favorites, setFavorites] = useState(() => initialFavorites(PORTAL_ROOT))
   const [layout] = usePref<Layout>('wk-portal-layout', LAYOUTS, 'dinamico')
-  const [cardStyle] = usePref<CardStyle>('wk-portal-cards', CARD_STYLES, 'padrao')
+  /* Sempre o card padrão. Os desenhos alternativos saíram do menu, mas a
+     preferência wk-portal-cards continuava valendo: um navegador que guardou
+     o card "atual" de testes antigos mostrava a caixa azulada e o fio sob a
+     imagem, e a mesma tela parecia outra conforme quem abria. */
+  const cardStyle: CardStyle = 'padrao'
   const [iconMode, setIconMode] = usePref<IconMode>('wk-portal-icones', ICON_MODES, 'definidos')
   const [heroCollapsed, setHeroCollapsed] = useState(false)
   const [section, setSection] = useState<SectionId>('pastas')
@@ -108,6 +112,8 @@ export function PortalScreen({ onNavigate }: { onNavigate: (route: PortalRoute) 
   const atRoot = path.length === 0
   const current = atRoot ? null : path[path.length - 1]
   const dynamicHero = layout === 'dinamico' && atRoot
+  /** No dinâmico, a pasta abre com a barra da home já recolhida. */
+  const folderBar = layout === 'dinamico' && !atRoot
 
   // Aviso curto de favorito, como no Weknow: aparece, fica ~2,5s e some.
   useEffect(() => {
@@ -167,19 +173,36 @@ export function PortalScreen({ onNavigate }: { onNavigate: (route: PortalRoute) 
 
   /* A barra de topo fica com a busca geral do Weknow — a que procura além do
      que está listado — sempre que a tela já tem uma busca própria: na home do
-     layout dinâmico (que leva a dela para a barra recolhida ao rolar) e na do
-     padrão. Dentro de pasta a tela não tem busca, então a da barra assume e
-     diz em que pasta procura. */
+     layout dinâmico (que leva a dela para a barra recolhida ao rolar), na do
+     padrão e dentro de qualquer pasta, que tem a sua no cabeçalho. Só a home
+     do compacto, que não tem busca, entrega a da barra para a lista.
+
+     Dentro da pasta a barra já mudou de função: virava "Pesquise em <pasta>"
+     e quem entrava numa pasta perdia a busca geral sem aviso. */
   const topbarSearch =
-    dynamicHero || (layout === 'padrao' && atRoot)
+    !atRoot || dynamicHero || layout === 'padrao'
       ? undefined
-      : {
-          value: query,
-          onChange: setQuery,
-          placeholder: current ? `Pesquise em ${current.name}` : searchScope,
-        }
+      : { value: query, onChange: setQuery, placeholder: searchScope }
 
   const controls = <BrowserControls prefs={prefs} mobile={isMobile} />
+
+  /* Busca da pasta: o mesmo campo da home, na medida compacta, mas procura só
+     na pasta aberta e nas subpastas — o título e o voltar continuam na tela, e
+     os resultados são dela. O texto não leva o nome da pasta: nome de cliente
+     é longo e o campo cortaria no meio dele.
+
+     Em tela larga ela fica na linha do título, antes da ordem e da
+     visualização. Abaixo de `lg` não cabe ali sem espremer o nome da pasta
+     até sumir, então desce para uma linha própria logo abaixo do título. */
+  const folderSearchField = (
+    <SearchField query={query} onQuery={setQuery} placeholder="Pesquise nesta pasta" compact />
+  )
+  const folderAside = (
+    <div className="flex items-center gap-3 shrink-0">
+      <div className="hidden lg:block w-[240px] xl:w-[280px]">{folderSearchField}</div>
+      {controls}
+    </div>
+  )
 
   const browser = (
     <CardStyleContext.Provider value={cardStyle}>
@@ -270,7 +293,7 @@ export function PortalScreen({ onNavigate }: { onNavigate: (route: PortalRoute) 
                       compact
                     />
                   </div>
-                  <MobileHero query={query} onQuery={setQuery} placeholder={`Pesquise em ${current.name}`} />
+                  <MobileHero query={query} onQuery={setQuery} placeholder="Pesquise nesta pasta" />
                 </>
               )
             )}
@@ -302,8 +325,11 @@ export function PortalScreen({ onNavigate }: { onNavigate: (route: PortalRoute) 
       className="flex flex-col"
       style={{ width: '100vw', height: '100vh', background: COLOR.canvas, fontFamily: FONT }}
     >
-      {/* Faixa de topo inteira com a marca; só o menu de baixo recolhe. */}
-      <div className="flex shrink-0" style={{ paddingRight: LAYOUT.sheetMarginRight }}>
+      {/* Faixa de topo inteira com a marca; só o menu de baixo recolhe.
+          `relative z-40`: os menus que abrem daqui (o "…" e o "…" do caminho)
+          descem por cima da folha, e lá a busca gruda numa camada própria
+          (z-30) — sem isto ela passava por cima do menu aberto. */}
+      <div className="relative z-40 flex shrink-0" style={{ paddingRight: LAYOUT.sheetMarginRight }}>
         <SidebarBrand collapsed={sidebar.collapsed} onToggle={sidebar.toggle} />
         <div className="flex-1 min-w-0">
           <Header trail={trail} menuItems={iconModeMenuItems(iconMode, setIconMode)} search={topbarSearch} />
@@ -328,7 +354,7 @@ export function PortalScreen({ onNavigate }: { onNavigate: (route: PortalRoute) 
           style={{ borderTopLeftRadius: LAYOUT.sheetRadius, borderTopRightRadius: LAYOUT.sheetRadius }}
         >
           {dynamicHero ? (
-            <div className="mx-auto flex flex-col px-8 pb-24" style={{ maxWidth: WIDE_MAX_WIDTH }}>
+            <div className="@container mx-auto flex flex-col px-8 pb-24" style={{ maxWidth: WIDE_MAX_WIDTH }}>
               <DynamicHero
                 query={query}
                 onQuery={setQuery}
@@ -349,6 +375,33 @@ export function PortalScreen({ onNavigate }: { onNavigate: (route: PortalRoute) 
                 {browser}
               </div>
             </div>
+          ) : folderBar && current ? (
+            /* Dentro da pasta, a barra da home já recolhida em cima
+               e o título da pasta logo abaixo (ver `FolderBar`).
+
+               A busca procura só nesta pasta e nas subpastas, então o título
+               e o voltar ficam na tela durante a busca: os resultados são
+               dela. Se ela varresse o acervo, o título teria de sair, e com ele
+               o caminho de volta. */
+            <div className="mx-auto flex flex-col px-8 pb-24" style={{ maxWidth: WIDE_MAX_WIDTH }}>
+              <FolderBar
+                query={query}
+                onQuery={setQuery}
+                placeholder="Pesquise nesta pasta"
+                section={section}
+                onSection={openSection}
+                controls={controls}
+              />
+              <div className="mt-4">
+                <FolderHeader
+                  name={current.name}
+                  onBack={() => navigate(path.length > 1 ? path[path.length - 2].id : null)}
+                />
+              </div>
+              <div ref={browserRef} className="mt-8 scroll-mt-24">
+                {browser}
+              </div>
+            </div>
           ) : (
             <div
               className={`mx-auto flex flex-col gap-8 pb-24 ${layout === 'padrao' ? 'px-6 pt-16' : 'px-8 pt-8'}`}
@@ -364,11 +417,14 @@ export function PortalScreen({ onNavigate }: { onNavigate: (route: PortalRoute) 
                 />
               )}
               {current && (
-                <FolderHeader
-                  name={current.name}
-                  onBack={() => navigate(path.length > 1 ? path[path.length - 2].id : null)}
-                  aside={controls}
-                />
+                <div>
+                  <FolderHeader
+                    name={current.name}
+                    onBack={() => navigate(path.length > 1 ? path[path.length - 2].id : null)}
+                    aside={folderAside}
+                  />
+                  <div className="lg:hidden">{folderSearchField}</div>
+                </div>
               )}
               <div ref={browserRef} className="scroll-mt-8">
                 {browser}

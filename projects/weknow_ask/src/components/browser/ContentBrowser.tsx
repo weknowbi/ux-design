@@ -188,8 +188,12 @@ export function ContentBrowser({
     })
   }
 
+  /* Na raiz a busca varre o acervo todo; dentro de pasta, só o que está nela
+     e nas subpastas — é o que o campo promete ("Pesquise nesta pasta"). */
   const entries: Entry[] = q
-    ? all.filter((e) => normalize(e.item.name).includes(q))
+    ? all.filter(
+        (e) => (path.length === 0 || e.path.includes(current)) && normalize(e.item.name).includes(q),
+      )
     : current.children.map((item) => ({ item, path }))
   const withContext = Boolean(q)
   /* Dentro de pasta o conteúdo vai todo junto, sem separar pasta de dashboard

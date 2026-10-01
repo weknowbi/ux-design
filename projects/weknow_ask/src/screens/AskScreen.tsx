@@ -205,8 +205,9 @@ export function AskScreen({ onNavigate }: { onNavigate?: (route: PortalRoute) =>
       style={{ width: '100vw', height: '100vh', background: COLOR.canvas, fontFamily: FONT }}
     >
       {/* Shell do protótipo: a faixa de topo atravessa a tela inteira e leva
-          a marca; o menu fica embaixo dela e é só ele que recolhe. */}
-      <div className="flex shrink-0" style={{ paddingRight: LAYOUT.sheetMarginRight }}>
+          a marca; o menu fica embaixo dela e é só ele que recolhe. `relative
+          z-40`: os menus que abrem daqui descem por cima da folha. */}
+      <div className="relative z-40 flex shrink-0" style={{ paddingRight: LAYOUT.sheetMarginRight }}>
         <SidebarBrand
           collapsed={sidebar.collapsed}
           onToggle={sidebar.toggle}
