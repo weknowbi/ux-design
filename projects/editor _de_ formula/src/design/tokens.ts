@@ -88,7 +88,7 @@ export const LAYOUT = {
   navItemGap: 8,
   navItemRadius: 8,
   navIconSize: 24,
-  sidebarPad: 16,
+  sidebarPad: 8,
   /**
    * Os glifos do Material Symbols têm ~2px de recuo dentro da caixa de 24px.
    * O logo preenche a dele, então precisa desse mesmo recuo para a coluna

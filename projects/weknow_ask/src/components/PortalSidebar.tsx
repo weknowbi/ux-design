@@ -1,6 +1,5 @@
 import { cloneElement, isValidElement, useState } from 'react'
 import { COLOR, FONT, LAYOUT } from '@/design/tokens'
-import { useSidebarPad } from '@/components/SidebarPadCompare' // TEMPORÁRIO: comparação 8 × 16
 import { SIDEBAR_TRANSITION } from '@/design/sidebar'
 import { useTheme } from '@/design/theme'
 import { Icon, IconWeknowAsk, type IconProps } from '@/components/icons'
@@ -97,16 +96,15 @@ export function PortalSidebar({
   collapsed: boolean
 }) {
   const { toggle: toggleTheme } = useTheme()
-  const { pad, rail } = useSidebarPad()
 
   return (
     <aside
       className="shrink-0 flex flex-col h-full overflow-hidden"
       style={{
-        width: collapsed ? rail : LAYOUT.sidebarWidth,
+        width: collapsed ? LAYOUT.sidebarRailWidth : LAYOUT.sidebarWidth,
         transition: `width ${SIDEBAR_TRANSITION}`,
         background: COLOR.canvas,
-        paddingInline: pad,
+        paddingInline: LAYOUT.sidebarPad,
         paddingBottom: 8,
       }}
     >

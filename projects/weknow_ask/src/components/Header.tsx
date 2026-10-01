@@ -2,7 +2,6 @@ import { Fragment, useEffect, useRef, useState } from 'react'
 import { BREADCRUMB, COLOR, FONT, TOPBAR } from '@/design/tokens'
 import { Icon } from '@/components/icons'
 import { ThemeRow } from '@/components/ThemeSwitch'
-import { SidebarPadRow } from '@/components/SidebarPadCompare' // TEMPORÁRIO: comparação 8 × 16
 import { Dropdown, MenuAction as DropdownAction } from '@/components/browser/Menu'
 import avatar from '@/assets/avatar.jpg'
 
@@ -261,7 +260,6 @@ function OverflowMenu({ items }: { items?: MenuItem[] }) {
           {!!items?.length && <div className="my-1 h-px" style={{ background: COLOR.border }} />}
           <MenuAction icon="support_agent" label="Suporte" />
           <ThemeRow />
-          <SidebarPadRow />
         </div>
       )}
     </div>

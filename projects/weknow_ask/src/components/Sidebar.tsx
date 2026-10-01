@@ -1,6 +1,5 @@
 import { useMemo, useRef, useState } from 'react'
 import { COLOR, FONT, LAYOUT } from '@/design/tokens'
-import { useSidebarPad } from '@/components/SidebarPadCompare' // TEMPORÁRIO: comparação 8 × 16
 import { SIDEBAR_TRANSITION } from '@/design/sidebar'
 import { Icon, IconNewChat, IconSearch } from '@/components/icons'
 import { ChatRowMenu } from '@/components/ChatRowMenu'
@@ -341,16 +340,15 @@ export function Sidebar({
   )
 
   const nothingFound = chats.length === 0 && folders.length === 0
-  const { pad, rail } = useSidebarPad()
 
   return (
     <aside
       className="shrink-0 flex flex-col h-full overflow-hidden"
       style={{
-        width: collapsed ? rail : LAYOUT.sidebarWidth,
+        width: collapsed ? LAYOUT.sidebarRailWidth : LAYOUT.sidebarWidth,
         transition: `width ${SIDEBAR_TRANSITION}`,
         background: COLOR.canvas,
-        paddingInline: pad,
+        paddingInline: LAYOUT.sidebarPad,
         paddingBottom: 8,
       }}
     >
