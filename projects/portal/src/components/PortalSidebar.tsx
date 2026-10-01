@@ -124,8 +124,9 @@ export function PortalSidebar({
         ))}
       </div>
 
-      {/* Rodapé, colado na base */}
-      <div className="flex-1 flex flex-col justify-end gap-1 pb-6">
+      {/* Rodapé, colado na base. O pb-2 soma 8 aos 8 do menu: Sair fica a
+          16 do pé. Com só os 8 das laterais ele parecia grudado na borda. */}
+      <div className="flex-1 flex flex-col justify-end gap-1 pb-2">
         <NavRow icon={<Icon name="settings" size={24} />} label={FOOTER[0].label} />
         {/* Recolhido não cabe a chave: o próprio ícone passa a alternar. */}
         <NavRow
