@@ -2,6 +2,7 @@ import { COLOR, LAYOUT, TOPBAR } from '@/design/tokens'
 import { SIDEBAR_TRANSITION } from '@/design/sidebar'
 import { Icon } from '@/components/icons'
 import { WeknowLogo } from '@/components/WeknowLogo'
+import { useSidebarPad } from '@/components/SidebarPadCompare' // TEMPORÁRIO: comparação 8 × 16
 
 /**
  * Canto superior esquerdo: botão do menu e marca. Comum ao portal e ao Ask.
@@ -39,7 +40,7 @@ const LOGO_W = (91.95 * LOGO_H) / 28
  * Recolhido: margem + botão + logo com o recuo dele, sem margem à direita.
  * Com os 16 do cabeçalho, o caminho fica a 24px da ponta do logo.
  */
-const COLLAPSED_W = LAYOUT.sidebarPad + BTN + LOGO_W + 2 * LAYOUT.navItemPadX
+const collapsedW = (pad: number) => pad + BTN + LOGO_W + 2 * LAYOUT.navItemPadX
 
 export function SidebarBrand({
   collapsed,
@@ -51,6 +52,7 @@ export function SidebarBrand({
   /** Sem ele o logo é só marca, sem afordância de clique. */
   onLogoClick?: () => void
 }) {
+  const { pad } = useSidebarPad()
   const label = collapsed ? 'Expandir menu' : 'Recolher menu'
   const logoBox = { height: BTN, paddingInline: LAYOUT.navItemPadX }
 
@@ -58,10 +60,10 @@ export function SidebarBrand({
     <div
       className="shrink-0 flex items-center"
       style={{
-        width: collapsed ? COLLAPSED_W : LAYOUT.sidebarWidth,
+        width: collapsed ? collapsedW(pad) : LAYOUT.sidebarWidth,
         transition: `width ${SIDEBAR_TRANSITION}`,
         height: TOPBAR.height,
-        paddingLeft: LAYOUT.sidebarPad,
+        paddingLeft: pad,
       }}
     >
       <button
