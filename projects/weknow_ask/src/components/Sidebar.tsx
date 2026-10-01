@@ -72,8 +72,13 @@ function Row({
           {icon}
         </span>
       )}
-      <span className="flex-1 min-w-0 text-[14px] leading-[1.4] text-left" style={{ fontFamily: FONT, color }}>
-        <MarqueeText text={label} active={hovered} />
+      {/* Rótulo curto de ação, sem letreiro: texto simples como o das pastas,
+          para as duas linhas renderizarem igual. */}
+      <span
+        className="flex-1 min-w-0 truncate text-[14px] leading-[1.4] text-left"
+        style={{ fontFamily: FONT, color }}
+      >
+        {label}
       </span>
       {trailing}
     </button>
@@ -355,8 +360,9 @@ export function Sidebar({
       </div>
 
       {/* A pílula de busca não é trocada por outro botão ao recolher: ela
-          perde o fundo, encolhe o recuo até a lupa cair na coluna dos
-          ícones, e o conjunto passa a se comportar como item do menu. */}
+          perde o fundo e o conjunto passa a se comportar como item do menu.
+          O recuo é o dos itens nos dois estados, então a lupa fica sempre na
+          coluna dos ícones e o texto na coluna dos rótulos. */}
       <div className="pb-2 shrink-0">
         <div
           onClick={collapsed ? openSearch : undefined}
@@ -379,10 +385,10 @@ export function Sidebar({
           className="flex items-center gap-2 h-[36px] focus-within:shadow-[0_0_0_2px_rgba(51,102,204,0.18)]"
           style={{
             cursor: collapsed ? 'pointer' : undefined,
-            paddingInline: collapsed ? LAYOUT.navItemPadX : 12,
+            paddingInline: LAYOUT.navItemPadX,
             borderRadius: collapsed ? LAYOUT.navItemRadius : 18,
             background: collapsed ? (searchHover ? COLOR.navHover : 'transparent') : COLOR.searchPill,
-            transition: `padding ${SIDEBAR_TRANSITION}, border-radius ${SIDEBAR_TRANSITION}, background-color 150ms ease, box-shadow 150ms ease`,
+            transition: `border-radius ${SIDEBAR_TRANSITION}, background-color 150ms ease, box-shadow 150ms ease`,
           }}
         >
           <IconSearch size={24} color={COLOR.navLabel} className="shrink-0" />

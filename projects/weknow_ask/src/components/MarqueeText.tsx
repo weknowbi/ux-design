@@ -79,7 +79,9 @@ export function MarqueeText({
           display: 'inline-block',
           transform: `translateX(-${offset}px)`,
           transition: `transform ${duration}s linear`,
-          willChange: 'transform',
+          // Só enquanto pode andar: a camada própria troca o antialiasing do
+          // texto por tons de cinza, e parado ele destoava das pastas.
+          willChange: active || running ? 'transform' : undefined,
         }}
       >
         {text}

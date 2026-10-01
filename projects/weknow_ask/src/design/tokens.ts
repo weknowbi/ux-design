@@ -80,10 +80,10 @@ export const LAYOUT = {
   headerHeight: 56,      // Top Bar
   sidebarWidth: 255,     // instance "sidebar white"
   /**
-   * Menu recolhido: só a coluna de ícones. 16 de margem + item de 40 + 16:
+   * Menu recolhido: só a coluna de ícones. 8 de margem + item de 40 + 8:
    * o item vira um quadrado e o ícone fica no mesmo x do menu aberto.
    */
-  sidebarRailWidth: 72,
+  sidebarRailWidth: 56,
   sheetRadius: 16,       // cantos superiores da folha branca
   sheetMarginRight: 48,  // 1920 - 255 - 1617: o conteúdo não encosta na borda
   threadMaxWidth: 896,
@@ -93,7 +93,13 @@ export const LAYOUT = {
   navItemGap: 8,
   navItemRadius: 8,
   navIconSize: 24,
-  sidebarPad: 16,
+  /**
+   * Margem lateral do menu. 8, não 16: a caixa de destaque dos itens fica a
+   * 8px da borda, como no produto. Vale para o menu inteiro (botão de
+   * recolher, ações, busca, pastas e conversas), para a coluna de ícones
+   * continuar uma só.
+   */
+  sidebarPad: 8,
   /**
    * Os glifos do Material Symbols têm ~2px de recuo dentro da caixa de 24px.
    * O logo preenche a dele, então precisa desse mesmo recuo para a coluna

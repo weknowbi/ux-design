@@ -10,7 +10,7 @@ import { WeknowLogo } from '@/components/WeknowLogo'
  * YouTube. O menu encolhe por baixo e isto aqui não se move: o logo fica
  * sempre inteiro e o botão fica sempre no mesmo lugar, colado nele.
  *
- * O ícone do botão cai na coluna dos ícones do menu (16 de margem + 8 de
+ * O ícone do botão cai na coluna dos ícones do menu (8 de margem + 8 de
  * recuo), então no menu recolhido ele encabeça essa coluna.
  *
  * Medido contra o Gmail: a posição já batia (ícone em 24–48, logo em 64);
