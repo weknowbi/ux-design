@@ -1,12 +1,22 @@
-import { createContext, useContext, useState, type ReactNode, type RefObject } from 'react'
-import { COLOR, FONT } from '@/design/tokens'
+import { createContext, useContext, useRef, useState, type ReactNode, type RefObject } from 'react'
+import { COLOR, FONT, RADIUS } from '@/design/tokens'
 import { Icon } from '@/components/icons'
 import type { Item } from '@/data/portal'
 import type { ViewMode } from '@/components/browser/prefs'
 import { Dropdown, MenuAction } from '@/components/browser/Menu'
 import { useEllipsisTooltip } from '@/components/Tooltip'
-import { APPEARANCE_COLORS, APPEARANCE_ICONS, setAppearance, useAppearance } from '@/components/browser/appearance'
-import { FormField } from '@/components/Field'
+import {
+  APPEARANCE_COLORS,
+  APPEARANCE_ICONS,
+  getAppearance,
+  readImageFile,
+  replaceAppearance,
+  setAppearance,
+  useAppearance,
+  type Appearance,
+} from '@/components/browser/appearance'
+import { Btn } from '@/components/Btn'
+import { FormField, fieldBoxStyle, fieldTextStyle } from '@/components/Field'
 
 /**
  * `meta`: coluna de metadado da Lista (conteúdo da pasta ou onde o item mora).
@@ -260,7 +270,8 @@ function ItemRow({
   onOpen,
   onToggleFavorite,
 }: ItemProps & { metaLabel?: string }) {
-  const tip = useEllipsisTooltip(item.name)
+  const { name } = useItemFace(item)
+  const tip = useEllipsisTooltip(name)
   return (
     <div
       role="listitem"
@@ -276,7 +287,7 @@ function ItemRow({
          primeira palavra útil. */
       className={`group relative grid items-center min-h-[56px] md:h-11 transition-colors hover:bg-[var(--wk-portal-list-hover)] active:bg-[var(--wk-portal-list-hover)] ${LIST_PAD} ${LIST_COLS}`}
     >
-      <button type="button" onClick={() => onOpen(item)} aria-label={item.name} className={OVERLAY} />
+      <button type="button" onClick={() => onOpen(item)} aria-label={name} className={OVERLAY} />
       <ItemIcon item={item} />
       <span className="pointer-events-none min-w-0 flex flex-col justify-center py-1.5 md:py-0">
         <span
@@ -284,7 +295,7 @@ function ItemRow({
           className="min-w-0 text-[14px] leading-[20px] line-clamp-2 md:truncate md:line-clamp-none"
           style={NAME_STYLE}
         >
-          {item.name}
+          {name}
         </span>
         {/* Abaixo de lg a coluna do metadado não existe, e nela mora o código
             que o cliente usa para citar a tarefa ou a apresentação — o dado
@@ -337,7 +348,7 @@ function ItemRow({
  * linha dentro do card: dentro do card ela mudava a altura, e card de tamanho
  * diferente por seção quebra o ritmo da grade. Na Lista ela tem coluna própria.
  */
-const tileTitle = (item: Item, context?: string) => (context ? `${item.name} — em ${context}` : item.name)
+const tileTitle = (name: string, context?: string) => (context ? `${name} — em ${context}` : name)
 
 /**
  * Compacto: card horizontal de altura FIXA, como as pastas do Drive.
@@ -435,8 +446,123 @@ function useResolvedAppearance(item: Item) {
 
 /** Itens cujo ícone não se escolhe — hoje, só os dashboards. */
 const fixedIcon = (item: Item) => item.kind === 'dashboard'
+/** Aviso curto do portal ("Alterações salvas"); quem mostra é a tela. */
+export const ToastContext = createContext<(text: string) => void>(() => {})
 
-/** ⋮ do card limpo: personalizar ícone e cor, e favoritar. Aparece no hover. */
+/**
+ * Nome e imagem do item: o que o usuário salvou, senão o que veio do cadastro.
+ * Nome vazio não apaga a pasta da tela — ela volta a se chamar como no
+ * cadastro, que é o que o portal tem para mostrar.
+ */
+export function useItemFace(item: Item) {
+  const custom = useAppearance(item.id)
+  return {
+    name: custom?.name?.trim() ? custom.name : item.name,
+    // `null` é imagem retirada pelo usuário; `undefined` é "não mexeram nela".
+    thumbnail: custom?.image === null ? undefined : custom?.image ?? item.thumbnail,
+  }
+}
+
+/**
+ * Ícone e cor da pasta — um campo só, "Aparência".
+ *
+ * Eram dois grupos, "ÍCONE" e "COR", com rótulo de 12 em caixa alta. Caixa alta
+ * é voz de cabeçalho de seção — num painel que já cabe em meia tela ela só
+ * somava uma terceira voz tipográfica ao "Nome" de 16, e o rótulo acabava
+ * pesando mais que a escolha que ele nomeia. Agora é um rótulo de 16/1.5 como o
+ * do Nome, e um só: ícone e cor produzem uma coisa só, o disco colorido do card.
+ *
+ * Sem moldura em volta. Uma caixa de borda aqui prometia um controle (um campo
+ * que se preenche) para o que é uma paleta, e ainda somava altura a um menu que
+ * já é alto. O que dá pé ao bloco é a própria grade: alvos de 32 em coluna
+ * regular, e o escolhido preenchido na cor, no mesmo desenho que vai para o
+ * card — trocar a cor repinta o ícone na hora.
+ */
+function AppearanceField({
+  icon,
+  color,
+  showIcons,
+  onIcon,
+  onColor,
+}: {
+  icon: string
+  color: string
+  showIcons: boolean
+  onIcon: (name: string) => void
+  onColor: (color: string) => void
+}) {
+  // A cor com a luz que o tema pede, como no disco do card (ver --wk-icon-lift):
+  // o que o painel mostra preenchido tem de ser o que aparece lá fora.
+  const tone = `color-mix(in srgb, #fff var(--wk-icon-lift), ${color})`
+  return (
+    <FormField label="Aparência">
+      <div className="flex flex-col gap-3">
+        {showIcons && (
+          <div className="grid grid-cols-6 gap-y-1 justify-items-center">
+            {APPEARANCE_ICONS.map((name) => {
+              const on = name === icon
+              return (
+                <button
+                  key={name}
+                  type="button"
+                  onClick={() => onIcon(name)}
+                  aria-label={name}
+                  aria-pressed={on}
+                  className={`flex items-center justify-center size-8 rounded-full transition-colors ${
+                    on ? '' : 'hover:bg-[var(--wk-menu-hover)]'
+                  }`}
+                  style={on ? { background: tone, color: '#fff' } : { color: COLOR.textSecondary }}
+                >
+                  <Icon name={name} size={20} weight={on ? 400 : 300} color="currentColor" />
+                </button>
+              )
+            })}
+          </div>
+        )}
+        {/* As cores seguem a mesma coluna óptica da grade: o px-1 alinha a
+            primeira bolinha com o primeiro glifo. */}
+        <div className="flex items-center justify-between px-1">
+          {APPEARANCE_COLORS.map((c) => (
+            <button
+              key={c}
+              type="button"
+              onClick={() => onColor(c)}
+              aria-label={`Cor ${c}`}
+              aria-pressed={c === color}
+              className="rounded-full"
+              style={{
+                width: 20,
+                height: 20,
+                background: c,
+                // O anel sai da superfície do menu, que é onde ele é desenhado.
+                boxShadow:
+                  c === color ? `0 0 0 2px var(--wk-surface), 0 0 0 4px ${c}` : undefined,
+              }}
+            />
+          ))}
+        </div>
+      </div>
+    </FormField>
+  )
+}
+
+/** Link discreto do painel (carregar, remover) — ação de apoio, sem caixa. */
+const PANEL_LINK = 'self-start text-[13px] leading-[18px] rounded-md hover:underline'
+
+/**
+ * ⋮ do card: favoritar e editar. Aparece no hover.
+ *
+ * O painel de editar é a parte visual do "Cadastro de menus" do desk —
+ * nome, imagem, ícone e cor — e só ela. Documentação, variáveis,
+ * palavras-chave e permissões continuam lá: num menu suspenso o cadastro
+ * inteiro viraria um formulário, e não é por caber que ele viria. É porque no
+ * desk a pessoa configura às cegas e precisa abrir o portal para ver como
+ * ficou. A pasta aparece aqui; é aqui que se escolhe a cara dela.
+ *
+ * Daí o Salvar: o que se mexe aqui é o cadastro, não uma preferência do
+ * navegador. Enquanto o painel está aberto o card muda junto — é o que a web
+ * tem e o desk não —, e fechar sem salvar devolve tudo ao que era.
+ */
 function CardMenu({
   item,
   icon,
@@ -451,12 +577,50 @@ function CardMenu({
   onToggleFavorite: (id: string) => void
 }) {
   // O mesmo menu troca de conteúdo: primeiro as duas ações, e "Personalizar"
-  // abre ali mesmo o painel de ícone e cor — sem um segundo popover.
+  // abre ali mesmo o painel — sem um segundo popover.
   const [customizing, setCustomizing] = useState(false)
+  const [focused, setFocused] = useState(false)
+  const custom = useAppearance(item.id)
+  const { name, thumbnail } = useItemFace(item)
+  const toast = useContext(ToastContext)
+  const fileRef = useRef<HTMLInputElement>(null)
+  /** O cadastro como estava quando o painel abriu — o que o Cancelar devolve. */
+  const snapshot = useRef<Appearance | undefined>(undefined)
+  const saved = useRef(false)
+  const kind = item.kind === 'folder' ? 'pasta' : 'dashboard'
+  /* O campo mostra o rascunho, não o nome que o card resolve: se mostrasse o
+     resolvido, apagar o texto traria o nome do cadastro de volta na hora e a
+     pessoa não conseguiria limpar o campo para digitar outro. */
+  const draftName = custom?.name ?? item.name
+
+  const openPanel = () => {
+    snapshot.current = getAppearance(item.id)
+    saved.current = false
+    setCustomizing(true)
+  }
+
+  /* Fechar sem salvar é cancelar, venha de onde vier — botão, Esc ou clique
+     fora. Sem isso o Salvar não significaria nada: bastava clicar ao lado para
+     o rascunho virar cadastro. */
+  const closePanel = () => {
+    if (customizing && !saved.current) replaceAppearance(item.id, snapshot.current)
+    setCustomizing(false)
+  }
+
+  const pickImage = async (file: File | undefined) => {
+    if (!file) return
+    try {
+      setAppearance(item.id, { image: await readImageFile(file) })
+    } catch {
+      toast('Não consegui ler essa imagem')
+    }
+  }
+
   return (
     <div className="relative shrink-0">
       <Dropdown
         minWidth={customizing ? 300 : 220}
+        onClose={closePanel}
         trigger={({ open, toggle }) => (
           <button
             type="button"
@@ -466,7 +630,7 @@ function CardMenu({
             }}
             aria-haspopup="menu"
             aria-expanded={open}
-            aria-label={`Ações de ${item.name}`}
+            aria-label={`Ações de ${name}`}
             title="Mais ações"
             // 40px no celular, 28 na mesa — o mesmo piso de toque da estrela,
             // que fica logo ao lado.
@@ -480,11 +644,7 @@ function CardMenu({
         {(close) =>
           !customizing ? (
             <>
-              <MenuAction
-                icon="palette"
-                label={fixedIcon(item) ? 'Personalizar cor' : 'Personalizar ícone e cor'}
-                onSelect={() => setCustomizing(true)}
-              />
+              <MenuAction icon="edit" label={`Editar ${kind}`} onSelect={openPanel} />
               <MenuAction
                 icon="star"
                 label={favorite ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
@@ -495,86 +655,114 @@ function CardMenu({
               />
             </>
           ) : (
-          /* p-3 aqui mais os 4 que o menu já tem dão 16 de respiro em volta, um
-             passo da grade — a mesma conta do painel do Portal. */
-          <div className="flex flex-col p-3" style={{ fontFamily: FONT }}>
-            {/* Ícone e cor num campo só, "Aparência", com o rótulo de 16 do
-                design system. Eram dois rótulos de 12 em semibold, um para cada
-                grupo: num painel desse tamanho eles pesavam mais que a escolha
-                que nomeavam, e as escolhas ficavam soltas embaixo. Os dois
-                produzem uma coisa só — o disco colorido do card —, e o ícone
-                escolhido aparece preenchido na cor escolhida, no mesmo desenho
-                que vai para o card: trocar a cor repinta o ícone na hora.
-                Dashboard não oferece a grade, o ícone dele é fixo. */}
-            <FormField label="Aparência">
-              <div className="flex flex-col gap-3">
-                {!fixedIcon(item) && (
-                  <div className="grid grid-cols-6 gap-y-1 justify-items-center">
-                    {APPEARANCE_ICONS.map((name) => {
-                      const on = name === icon
-                      return (
-                        <button
-                          key={name}
-                          type="button"
-                          onClick={() => setAppearance(item.id, { icon: name })}
-                          aria-label={name}
-                          aria-pressed={on}
-                          className={`flex items-center justify-center size-8 rounded-full transition-colors ${
-                            on ? '' : 'hover:bg-[var(--wk-menu-hover)]'
-                          }`}
-                          style={
-                            on
-                              ? {
-                                  // A cor com a luz que o tema pede, como no disco
-                                  // do card (ver --wk-icon-lift).
-                                  background: `color-mix(in srgb, #fff var(--wk-icon-lift), ${color})`,
-                                  color: '#fff',
-                                }
-                              : { color: COLOR.textSecondary }
-                          }
-                        >
-                          <Icon name={name} size={20} weight={on ? 400 : 300} color="currentColor" />
-                        </button>
-                      )
-                    })}
-                  </div>
-                )}
-                {/* As cores seguem a mesma coluna óptica da grade: o px-1 alinha
-                    a primeira bolinha com o primeiro glifo. */}
-                <div className="flex items-center justify-between px-1">
-                  {APPEARANCE_COLORS.map((c) => (
+            /* O campo de texto é o do design system (ver components/Field):
+               rótulo de 16/1.5 acima da caixa de 38, e o respiro de 16 entre um
+               bloco e o seguinte sai do próprio FormField.
+
+               p-3 aqui mais os 4 que o menu já tem dão 16 de respiro em volta,
+               um passo da grade. Com 8 o conteúdo encostava na borda do painel
+               e a caixa do campo parecia maior do que o painel comporta. */
+            <div className="flex flex-col p-3" style={{ fontFamily: FONT }}>
+              <FormField label="Nome">
+                <input
+                  type="text"
+                  value={draftName}
+                  onChange={(e) => setAppearance(item.id, { name: e.target.value })}
+                  onFocus={() => setFocused(true)}
+                  onBlur={() => setFocused(false)}
+                  aria-label={`Nome da ${kind}`}
+                  className="w-full outline-none"
+                  style={{ ...fieldBoxStyle({ focused }), ...fieldTextStyle }}
+                />
+              </FormField>
+
+              {/* A mesma imagem que o Expandido mostra no card, e sem rótulo em
+                  cima: a miniatura mostra o que é, e "Imagem" só repetia a
+                  imagem. A própria miniatura abre o seletor — alvo de 120×60 em
+                  vez de um link de 13px —, e segue a proporção 2:1 do card, que
+                  é o que ela está prevendo. "Carregar do disco" é o texto do
+                  cadastro no desk: mesma ação, mesmo nome. */}
+              <div className="flex items-center gap-3" style={{ paddingBottom: 16 }}>
+                  <button
+                    type="button"
+                    onClick={() => fileRef.current?.click()}
+                    title={thumbnail ? 'Trocar imagem' : 'Carregar imagem do disco'}
+                    className="shrink-0 overflow-hidden flex items-center justify-center border border-[var(--wk-border)]"
+                    style={{
+                      width: 120,
+                      height: 60,
+                      borderRadius: RADIUS.sm,
+                      background: 'var(--wk-thumb-empty)',
+                    }}
+                  >
+                    {thumbnail ? (
+                      <img src={thumbnail} alt="" className="w-full h-full object-cover" />
+                    ) : (
+                      <Icon name="image" size={24} color={COLOR.textMuted} />
+                    )}
+                  </button>
+                  <span className="flex flex-col gap-1 min-w-0">
                     <button
-                      key={c}
                       type="button"
-                      onClick={() => setAppearance(item.id, { color: c })}
-                      aria-label={`Cor ${c}`}
-                      aria-pressed={c === color}
-                      className="rounded-full"
-                      style={{
-                        width: 20,
-                        height: 20,
-                        background: c,
-                        // O anel sai da superfície do menu, que é onde ele é desenhado.
-                        boxShadow:
-                          c === color ? `0 0 0 2px var(--wk-surface), 0 0 0 4px ${c}` : undefined,
-                      }}
-                    />
-                  ))}
-                </div>
+                      onClick={() => fileRef.current?.click()}
+                      className={PANEL_LINK}
+                      style={{ color: 'var(--wk-primary)' }}
+                    >
+                      {thumbnail ? 'Trocar imagem' : 'Carregar do disco'}
+                    </button>
+                    {thumbnail && (
+                      <button
+                        type="button"
+                        onClick={() => setAppearance(item.id, { image: null })}
+                        className={PANEL_LINK}
+                        style={{ color: COLOR.textMuted }}
+                      >
+                        Remover
+                      </button>
+                    )}
+                  </span>
+                  <input
+                    ref={fileRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      pickImage(e.target.files?.[0])
+                      // zera para a mesma imagem poder ser escolhida de novo
+                      e.target.value = ''
+                    }}
+                  />
               </div>
-            </FormField>
-            <button
-              type="button"
-              onClick={() => {
-                setAppearance(item.id, null)
-                close()
-              }}
-              className="self-start text-[13px] rounded-md px-1 -mx-1 hover:underline"
-              style={{ color: 'var(--wk-primary)' }}
-            >
-              Restaurar padrão
-            </button>
-          </div>
+
+              {/* Dashboard não oferece a grade: o ícone dele é fixo — sobra a cor. */}
+              <AppearanceField
+                icon={icon}
+                color={color}
+                showIcons={!fixedIcon(item)}
+                onIcon={(name) => setAppearance(item.id, { icon: name })}
+                onColor={(c) => setAppearance(item.id, { color: c })}
+              />
+
+              {/* O fio sangra até as bordas do painel: ele separa o formulário
+                  das ações, não uma coluna de texto da outra. */}
+              <div
+                className="flex justify-end gap-2 -mx-3 px-3 pt-3 border-t"
+                style={{ borderColor: COLOR.border }}
+              >
+                <Btn variant="ghost" onClick={close}>
+                  Cancelar
+                </Btn>
+                <Btn
+                  onClick={() => {
+                    saved.current = true
+                    toast('Alterações salvas')
+                    close()
+                  }}
+                >
+                  Salvar
+                </Btn>
+              </div>
+            </div>
           )
         }
       </Dropdown>
@@ -600,12 +788,14 @@ function CardMenu({
  */
 function CleanTileBody({
   item,
+  name,
   favorite,
   quietFavorite,
   onToggleFavorite,
   tipRef,
 }: {
   item: Item
+  name: string
   favorite: boolean
   quietFavorite?: boolean
   onToggleFavorite: (id: string) => void
@@ -620,10 +810,10 @@ function CleanTileBody({
   const tone = `color-mix(in srgb, #fff var(--wk-icon-lift), ${color})`
 
   if (style === 'referencia') {
-    const title = item.theme?.title ?? item.name
+    const title = item.theme?.title ?? name
     // Com tema, o nome completo desce para a linha de baixo — e é ele que o
     // tooltip precisa revelar quando corta.
-    const sub = item.theme ? item.name : undefined
+    const sub = item.theme ? name : undefined
     return (
       <>
         <span className="pointer-events-none flex-1 min-w-0 flex items-start gap-3.5">
@@ -717,7 +907,7 @@ function CleanTileBody({
         className="pointer-events-none flex-1 min-w-0 line-clamp-2 break-words text-[14px] leading-[18px]"
         style={NAME_STYLE}
       >
-        {item.name}
+        {name}
       </span>
       {/* Ações: o ⋮ (personalizar e favoritar) aparece no hover, e a estrela
           fica na ponta, como sinal de favorito — fora da seção Favoritos, só
@@ -747,12 +937,14 @@ function CleanTileBody({
 /** Ícone + texto + estrela: a faixa comum ao Compacto e ao rodapé do Expandido. */
 function TileBody({
   item,
+  name,
   favorite,
   quietFavorite,
   onToggleFavorite,
   tipRef,
 }: {
   item: Item
+  name: string
   favorite: boolean
   quietFavorite?: boolean
   onToggleFavorite: (id: string) => void
@@ -763,6 +955,7 @@ function TileBody({
     return (
       <CleanTileBody
         item={item}
+        name={name}
         favorite={favorite}
         quietFavorite={quietFavorite}
         onToggleFavorite={onToggleFavorite}
@@ -778,7 +971,7 @@ function TileBody({
         className="pointer-events-none flex-1 min-w-0 line-clamp-2 break-words text-[14px] leading-[18px]"
         style={NAME_STYLE}
       >
-        {item.name}
+        {name}
       </span>
       <FavoriteToggle item={item} favorite={favorite} quiet={quietFavorite} onToggle={onToggleFavorite} />
     </>
@@ -787,7 +980,8 @@ function TileBody({
 
 function ItemTile({ entry: { item, context }, favorite, quietFavorite, onOpen, onToggleFavorite }: ItemProps) {
   const style = useContext(CardStyleContext)
-  const tip = useEllipsisTooltip(tileTitle(item, context), context !== undefined)
+  const { name } = useItemFace(item)
+  const tip = useEllipsisTooltip(tileTitle(name, context), context !== undefined)
   return (
     <div
       role="listitem"
@@ -803,9 +997,10 @@ function ItemTile({ entry: { item, context }, favorite, quietFavorite, onOpen, o
       }`}
       style={{ height: isClean(style) ? cleanTileHeight(style) : TILE_HEIGHT }}
     >
-      <button type="button" onClick={() => onOpen(item)} aria-label={item.name} className={OVERLAY} />
+      <button type="button" onClick={() => onOpen(item)} aria-label={name} className={OVERLAY} />
       <TileBody
         item={item}
+        name={name}
         favorite={favorite}
         quietFavorite={quietFavorite}
         onToggleFavorite={onToggleFavorite}
@@ -835,16 +1030,17 @@ function ItemThumb({ entry: { item, context }, favorite, quietFavorite, onOpen, 
   const folder = item.kind === 'folder'
   const style = useContext(CardStyleContext)
   const look = useResolvedAppearance(item)
-  const tip = useEllipsisTooltip(tileTitle(item, context), context !== undefined)
+  const { name, thumbnail } = useItemFace(item)
+  const tip = useEllipsisTooltip(tileTitle(name, context), context !== undefined)
   // Sem imagem, no limpo: o ícone do tema grande, na cor dele, sobre a mesma
   // cor bem diluída — o card vazio conversa com o círculo do rodapé.
-  const cleanEmpty = isClean(style) && !item.thumbnail
+  const cleanEmpty = isClean(style) && !thumbnail
   // No Expandido o card é claro nos dois estilos, então a cor diluída da
   // miniatura vazia se mistura sempre no branco dele.
   const emptyStyle = cleanEmpty
     ? { background: `color-mix(in srgb, ${look.color} 9%, var(--wk-card-surface))` }
-    : folder && !item.thumbnail
-      ? { background: `linear-gradient(${folderTint(item.name)}, ${folderTint(item.name)}), var(--wk-card-surface)` }
+    : folder && !thumbnail
+      ? { background: `linear-gradient(${folderTint(name)}, ${folderTint(name)}), var(--wk-card-surface)` }
       : undefined
   return (
     <div
@@ -864,7 +1060,7 @@ function ItemThumb({ entry: { item, context }, favorite, quietFavorite, onOpen, 
           : 'rounded-xl border border-[var(--wk-card-border)] transition-colors bg-[var(--wk-card-surface)] hover:bg-[var(--wk-card-surface-hover)]'
       }`}
     >
-      <button type="button" onClick={() => onOpen(item)} aria-label={item.name} className={OVERLAY} />
+      <button type="button" onClick={() => onOpen(item)} aria-label={name} className={OVERLAY} />
       {/* Imagem e faixa do nome em tons diferentes: com o mesmo fundo, o card
           virava um bloco só e não se via onde a imagem acabava. */}
       {/* Pasta sem imagem: fundo no matiz da pasta, bem diluído sobre o
@@ -889,8 +1085,8 @@ function ItemThumb({ entry: { item, context }, favorite, quietFavorite, onOpen, 
         }`}
         style={emptyStyle}
       >
-        {item.thumbnail ? (
-          <img src={item.thumbnail} alt="" className="w-full h-full object-cover" />
+        {thumbnail ? (
+          <img src={thumbnail} alt="" className="w-full h-full object-cover" />
         ) : cleanEmpty ? (
           <Icon name={look.icon} size={56} weight={300} color={look.color} className="opacity-60" />
         ) : (
@@ -898,7 +1094,7 @@ function ItemThumb({ entry: { item, context }, favorite, quietFavorite, onOpen, 
             name={folder ? 'folder' : 'dashboard'}
             size={48}
             filled
-            color={folder ? folderTone(item.name) : 'var(--wk-dashboard-icon-soft)'}
+            color={folder ? folderTone(name) : 'var(--wk-dashboard-icon-soft)'}
           />
         )}
       </div>
@@ -908,6 +1104,7 @@ function ItemThumb({ entry: { item, context }, favorite, quietFavorite, onOpen, 
       >
         <TileBody
           item={item}
+          name={name}
           favorite={favorite}
           quietFavorite={quietFavorite}
           onToggleFavorite={onToggleFavorite}

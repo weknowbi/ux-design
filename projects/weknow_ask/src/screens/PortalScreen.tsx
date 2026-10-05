@@ -12,7 +12,15 @@ import { MobileDrawer, MobileTopBar } from '@/components/MobileNav'
 import { ContentBrowser } from '@/components/browser/ContentBrowser'
 import { useBrowserPrefs, usePref } from '@/components/browser/prefs'
 import { BrowserControls } from '@/components/browser/BrowserControls'
-import { CardStyleContext, ICON_MODES, IconModeContext, type CardStyle, type IconMode } from '@/components/browser/Items'
+import {
+  CardStyleContext,
+  ICON_MODES,
+  IconModeContext,
+  ToastContext,
+  type CardStyle,
+  type IconMode,
+} from '@/components/browser/Items'
+import { useAppearances } from '@/components/browser/appearance'
 import { PORTAL_ROOT, findFolderPath, initialFavorites, type Folder } from '@/data/portal'
 
 /**
@@ -110,6 +118,12 @@ export function PortalScreen({ onNavigate }: { onNavigate: (route: PortalRoute) 
 
   const path = (folderId && findFolderPath(PORTAL_ROOT, folderId)) || []
   const atRoot = path.length === 0
+  /* O nome que o usuário deu à pasta no card vale em toda a tela — cabeçalho e
+     caminho da barra de topo inclusive. Renomear no card e a pasta continuar
+     com o nome antigo lá dentro seria dizer que foram duas coisas diferentes. */
+  const customized = useAppearances()
+  const folderName = (f: Folder) => customized[f.id]?.name?.trim() || f.name
+
   const current = atRoot ? null : path[path.length - 1]
   const dynamicHero = layout === 'dinamico' && atRoot
   /** No dinâmico, a pasta abre com a barra da home já recolhida. */
@@ -159,12 +173,12 @@ export function PortalScreen({ onNavigate }: { onNavigate: (route: PortalRoute) 
      lista os nomes completos.
      Na home não há caminho a mostrar — o breadcrumb só aparece depois que o
      usuário entra em alguma pasta. */
-  const toCrumb = (f: Folder): Crumb => ({ label: f.name, onClick: () => navigate(f.id) })
+  const toCrumb = (f: Folder): Crumb => ({ label: folderName(f), onClick: () => navigate(f.id) })
   const hidden = path.length > 1 ? path.slice(0, -1) : []
   const trail: Crumb[] = path.length === 0 ? [] : [
     { label: 'Portal', icon: <Icon name="home" size={24} />, iconOnly: true, onClick: () => navigate(null) },
     ...(hidden.length
-      ? [{ label: '…', collapsed: hidden.map((f) => ({ label: f.name, onClick: () => navigate(f.id) })) }]
+      ? [{ label: '…', collapsed: hidden.map((f) => ({ label: folderName(f), onClick: () => navigate(f.id) })) }]
       : []),
     ...path.slice(hidden.length).map(toCrumb),
   ]
@@ -204,7 +218,10 @@ export function PortalScreen({ onNavigate }: { onNavigate: (route: PortalRoute) 
     </div>
   )
 
+  const showToast = useCallback((text: string) => setToast({ text, at: Date.now() }), [])
+
   const browser = (
+    <ToastContext.Provider value={showToast}>
     <CardStyleContext.Provider value={cardStyle}>
       <IconModeContext.Provider value={iconMode}>
         <ContentBrowser
@@ -222,6 +239,7 @@ export function PortalScreen({ onNavigate }: { onNavigate: (route: PortalRoute) 
         />
       </IconModeContext.Provider>
     </CardStyleContext.Provider>
+    </ToastContext.Provider>
   )
 
   const toastBox = (
@@ -287,7 +305,7 @@ export function PortalScreen({ onNavigate }: { onNavigate: (route: PortalRoute) 
                       subir, e o gesto do sistema continua valendo. */}
                   <div className="pt-4">
                     <FolderHeader
-                      name={current.name}
+                      name={folderName(current)}
                       onBack={() => navigate(path.length > 1 ? path[path.length - 2].id : null)}
                       aside={controls}
                       compact
@@ -394,7 +412,7 @@ export function PortalScreen({ onNavigate }: { onNavigate: (route: PortalRoute) 
               />
               <div className="mt-4">
                 <FolderHeader
-                  name={current.name}
+                  name={folderName(current)}
                   onBack={() => navigate(path.length > 1 ? path[path.length - 2].id : null)}
                 />
               </div>
@@ -419,7 +437,7 @@ export function PortalScreen({ onNavigate }: { onNavigate: (route: PortalRoute) 
               {current && (
                 <div>
                   <FolderHeader
-                    name={current.name}
+                    name={folderName(current)}
                     onBack={() => navigate(path.length > 1 ? path[path.length - 2].id : null)}
                     aside={folderAside}
                   />
