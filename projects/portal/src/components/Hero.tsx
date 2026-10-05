@@ -8,7 +8,7 @@ export const CONTENT_TYPES = [
   { id: 'apresentacoes', icon: 'animated_images', label: 'Apresentações' },
 ] as const
 
-function FilterChip({
+export function FilterChip({
   icon,
   label,
   active,
@@ -28,7 +28,7 @@ function FilterChip({
       onClick={onSelect}
       aria-pressed={active}
       // .home-tab: 36px, respiro 8/16, raio total, gap 8. O hover só vale fora do ativo.
-      className={`inline-flex items-center rounded-full transition-colors ${
+      className={`inline-flex items-center whitespace-nowrap rounded-full transition-colors ${
         compact ? 'px-3 h-[32px] text-[13px]' : 'gap-2 px-4 h-[36px] text-[14px]'
       } ${
         active ? 'bg-[var(--wk-chip-active-bg)]' : 'bg-[var(--wk-chip-bg)] hover:bg-[var(--wk-chip-bg-hover)]'

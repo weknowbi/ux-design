@@ -3,7 +3,7 @@ import { BREADCRUMB, COLOR, FONT, TOPBAR } from '@/design/tokens'
 import { Icon } from '@/components/icons'
 import { ThemeRow } from '@/components/ThemeSwitch'
 import { Dropdown, MenuAction as DropdownAction } from '@/components/browser/Menu'
-import avatar from '@/assets/avatar.png'
+import avatar from '@/assets/avatar.jpg'
 
 /**
  * Barra de topo — medidas do nó `Frame 427319838` (WP-832, 4454:7125):
@@ -279,7 +279,7 @@ export function Header({
    * `hidden`: a busca está visível em outro lugar da tela (layout dinâmico).
    * O espaço fica reservado para o caminho à esquerda não pular.
    */
-  search?: { value: string; onChange: (q: string) => void; placeholder: string; hidden?: boolean }
+  search?: { value: string; onChange: (q: string) => void; placeholder: string; hidden?: boolean; global?: boolean }
 }) {
   const S = TOPBAR.search
 
@@ -302,7 +302,7 @@ export function Header({
         // 328px (espec.) a partir de 1536px; abaixo cede espaço ao caminho, que carrega nome longo de pasta.
         // Quando a busca é da tela (como no Drive), ela ganha mais largura: é a busca principal.
         className={`hidden md:flex shrink-0 items-center focus-within:shadow-[0_0_0_2px_rgba(51,102,204,0.18)] transition-[opacity,visibility,box-shadow] duration-300 ease-[cubic-bezier(0.4,0,0,1)] ${
-          search ? 'w-[300px] xl:w-[380px] 2xl:w-[440px]' : 'w-[240px] 2xl:w-[328px]'
+          search && !search.global ? 'w-[220px] lg:w-[300px] xl:w-[380px] 2xl:w-[440px]' : 'w-[200px] lg:w-[240px] 2xl:w-[328px]'
         } ${search?.hidden ? 'opacity-0 invisible' : 'opacity-100 visible'}`}
         aria-hidden={search?.hidden || undefined}
         style={{

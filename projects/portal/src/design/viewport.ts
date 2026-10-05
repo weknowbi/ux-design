@@ -34,3 +34,24 @@ export function useIsMobile() {
 
   return mobile
 }
+
+/**
+ * Consulta de mídia avulsa — para o que muda de forma em larguras que não são
+ * o corte entre celular e mesa. A tabela usa isto para *tirar colunas da
+ * grade* em vez de escondê-las com `hidden`: coluna escondida por CSS continua
+ * ocupando uma faixa do `grid-template-columns`, e a tabela de cadastro tem
+ * sete delas — o buraco somava mais que o conteúdo.
+ */
+export function useMediaQuery(query: string) {
+  const [matches, setMatches] = useState(() => window.matchMedia(query).matches)
+
+  useEffect(() => {
+    const mq = window.matchMedia(query)
+    const sync = () => setMatches(mq.matches)
+    sync()
+    mq.addEventListener('change', sync)
+    return () => mq.removeEventListener('change', sync)
+  }, [query])
+
+  return matches
+}

@@ -2,7 +2,7 @@ import { useEffect, type ReactNode } from 'react'
 import { COLOR, LAYOUT, TOPBAR } from '@/design/tokens'
 import { Icon } from '@/components/icons'
 import { WeknowLogo } from '@/components/WeknowLogo'
-import avatar from '@/assets/avatar.png'
+import avatar from '@/assets/avatar.jpg'
 
 /**
  * Navegação do portal no celular.

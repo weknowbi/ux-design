@@ -87,6 +87,11 @@
 
   --wk-icon-hover: rgba(51, 102, 204, 0.08);
   --wk-danger: #b91c1c;
+  /* Estado ligado — o único sinal binário das telas de cadastro (usuário
+     ativo ou não). O verde vem do design system do Weknow (--bs-success), o
+     mesmo lugar de onde --wk-danger veio; aqui ele pinta só um ponto de 8px,
+     nunca uma faixa. */
+  --wk-ok: #198754;
 
 /* Botões — nó Make "Button variations with animations" (tema claro) */
   --wk-btn-on-primary: #ffffff;
@@ -257,6 +262,9 @@
 
   --wk-icon-hover: rgba(138, 180, 248, 0.08);
   --wk-danger: #ab4444;
+  /* #198754 dá 2,6:1 sobre a folha escura e some; este é o verde do botão de
+     sucesso do mesmo design system, que já nasceu para fundo escuro. */
+  --wk-ok: #5cb85c;
 
 /* Botões — mesma fonte, bloco "Dark theme" */
   --wk-btn-on-primary: #0d1b2a;

@@ -11,7 +11,7 @@ import { ThemeSwitch } from '@/components/ThemeSwitch'
  * Ativo: fundo #e4e9f1, texto #3366cc, ícone com FILL 1.
  */
 
-export type PortalRoute = 'portal' | 'ask' | 'sql'
+export type PortalRoute = 'portal' | 'ask' | 'sql' | 'configuracoes'
 
 const MENU: { id: PortalRoute; label: string; icon: React.ReactNode }[] = [
   // "Portal", não "Página inicial": é o nome do nó `sidebar white` (WP-832) e
@@ -24,7 +24,6 @@ const MENU: { id: PortalRoute; label: string; icon: React.ReactNode }[] = [
 ]
 
 const FOOTER = [
-  { label: 'Configurações', icon: 'settings' },
   { label: 'Ajuda', icon: 'help' },
   { label: 'Sair', icon: 'logout' },
 ]
@@ -44,12 +43,19 @@ function NavRow({
   trailing?: React.ReactNode
 }) {
   const [hovered, setHovered] = useState(false)
+  /**
+   * A linha "Tema" carrega a chave de tema, que é um controle por si só, e
+   * botão dentro de botão é HTML inválido — o React reclamava disso a cada
+   * pintura. Quando a linha tem um controle na ponta, ela deixa de ser botão:
+   * ali não há o que clicar na linha inteira, só na chave.
+   */
+  const Tag = trailing ? 'div' : 'button'
   const background = active ? COLOR.navActive : hovered ? COLOR.navHover : 'transparent'
   const color = active ? COLOR.navActiveText : hovered ? COLOR.navHoverText : COLOR.navText
   const iconColor = active ? COLOR.navActiveText : COLOR.navLabel
 
   return (
-    <button
+    <Tag
       onClick={onClick}
       title={label}
       onMouseEnter={() => setHovered(true)}
@@ -76,7 +82,7 @@ function NavRow({
         {label}
       </span>
       {trailing}
-    </button>
+    </Tag>
   )
 }
 
@@ -127,7 +133,16 @@ export function PortalSidebar({
       {/* Rodapé, colado na base. O pb-2 soma 8 aos 8 do menu: Sair fica a
           16 do pé. Com só os 8 das laterais ele parecia grudado na borda. */}
       <div className="flex-1 flex flex-col justify-end gap-1 pb-2">
-        <NavRow icon={<Icon name="settings" size={24} />} label={FOOTER[0].label} />
+        {/* Configurações é uma tela, não um enfeite de rodapé: marca como
+            aberta igual aos itens de cima. Sem esse estado, dentro do cadastro
+            de usuários o menu inteiro continuava dizendo que você estava no
+            portal. */}
+        <NavRow
+          icon={<Icon name="settings" size={24} />}
+          label="Configurações"
+          active={active === 'configuracoes'}
+          onClick={() => onNavigate('configuracoes')}
+        />
         {/* Recolhido não cabe a chave: o próprio ícone passa a alternar. */}
         <NavRow
           icon={<Icon name="palette" size={24} />}
@@ -135,8 +150,8 @@ export function PortalSidebar({
           onClick={collapsed ? toggleTheme : undefined}
           trailing={collapsed ? undefined : <ThemeSwitch />}
         />
-        <NavRow icon={<Icon name="help" size={24} />} label={FOOTER[1].label} />
-        <NavRow icon={<Icon name="logout" size={24} />} label={FOOTER[2].label} />
+        <NavRow icon={<Icon name="help" size={24} />} label={FOOTER[0].label} />
+        <NavRow icon={<Icon name="logout" size={24} />} label={FOOTER[1].label} />
       </div>
     </aside>
   )

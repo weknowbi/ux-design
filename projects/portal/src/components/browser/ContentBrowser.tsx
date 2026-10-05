@@ -103,6 +103,7 @@ export function ContentBrowser({
   favorites,
   prefs,
   section,
+  globalSearch,
   controls,
   controlsHidden,
   mobile = false,
@@ -116,6 +117,8 @@ export function ContentBrowser({
   prefs: BrowserPrefs
   /** Área de conteúdo aberta: Pastas, Tarefas ou Apresentações. */
   section: SectionId
+  /** A busca veio da barra de topo: procura no portal inteiro e diz o caminho de cada resultado. */
+  globalSearch?: boolean
   /** Ordenação e visualização, quando é o browser que os mostra. */
   controls?: ReactNode
   /** Os controles subiram para a barra do topo; aqui eles só esmaecem. */
@@ -171,7 +174,7 @@ export function ContentBrowser({
     )
   }
 
-  const toListed = (entries: Entry[], withContext: boolean, view: ViewMode): Listed[] => {
+  const toListed = (entries: Entry[], withContext: boolean, view: ViewMode, withTrail = false): Listed[] => {
     const byItem = new Map(entries.map((e) => [e.item, e]))
     return sortItems(
       entries.map((e) => e.item),
@@ -179,30 +182,43 @@ export function ContentBrowser({
       prefs.dir,
     ).map((item) => {
       const entry = byItem.get(item)!
+      const trail = withTrail && view !== 'list' ? entry.path.map((p) => p.name) : undefined
       return {
         item,
         meta: metaFor(entry, view, withContext),
-        // Fora da Lista, a origem vai para o tooltip do card (Favoritos, busca).
-        context: withContext && view !== 'list' ? parentLabel(entry.path) : undefined,
+        // Fora da Lista, a origem vai para o tooltip do card (Favoritos, busca)
+        // — menos onde o card já mostra o caminho, que aí seria dito duas vezes.
+        context: withContext && view !== 'list' && !trail ? parentLabel(entry.path) : undefined,
+        // Caminho vazio é a home, e ali o card diz "Pastas" em vez de deixar a
+        // linha em branco — a grade tem de manter o mesmo desenho.
+        trail,
       }
     })
   }
 
-  /* Na raiz a busca varre o acervo todo; dentro de pasta, só o que está nela
-     e nas subpastas — é o que o campo promete ("Pesquise nesta pasta"). */
+  /* A busca da tela: na raiz varre o acervo todo; dentro de pasta, só o que
+     está nela e nas subpastas — é o que o campo promete ("Pesquise nesta
+     pasta"). A busca geral da barra de topo ignora onde o usuário está: ela
+     procura no portal inteiro, inclusive de dentro de uma pasta. */
   const entries: Entry[] = q
     ? all.filter(
-        (e) => (path.length === 0 || e.path.includes(current)) && normalize(e.item.name).includes(q),
+        (e) =>
+          (globalSearch || path.length === 0 || e.path.includes(current)) &&
+          normalize(e.item.name).includes(q),
       )
     : current.children.map((item) => ({ item, path }))
   const withContext = Boolean(q)
+  /* Só a busca geral põe o caminho no card. Nas outras telas — Favoritos, a
+     busca da tela, o conteúdo de uma pasta — o item está no lugar dele, e o
+     caminho repetido card a card engordaria a grade sem responder nada. */
+  const searchTrail = withContext && Boolean(globalSearch)
   /* Dentro de pasta o conteúdo vai todo junto, sem separar pasta de dashboard
      — é o que o Weknow faz, e dois blocos só afastavam o usuário do que ele
      procura. Na raiz as seções ficam, porque ali elas fazem o papel de
      sumário; na busca também, porque o resultado vem de pastas diferentes. */
   const flat = !q && path.length > 0
-  const folders = toListed(entries.filter((e) => e.item.kind === 'folder'), withContext, view)
-  const dashboards = toListed(entries.filter((e) => e.item.kind === 'dashboard'), withContext, view)
+  const folders = toListed(entries.filter((e) => e.item.kind === 'folder'), withContext, view, searchTrail)
+  const dashboards = toListed(entries.filter((e) => e.item.kind === 'dashboard'), withContext, view, searchTrail)
   /* Favoritos segue a visualização escolhida, como o resto da tela: em
      Expandido a pasta favorita aparece com a imagem que o cliente cadastrou,
      que é justamente o que ele escolheu ver. Uma seção em outra densidade

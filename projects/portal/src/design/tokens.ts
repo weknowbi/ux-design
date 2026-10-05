@@ -60,6 +60,7 @@ export const COLOR = {
 
   /* estados */
   danger:         'var(--wk-danger)',
+  ok:             'var(--wk-ok)',
 } as const
 
 export const SHADOW = {

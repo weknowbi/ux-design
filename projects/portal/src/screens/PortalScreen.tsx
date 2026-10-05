@@ -1,18 +1,24 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { COLOR, FONT, LAYOUT } from '@/design/tokens'
-import { useSidebar } from '@/design/sidebar'
+import { COLOR, FONT } from '@/design/tokens'
 import { useIsMobile } from '@/design/viewport'
-import { Header, type Crumb, type MenuItem } from '@/components/Header'
+import { type Crumb, type MenuItem } from '@/components/Header'
+import { AppShell } from '@/components/AppShell'
 import { Icon } from '@/components/icons'
-import { PortalSidebar } from '@/components/PortalSidebar'
-import { SidebarBrand } from '@/components/SidebarBrand'
 import { FolderHeader } from '@/components/FolderHeader'
 import { CONTENT_TYPES, DynamicHero, FADE, FolderBar, Hero, MobileHero, SearchField, type SectionId } from '@/components/Hero'
-import { MobileDrawer, MobileTopBar } from '@/components/MobileNav'
 import { ContentBrowser } from '@/components/browser/ContentBrowser'
 import { useBrowserPrefs, usePref } from '@/components/browser/prefs'
 import { BrowserControls } from '@/components/browser/BrowserControls'
-import { CardStyleContext, ICON_MODES, IconModeContext, type CardStyle, type IconMode } from '@/components/browser/Items'
+import {
+  CardStyleContext,
+  ICON_MODES,
+  IconModeContext,
+  ToastContext,
+  type CardStyle,
+  type IconMode,
+} from '@/components/browser/Items'
+import { useAppearances } from '@/components/browser/appearance'
+import type { PortalRoute } from '@/components/PortalSidebar'
 import { PORTAL_ROOT, findFolderPath, initialFavorites, type Folder } from '@/data/portal'
 
 /** Espec. do frame `home` (WP-832): conteúdo de 1159px centrado na coluna de 1617. */
@@ -63,12 +69,12 @@ function readHash(): string | null {
   return m ? decodeURIComponent(m[1]) : null
 }
 
-export function PortalScreen() {
-  const sidebar = useSidebar()
+export function PortalScreen({ onRoute }: { onRoute: (route: PortalRoute) => void }) {
   const isMobile = useIsMobile()
-  const [drawerOpen, setDrawerOpen] = useState(false)
   const [folderId, setFolderId] = useState(readHash)
   const [query, setQuery] = useState('')
+  /** A busca que está valendo é a geral, da barra de topo (ver `topbarSearch`). */
+  const [globalSearch, setGlobalSearch] = useState(false)
   const [favorites, setFavorites] = useState(() => initialFavorites(PORTAL_ROOT))
   const [layout] = usePref<Layout>('wk-portal-layout', LAYOUTS, 'dinamico')
   /* Sempre o card padrão. Os desenhos alternativos saíram do menu, mas a
@@ -90,6 +96,12 @@ export function PortalScreen() {
     setSection(id)
     navigate(null)
   }, [])
+
+  /* O nome que o usuário deu à pasta no card vale em toda a tela — cabeçalho e
+     caminho da barra de topo inclusive. Renomear no card e a pasta continuar
+     com o nome antigo lá dentro seria dizer que foram duas coisas diferentes. */
+  const customized = useAppearances()
+  const folderName = (f: Folder) => customized[f.id]?.name?.trim() || f.name
 
   const path = (folderId && findFolderPath(PORTAL_ROOT, folderId)) || []
   const atRoot = path.length === 0
@@ -127,6 +139,7 @@ export function PortalScreen() {
 
   const navigate = useCallback((id: string | null) => {
     setQuery('')
+    setGlobalSearch(false)
     if (id) window.location.hash = `/pasta/${encodeURIComponent(id)}`
     else if (window.location.hash) window.history.pushState(null, '', window.location.pathname + window.location.search)
     setFolderId(id)
@@ -149,17 +162,38 @@ export function PortalScreen() {
      lista os nomes completos.
      Na home não há caminho a mostrar — o breadcrumb só aparece depois que o
      usuário entra em alguma pasta. */
-  const toCrumb = (f: Folder): Crumb => ({ label: f.name, onClick: () => navigate(f.id) })
+  const toCrumb = (f: Folder): Crumb => ({ label: folderName(f), onClick: () => navigate(f.id) })
   const hidden = path.length > 1 ? path.slice(0, -1) : []
   const trail: Crumb[] = path.length === 0 ? [] : [
     { label: 'Portal', icon: <Icon name="home" size={24} />, iconOnly: true, onClick: () => navigate(null) },
     ...(hidden.length
-      ? [{ label: '…', collapsed: hidden.map((f) => ({ label: f.name, onClick: () => navigate(f.id) })) }]
+      ? [{ label: '…', collapsed: hidden.map((f) => ({ label: folderName(f), onClick: () => navigate(f.id) })) }]
       : []),
     ...path.slice(hidden.length).map(toCrumb),
   ]
 
   const searchScope = `Pesquise em ${CONTENT_TYPES.find((t) => t.id === section)!.label}`
+
+  /* Duas buscas na tela, dois papéis. A da barra de topo é a busca geral do
+     Weknow: procura no portal inteiro, de qualquer tela, e é a única cujos
+     resultados dizem o caminho — ali o item vem de qualquer lugar, e sem o
+     caminho a lista não se explica. A busca da tela ("Pesquise em Pastas",
+     "Pesquise nesta pasta") filtra o que já está listado, e por isso os cards
+     dela seguem sem caminho: seria o cabeçalho repetido card a card.
+
+     Uma caixa de texto só para as duas: o que muda é quem está com ela. Quem
+     digita assume a busca e o campo do outro lado se esvazia — dois campos com
+     o mesmo texto e escopos diferentes diriam que a tela tem duas respostas
+     para a mesma pergunta. */
+  const localQuery = globalSearch ? '' : query
+  const onLocalQuery = useCallback((v: string) => {
+    setGlobalSearch(false)
+    setQuery(v)
+  }, [])
+  const onGlobalQuery = useCallback((v: string) => {
+    setGlobalSearch(true)
+    setQuery(v)
+  }, [])
 
   /* A barra de topo fica com a busca geral do Weknow — a que procura além do
      que está listado — sempre que a tela já tem uma busca própria: na home do
@@ -171,8 +205,8 @@ export function PortalScreen() {
      e quem entrava numa pasta perdia a busca geral sem aviso. */
   const topbarSearch =
     !atRoot || dynamicHero || layout === 'padrao'
-      ? undefined
-      : { value: query, onChange: setQuery, placeholder: searchScope }
+      ? { value: globalSearch ? query : '', onChange: onGlobalQuery, placeholder: 'Pesquise no Weknow', global: true }
+      : { value: localQuery, onChange: onLocalQuery, placeholder: searchScope }
 
   const controls = <BrowserControls prefs={prefs} mobile={isMobile} />
 
@@ -185,7 +219,7 @@ export function PortalScreen() {
      visualização. Abaixo de `lg` não cabe ali sem espremer o nome da pasta
      até sumir, então desce para uma linha própria logo abaixo do título. */
   const folderSearchField = (
-    <SearchField query={query} onQuery={setQuery} placeholder="Pesquise nesta pasta" compact />
+    <SearchField query={localQuery} onQuery={onLocalQuery} placeholder="Pesquise nesta pasta" compact />
   )
   const folderAside = (
     <div className="flex items-center gap-3 shrink-0">
@@ -194,7 +228,10 @@ export function PortalScreen() {
     </div>
   )
 
+  const showToast = useCallback((text: string) => setToast({ text, at: Date.now() }), [])
+
   const browser = (
+    <ToastContext.Provider value={showToast}>
     <CardStyleContext.Provider value={cardStyle}>
       <IconModeContext.Provider value={iconMode}>
         <ContentBrowser
@@ -204,6 +241,7 @@ export function PortalScreen() {
           favorites={favorites}
           prefs={prefs}
           section={section}
+          globalSearch={globalSearch}
           controls={atRoot ? controls : undefined}
           controlsHidden={dynamicHero && heroCollapsed}
           mobile={isMobile}
@@ -212,6 +250,7 @@ export function PortalScreen() {
         />
       </IconModeContext.Provider>
     </CardStyleContext.Provider>
+    </ToastContext.Provider>
   )
 
   const toastBox = (
@@ -228,203 +267,138 @@ export function PortalScreen() {
   )
 
   /**
-   * Celular: uma coluna só, sem menu ao lado.
-   *
-   * A folha mantém os cantos arredondados do topo, como na versão de mesa: é
-   * o que separa a barra — que é da aplicação — do conteúdo, que é do
-   * cliente. O que ela larga é a margem lateral, que ali só comeria largura.
-   * A barra de topo fica, porque é ela que carrega o menu, a marca e a conta
-   * (protótipo mobile, nó 5121:3576).
-   *
-   * `100dvh` e não `100vh`: no celular a barra de endereço do navegador
-   * entra e sai, e com `vh` a última linha da lista fica permanentemente
-   * escondida atrás dela.
+   * Celular: uma coluna só. A moldura (`AppShell`) já troca de layout sozinha;
+   * aqui muda o recheio — pb-16 para a lista terminar acima da borda, e não
+   * colada nela, onde o último item cai na área do gesto de voltar do sistema.
    */
-  if (isMobile) {
-    return (
-      <div
-        className="flex flex-col"
-        style={{ width: '100%', height: '100dvh', background: COLOR.canvas, fontFamily: FONT }}
-      >
-        <MobileTopBar onMenu={() => setDrawerOpen(true)} />
-
-        <main
-          ref={mainRef}
-          className="flex-1 overflow-y-auto min-h-0"
-          style={{
-            background: COLOR.surface,
-            borderTopLeftRadius: LAYOUT.sheetRadius,
-            borderTopRightRadius: LAYOUT.sheetRadius,
-          }}
-        >
-          {/* pb-16: a lista termina acima da borda, e não colada nela — no
-              celular o último item cai na área do gesto de voltar do sistema. */}
-          <div className="flex flex-col px-4 pb-16">
-            {atRoot ? (
-              <MobileHero
-                query={query}
-                onQuery={setQuery}
-                placeholder={searchScope}
-                section={section}
-                onSection={openSection}
-              />
-            ) : (
-              current && (
-                <>
-                  {/* O nome da pasta rola junto com o conteúdo e a busca gruda
-                      em cima dele: ao descer numa pasta longa, o que precisa
-                      ficar à mão é o campo, não o título — para voltar basta
-                      subir, e o gesto do sistema continua valendo. */}
-                  <div className="pt-4">
-                    <FolderHeader
-                      name={current.name}
-                      onBack={() => navigate(path.length > 1 ? path[path.length - 2].id : null)}
-                      aside={controls}
-                      compact
-                    />
-                  </div>
-                  <MobileHero query={query} onQuery={setQuery} placeholder="Pesquise nesta pasta" />
-                </>
-              )
-            )}
-            <div ref={browserRef} className="scroll-mt-4">
-              {browser}
-            </div>
-          </div>
-        </main>
-
-        <MobileDrawer open={drawerOpen} onClose={() => setDrawerOpen(false)}>
-          <PortalSidebar
-            active="portal"
-            onNavigate={(route) => {
-              setDrawerOpen(false)
-              if (route === 'portal') navigate(null)
-            }}
-            collapsed={false}
-          />
-        </MobileDrawer>
-
-        {toastBox}
-      </div>
-    )
-  }
-
-  return (
-    <div
-      className="flex flex-col"
-      style={{ width: '100vw', height: '100vh', background: COLOR.canvas, fontFamily: FONT }}
-    >
-      {/* Faixa de topo inteira com a marca; só o menu de baixo recolhe.
-          `relative z-40`: os menus que abrem daqui (o "…" e o "…" do caminho)
-          descem por cima da folha, e lá a busca gruda numa camada própria
-          (z-30) — sem isto ela passava por cima do menu aberto. */}
-      <div className="relative z-40 flex shrink-0" style={{ paddingRight: LAYOUT.sheetMarginRight }}>
-        <SidebarBrand collapsed={sidebar.collapsed} onToggle={sidebar.toggle} />
-        <div className="flex-1 min-w-0">
-          <Header trail={trail} menuItems={iconModeMenuItems(iconMode, setIconMode)} search={topbarSearch} />
-        </div>
-      </div>
-
-      <div
-        className="flex flex-1 overflow-hidden relative"
-        style={{ minHeight: 0, paddingRight: LAYOUT.sheetMarginRight }}
-      >
-        {/* As áreas de conteúdo saíram do menu lateral: os chips ficam sempre
-            à mão, na barra que gruda ao rolar a home. Aqui só "Página inicial"
-            navega — Ask e SQL AI são outros apps. */}
-        <PortalSidebar
-          active="portal"
-          onNavigate={(route) => route === 'portal' && navigate(null)}
-          collapsed={sidebar.collapsed}
+  const mobileContent = (
+    <div className="flex flex-col px-4 pb-16">
+      {atRoot ? (
+        <MobileHero
+          query={localQuery}
+          onQuery={onLocalQuery}
+          placeholder={searchScope}
+          section={section}
+          onSection={openSection}
         />
-
-        <main
-          ref={mainRef}
-          className="flex-1 overflow-y-auto [scrollbar-gutter:stable] bg-[var(--wk-surface)] min-w-0"
-          style={{ borderTopLeftRadius: LAYOUT.sheetRadius, borderTopRightRadius: LAYOUT.sheetRadius }}
-        >
-          {dynamicHero ? (
-            <div className="@container mx-auto flex flex-col px-8 pb-24" style={{ maxWidth: WIDE_MAX_WIDTH }}>
-              <DynamicHero
-                query={query}
-                onQuery={setQuery}
-                placeholder={searchScope}
-                section={section}
-                onSection={openSection}
-                scrollRef={mainRef}
-                onCollapsedChange={setHeroCollapsed}
-                controls={controls}
+      ) : (
+        current && (
+          <>
+            {/* O nome da pasta rola junto com o conteúdo e a busca gruda
+                em cima dele: ao descer numa pasta longa, o que precisa
+                ficar à mão é o campo, não o título — para voltar basta
+                subir, e o gesto do sistema continua valendo. */}
+            <div className="pt-4">
+              <FolderHeader
+                name={folderName(current)}
+                onBack={() => navigate(path.length > 1 ? path[path.length - 2].id : null)}
+                aside={controls}
+                compact
               />
-              {/* 32 e não 40, o vão que separa uma seção da outra: ali os 40
-                  separam uma grade densa de cards do título seguinte, aqui
-                  separam três pílulas leves. Vão igual ao lado de elemento leve
-                  lê maior, então 32 é o que *parece* igual — com os 48 que havia
-                  antes, o herói não lia como bloco à parte, lia como mais uma
-                  seção com folga sobrando. */}
-              <div ref={browserRef} className="mt-8 scroll-mt-24">
-                {browser}
-              </div>
             </div>
-          ) : folderBar && current ? (
-            /* Dentro da pasta, a barra da home já recolhida em cima
-               e o título da pasta logo abaixo (ver `FolderBar`).
-
-               A busca procura só nesta pasta e nas subpastas, então o título
-               e o voltar ficam na tela durante a busca: os resultados são
-               dela. Se ela varresse o acervo, o título teria de sair, e com ele
-               o caminho de volta. */
-            <div className="mx-auto flex flex-col px-8 pb-24" style={{ maxWidth: WIDE_MAX_WIDTH }}>
-              <FolderBar
-                query={query}
-                onQuery={setQuery}
-                placeholder="Pesquise nesta pasta"
-                section={section}
-                onSection={openSection}
-                controls={controls}
-              />
-              <div className="mt-4">
-                <FolderHeader
-                  name={current.name}
-                  onBack={() => navigate(path.length > 1 ? path[path.length - 2].id : null)}
-                />
-              </div>
-              <div ref={browserRef} className="mt-8 scroll-mt-24">
-                {browser}
-              </div>
-            </div>
-          ) : (
-            <div
-              className={`mx-auto flex flex-col gap-8 pb-24 ${layout === 'padrao' ? 'px-6 pt-16' : 'px-8 pt-8'}`}
-              style={{ maxWidth: layout === 'padrao' ? CONTENT_WIDTH : WIDE_MAX_WIDTH }}
-            >
-              {layout === 'padrao' && atRoot && (
-                <Hero
-                  query={query}
-                  onQuery={setQuery}
-                  placeholder={searchScope}
-                  section={section}
-                  onSection={openSection}
-                />
-              )}
-              {current && (
-                <div>
-                  <FolderHeader
-                    name={current.name}
-                    onBack={() => navigate(path.length > 1 ? path[path.length - 2].id : null)}
-                    aside={folderAside}
-                  />
-                  <div className="lg:hidden">{folderSearchField}</div>
-                </div>
-              )}
-              <div ref={browserRef} className="scroll-mt-8">
-                {browser}
-              </div>
-            </div>
-          )}
-        </main>
-
-        {toastBox}
+            <MobileHero query={localQuery} onQuery={onLocalQuery} placeholder="Pesquise nesta pasta" />
+          </>
+        )
+      )}
+      <div ref={browserRef} className="scroll-mt-4">
+        {browser}
       </div>
     </div>
+  )
+
+  const desktopContent = dynamicHero ? (
+    <div className="@container mx-auto flex flex-col px-8 pb-24" style={{ maxWidth: WIDE_MAX_WIDTH }}>
+      <DynamicHero
+        query={localQuery}
+        onQuery={onLocalQuery}
+        placeholder={searchScope}
+        section={section}
+        onSection={openSection}
+        scrollRef={mainRef}
+        onCollapsedChange={setHeroCollapsed}
+        controls={controls}
+      />
+      {/* 32 e não 40, o vão que separa uma seção da outra: ali os 40
+          separam uma grade densa de cards do título seguinte, aqui
+          separam três pílulas leves. Vão igual ao lado de elemento leve
+          lê maior, então 32 é o que *parece* igual — com os 48 que havia
+          antes, o herói não lia como bloco à parte, lia como mais uma
+          seção com folga sobrando. */}
+      <div ref={browserRef} className="mt-8 scroll-mt-24">
+        {browser}
+      </div>
+    </div>
+  ) : folderBar && current ? (
+    /* Dentro da pasta, a barra da home já recolhida em cima e o título da
+       pasta logo abaixo (ver `FolderBar`).
+
+       A busca procura só nesta pasta e nas subpastas, então o título e o
+       voltar ficam na tela durante a busca: os resultados são dela. Se ela
+       varresse o acervo, o título teria de sair, e com ele o caminho de
+       volta. */
+    <div className="mx-auto flex flex-col px-8 pb-24" style={{ maxWidth: WIDE_MAX_WIDTH }}>
+      <FolderBar
+        query={localQuery}
+        onQuery={onLocalQuery}
+        placeholder="Pesquise nesta pasta"
+        section={section}
+        onSection={openSection}
+        controls={controls}
+      />
+      <div className="mt-4">
+        <FolderHeader
+          name={folderName(current)}
+          onBack={() => navigate(path.length > 1 ? path[path.length - 2].id : null)}
+        />
+      </div>
+      <div ref={browserRef} className="mt-8 scroll-mt-24">
+        {browser}
+      </div>
+    </div>
+  ) : (
+    <div
+      className={`mx-auto flex flex-col gap-8 pb-24 ${layout === 'padrao' ? 'px-6 pt-16' : 'px-8 pt-8'}`}
+      style={{ maxWidth: layout === 'padrao' ? CONTENT_WIDTH : WIDE_MAX_WIDTH }}
+    >
+      {layout === 'padrao' && atRoot && (
+        <Hero
+          query={localQuery}
+          onQuery={onLocalQuery}
+          placeholder={searchScope}
+          section={section}
+          onSection={openSection}
+        />
+      )}
+      {current && (
+        <div>
+          <FolderHeader
+            name={folderName(current)}
+            onBack={() => navigate(path.length > 1 ? path[path.length - 2].id : null)}
+            aside={folderAside}
+          />
+          <div className="lg:hidden">{folderSearchField}</div>
+        </div>
+      )}
+      <div ref={browserRef} className="scroll-mt-8">
+        {browser}
+      </div>
+    </div>
+  )
+
+  return (
+    <AppShell
+      route="portal"
+      onNavigate={(route) => {
+        if (route === 'portal') navigate(null)
+        else onRoute(route)
+      }}
+      trail={trail}
+      menuItems={iconModeMenuItems(iconMode, setIconMode)}
+      search={topbarSearch}
+      mainRef={mainRef}
+      overlay={toastBox}
+    >
+      {isMobile ? mobileContent : desktopContent}
+    </AppShell>
   )
 }
