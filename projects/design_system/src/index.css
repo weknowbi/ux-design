@@ -101,21 +101,54 @@
 /* ---------------------------------------------------------------------------
    Terceira coluna (sumário da página).
 
-   Os dois trilhos laterais são ancorados nas bordas e o texto se centra entre
-   eles. Quando o sumário sai, some junto o respiro que ele dava à direita, e
-   sem `.wk-reading` o texto passaria a encostar na janela. As duas regras são
-   um par: mexer numa sem a outra quebra a margem.
+   O sumário é a única coluna dispensável da tela: ele repete títulos que o
+   texto logo abaixo já mostra. O menu e a lista do grupo, não — some com eles
+   e a pessoa perde o caminho. Então é o sumário que sai quando falta largura.
 
-   O corte é 1500, e sai de uma conta em vez de um degrau do Tailwind: aí o
-   conteúdo tem 1244, menos 272 do trilho esquerdo e 256 do direito, sobram
-   716 para o texto, praticamente os 745 que ele tinha logo abaixo do corte.
-   Cortar antes (1280, como estava) fazia o artigo encolher de 745 para 617 ao
-   ganhar o sumário, e o degrau aparecia.
+   O corte sai de uma conta, não de um degrau do Tailwind: menu 255 + lista do
+   grupo 240 + margem 48 da folha = 543, mais os 80 de respiro interno da
+   folha, e o par texto + sumário pede 760 + 40 + 176 = 976 — 1599 ao todo.
+   Abaixo disso o artigo encolheria para caber o sumário, e um degrau de
+   largura no texto custa mais do que o sumário entrega.
+
+   O respiro à direita do texto não depende mais desta regra: agora é a folha
+   que tem o próprio recuo, nos dois lados, com ou sem sumário.
 --------------------------------------------------------------------------- */
 .wk-toc-col { display: none; }
-.wk-reading { padding-right: 40px; }
 
-@media (min-width: 1500px) {
+@media (min-width: 1600px) {
   .wk-toc-col { display: block; }
-  .wk-reading { padding-right: 0; }
 }
+
+/* ---------------------------------------------------------------------------
+   Largura dos trilhos e respiro da folha.
+
+   Os dois encolhem juntos, e por isso estão no mesmo lugar: a coluna do grupo
+   e o recuo interno da folha disputam a mesma largura que o texto, e ajustar
+   um sem o outro só muda de onde vem o aperto.
+
+   O corte é 1100: abaixo disso o menu (255) e a coluna (240) comem metade de
+   uma janela de 1280, e o texto cai para menos de 60 caracteres por linha.
+   Quem precisa de mais recolhe o menu, que devolve 199px de uma vez.
+--------------------------------------------------------------------------- */
+.wk-group-col { width: 240px; }
+.wk-sheet { padding: 48px 40px; }
+
+@media (max-width: 1100px) {
+  .wk-group-col { width: 200px; }
+  .wk-sheet { padding: 32px 24px; }
+}
+
+/* ---------------------------------------------------------------------------
+   Fio entre as duas colunas do menu (classe aplicada só com o menu aberto).
+
+   A linha vai do topo da janela ao pé: ela é usada duas vezes, no vão da
+   faixa de topo e na coluna das páginas, que se encontram no mesmo x. Uma
+   divisão que começasse abaixo da faixa seria um traço solto no meio da tela.
+
+   É sombra interna, não `border` nem elemento posicionado: a borda empurraria
+   o conteúdo 1px e desalinharia a coluna do menu ao lado, e um elemento
+   absoluto rolaria junto com a lista, que tem rolagem própria. A sombra fica
+   presa à caixa e some sem deixar vão quando o menu recolhe.
+--------------------------------------------------------------------------- */
+.wk-nav-divider { box-shadow: inset 1px 0 0 var(--wk-border); }

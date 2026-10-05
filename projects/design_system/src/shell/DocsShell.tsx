@@ -1,40 +1,32 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { COLOR, FONT } from '@/design/tokens'
+import { COLOR, FONT, LAYOUT } from '@/design/tokens'
+import { DocsBrand } from '@docs/shell/DocsBrand'
 import { DocsSidebar } from '@docs/shell/DocsSidebar'
-import { GroupPages, GROUP_LIST_WIDTH } from '@docs/shell/GroupPages'
+import { DocsTopbar } from '@docs/shell/DocsTopbar'
+import { GroupPages } from '@docs/shell/GroupPages'
 import { Toc, TOC_WIDTH } from '@docs/shell/Toc'
+import { NAV_DIVIDER, useSidebar } from '@docs/shell/layout'
 import { Prose, bodyOf, headingsOf } from '@docs/blocks/Prose'
 import { findPage, groupOf, HOME, type Page, type Status } from '@docs/docs/registry'
 
 /**
- * A casca deste documento **não** é a do produto, e isso é decisão, não
- * descuido.
+ * A casca deste documento é a do produto.
  *
- * A primeira versão copiava o frame `home`: folha de conteúdo com cantos
- * arredondados sobre o canvas, 48 de margem à direita, barra de topo de 56. No
- * portal aquilo resolve um problema real, o conteúdo é um cartão que rola sob
- * uma barra fixa, e a folha o separa do fundo. Aqui não havia esse problema:
- * sobravam um canto arredondado sem função, uma faixa morta à direita e um
- * vazio no alto que nenhum ajuste de espaçamento consertava, porque a origem
- * dele era a moldura.
+ * Portal e Ask dividem a mesma moldura — faixa de topo com marca e caminho,
+ * menu lateral que recolhe em trilho, e a folha branca de cantos arredondados
+ * sobre o canvas, com 48 de margem à direita. O design system mora dentro
+ * dela, no mesmo lugar em que o portal mostra as pastas: documentar a
+ * moldura numa moldura diferente era pedir para as duas divergirem.
  *
- * O que o design system pede é que tokens, componentes, ícones e tema sejam os
- * mesmos, e são. Estrutura de tela é outra camada: um documento tem colunas
- * de referência e uma coluna de leitura, e é isso que está montado aqui.
+ *   faixa de topo   marca + botão do menu (255 / recolhido), caminho, busca
+ *   menu            grupos do documento, 255 ou trilho de 56, no canvas
+ *   coluna 2        páginas do grupo aberto, **também no canvas**
+ *   folha           superfície branca, raio 16 no topo, margem 48 à direita
  *
- *   menu          255, no canvas, com marca, busca, seções e rodapé
- *   conteúdo      superfície inteira, sem raio e sem margem, separada por 1px
- *   três trilhos  lista do grupo à esquerda, sumário à direita, texto no meio
- *
- * As duas laterais são **ancoradas nas bordas** e o texto se centra entre
- * elas. Centrar o bloco inteiro, como estava antes, deixava a lista a 170px da
- * borda numa tela de 1920, parecia solta porque estava.
+ * As duas listas são o mesmo sistema de navegação e por isso têm o mesmo
+ * fundo. A folha começa depois das duas, e é só ela que rola.
  */
 
-/** Distância das colunas de referência até a borda da janela. */
-const RAIL_PAD = 40
-/** Respiro entre uma coluna de referência e o texto. */
-const GUTTER = 40
 const CONTENT_WIDTH = 760
 
 const STATUS_LABEL: Record<Status, string> = {
@@ -63,7 +55,7 @@ function StatusTag({ status }: { status: Status }) {
   )
 }
 
-function Article({ page, onNavigate }: { page: Page; onNavigate: (id: string) => void }) {
+function Article({ page }: { page: Page }) {
   const Demo = page.demo
 
   return (
@@ -100,33 +92,26 @@ function Article({ page, onNavigate }: { page: Page; onNavigate: (id: string) =>
   )
 }
 
-function PageView({ page, onNavigate }: { page: Page; onNavigate: (id: string) => void }) {
+function PageView({ page }: { page: Page }) {
   const headings = useMemo(() => headingsOf(page.md), [page.md])
 
   return (
     /*
-      Sem `items-start`: as colunas precisam esticar com a linha para os
-      elementos presos (`sticky`) terem por onde correr. Com a altura do
-      conteúdo, o preso não tem para onde ir e o `sticky` vira enfeite.
+      Sem `items-start`: a coluna do sumário precisa esticar com a linha para o
+      elemento preso (`sticky`) ter por onde correr. Com a altura do conteúdo,
+      o preso não tem para onde ir e o `sticky` vira enfeite.
+
+      O respiro interno da folha (`wk-sheet`, em `index.css`) encolhe junto
+      com a coluna do grupo quando a janela aperta.
     */
-    <div className="flex" style={{ paddingBlock: 48 }}>
-      <div
-        className="shrink-0"
-        style={{ width: GROUP_LIST_WIDTH, marginLeft: RAIL_PAD, marginRight: GUTTER }}
-      >
-        <GroupPages group={groupOf(page.id)} current={page.id} onNavigate={onNavigate} />
+    <div className="wk-sheet flex">
+      <div className="flex-1 min-w-0 flex justify-center">
+        <Article page={page} />
       </div>
 
-      <div className="wk-reading flex-1 min-w-0 flex justify-center">
-        <Article page={page} onNavigate={onNavigate} />
-      </div>
-
-      {/* O sumário repete o que o texto já mostra; a lista do grupo, não. Por
+      {/* O sumário repete o que o texto já mostra; a coluna do grupo, não. Por
           isso é ele que sai quando o espaço aperta (regra em `index.css`). */}
-      <div
-        className="wk-toc-col shrink-0"
-        style={{ width: TOC_WIDTH, marginLeft: GUTTER, marginRight: RAIL_PAD }}
-      >
+      <div className="wk-toc-col shrink-0" style={{ width: TOC_WIDTH, marginLeft: 40 }}>
         <Toc headings={headings} />
       </div>
     </div>
@@ -148,7 +133,9 @@ function readHash() {
 export function DocsShell() {
   const [pageId, setPageId] = useState(readHash)
   const page = findPage(pageId) ?? HOME
+  const group = groupOf(page.id)
   const main = useRef<HTMLElement>(null)
+  const sidebar = useSidebar()
 
   useEffect(() => {
     const onHash = () => setPageId(readHash())
@@ -171,22 +158,70 @@ export function DocsShell() {
     setPageId(id)
   }
 
+  const trail = [
+    { label: 'Design System', onClick: () => navigate(HOME.id) },
+    { label: group.label, onClick: () => navigate(group.pages[0].id) },
+    { label: page.title },
+  ]
+
   return (
     <div
-      className="flex"
+      className="flex flex-col"
       style={{ width: '100vw', height: '100vh', background: COLOR.canvas, fontFamily: FONT }}
     >
-      <DocsSidebar current={page.id} onNavigate={navigate} />
-
-      {/* Superfície inteira, sem raio e sem margem. A separação do menu é uma
-          linha de 1px, no escuro ela quase some, que é a convenção do tema. */}
-      <main
-        ref={main}
-        className="flex-1 min-w-0 overflow-y-auto"
-        style={{ background: 'var(--wk-surface)', borderLeft: `1px solid ${COLOR.border}` }}
+      {/* Faixa de topo inteira com a marca; só o menu de baixo recolhe.
+          `relative z-40`: o painel da busca desce por cima da folha. */}
+      <div
+        className="relative z-40 flex shrink-0"
+        style={{ paddingRight: LAYOUT.sheetMarginRight }}
       >
-        <PageView page={page} onNavigate={navigate} />
-      </main>
+        <DocsBrand
+          collapsed={sidebar.collapsed}
+          onToggle={sidebar.toggle}
+          onLogoClick={() => navigate(HOME.id)}
+        />
+        {/* Vão da coluna do grupo. O caminho é o rótulo da folha, então
+            começa onde a folha começa — e fica lá, recolhido ou não. Sem ele
+            o caminho colava no logo quando o menu virava trilho, e a mesma
+            informação mudava de lugar só porque o menu encolheu.
+
+            O vão repete o fio da coluna de baixo para a linha subir até o
+            topo da janela: a divisão é entre as duas colunas inteiras, e uma
+            linha que começasse no meio seria um traço solto. */}
+        <div
+          className={`wk-group-col shrink-0${sidebar.collapsed ? '' : ` ${NAV_DIVIDER}`}`}
+          aria-hidden
+        />
+
+        <div className="flex-1 min-w-0">
+          <DocsTopbar trail={trail} onNavigate={navigate} />
+        </div>
+      </div>
+
+      <div
+        className="flex flex-1 overflow-hidden"
+        style={{ minHeight: 0, paddingRight: LAYOUT.sheetMarginRight }}
+      >
+        <DocsSidebar current={page.id} onNavigate={navigate} collapsed={sidebar.collapsed} />
+        <GroupPages
+          group={group}
+          current={page.id}
+          onNavigate={navigate}
+          divided={!sidebar.collapsed}
+        />
+
+        <main
+          ref={main}
+          className="flex-1 overflow-y-auto [scrollbar-gutter:stable] min-w-0"
+          style={{
+            background: COLOR.surface,
+            borderTopLeftRadius: LAYOUT.sheetRadius,
+            borderTopRightRadius: LAYOUT.sheetRadius,
+          }}
+        >
+          <PageView page={page} />
+        </main>
+      </div>
     </div>
   )
 }

@@ -1,43 +1,59 @@
 import { useState } from 'react'
-import { COLOR, FONT, LAYOUT, TOPBAR } from '@/design/tokens'
+import { COLOR, FONT, LAYOUT } from '@/design/tokens'
+import { useTheme } from '@/design/theme'
 import { Icon } from '@/components/icons'
 import { ThemeSwitch } from '@/components/ThemeSwitch'
-import { WeknowLogo } from '@/components/WeknowLogo'
-import { DocsSearch } from '@docs/shell/DocsSearch'
 import { GROUPS, groupOf } from '@docs/docs/registry'
+import { SIDEBAR_PAD, SIDEBAR_RAIL_WIDTH, SIDEBAR_TRANSITION } from '@docs/shell/layout'
 
 /**
- * Menu do documento.
+ * Menu do documento — a barra do produto (`PortalSidebar`), item por item:
+ * 40 de altura, raio 8, ícone 24, texto 14/1.5, ativo com fundo `navActive` e
+ * ícone `FILL 1`, rodapé colado na base, e o mesmo recolher em trilho.
  *
- * O item segue a espec. do produto, 40 de altura, raio 8, ícone 24, texto
- * 14/1.5, ativo com fundo `navActive` e ícone `FILL 1`. O que muda é o
- * conteúdo: aqui só existem os **grupos**, cinco itens. As páginas de cada um
- * aparecem numa segunda lista, ao lado do texto (`GroupPages`).
+ * Só o conteúdo muda. Onde o portal lista aplicativos, aqui ficam os
+ * **grupos** do documento. As páginas de cada grupo aparecem na coluna ao
+ * lado (`GroupPages`), que é o segundo nível — a barra fica com um só, como a
+ * espec. de layout pede.
  *
- * A busca também vive aqui, e não numa barra de topo. Uma barra inteira de
- * 56px para carregar um campo é moldura demais para o que ela entrega, e sem
- * ela o conteúdo começa no alto da janela.
+ * A marca e o botão de recolher não moram aqui: ficam na faixa de topo
+ * (`DocsBrand`), que não encolhe junto com o menu.
  */
 
 function NavRow({
   icon,
   label,
   active,
+  collapsed,
   onClick,
+  href,
+  trailing,
 }: {
   icon: string
   label: string
   active?: boolean
-  onClick: () => void
+  collapsed: boolean
+  onClick?: () => void
+  /** Leva para fora do documento; ganha a seta de link externo. */
+  href?: string
+  trailing?: React.ReactNode
 }) {
   const [hovered, setHovered] = useState(false)
+  /* A linha "Tema" carrega a chave de tema, que é um controle por si só, e
+     botão dentro de botão é HTML inválido. Quando a linha tem um controle na
+     ponta, ela deixa de ser botão: ali não há o que clicar na linha inteira. */
+  const Tag = href ? 'a' : trailing ? 'div' : 'button'
   const background = active ? COLOR.navActive : hovered ? COLOR.navHover : 'transparent'
   const color = active ? COLOR.navActiveText : hovered ? COLOR.navHoverText : COLOR.navText
+  const iconColor = active ? COLOR.navActiveText : COLOR.navLabel
 
   return (
-    <button
+    <Tag
       onClick={onClick}
       title={label}
+      href={href}
+      target={href ? '_blank' : undefined}
+      rel={href ? 'noreferrer' : undefined}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       className="w-full text-left flex items-center overflow-hidden transition-colors"
@@ -53,130 +69,84 @@ function NavRow({
         className="shrink-0 flex items-center justify-center"
         style={{ width: LAYOUT.navIconSize, height: LAYOUT.navIconSize }}
       >
-        <Icon name={icon} size={24} filled={active} color={active ? COLOR.navActiveText : COLOR.navLabel} />
+        <Icon name={icon} size={LAYOUT.navIconSize} filled={active} color={iconColor} />
       </span>
       <span
-        className="flex-1 min-w-0 wk-fade-r text-[14px] leading-[1.5]"
+        className="flex-1 min-w-0 wk-fade-r text-[14px] leading-[1.5] text-left"
         style={{ fontFamily: FONT, color }}
       >
         {label}
       </span>
-    </button>
-  )
-}
-
-/** Linha do rodapé: leva para fora do documento. */
-function FooterLink({ icon, label, href }: { icon: string; label: string; href: string }) {
-  return (
-    <a
-      href={href}
-      target="_blank"
-      rel="noreferrer"
-      className="w-full flex items-center transition-colors hover:bg-[var(--wk-nav-hover)]"
-      style={{
-        height: LAYOUT.navItemHeight,
-        gap: LAYOUT.navItemGap,
-        paddingInline: LAYOUT.navItemPadX,
-        borderRadius: LAYOUT.navItemRadius,
-      }}
-    >
-      <span
-        className="shrink-0 flex items-center justify-center"
-        style={{ width: LAYOUT.navIconSize, height: LAYOUT.navIconSize }}
-      >
-        <Icon name={icon} size={24} color={COLOR.navLabel} />
-      </span>
-      <span className="flex-1 text-[14px]" style={{ fontFamily: FONT, color: COLOR.navText }}>
-        {label}
-      </span>
-      <Icon name="open_in_new" size={16} color={COLOR.textIcon} className="shrink-0" />
-    </a>
+      {href && !collapsed && (
+        <Icon name="open_in_new" size={16} color={COLOR.textIcon} className="shrink-0" />
+      )}
+      {trailing}
+    </Tag>
   )
 }
 
 export function DocsSidebar({
   current,
   onNavigate,
+  collapsed,
 }: {
   current: string
   onNavigate: (id: string) => void
+  /** Recolhido em trilho: só os ícones, com o rótulo no `title`. */
+  collapsed: boolean
 }) {
   const active = groupOf(current)
+  const { toggle: toggleTheme } = useTheme()
 
   return (
     <aside
-      className="shrink-0 flex flex-col h-full"
-      style={{ width: LAYOUT.sidebarWidth, background: COLOR.canvas, paddingBottom: 8 }}
+      className="shrink-0 flex flex-col h-full overflow-hidden"
+      style={{
+        width: collapsed ? SIDEBAR_RAIL_WIDTH : LAYOUT.sidebarWidth,
+        transition: `width ${SIDEBAR_TRANSITION}`,
+        background: COLOR.canvas,
+        paddingInline: SIDEBAR_PAD,
+        paddingBottom: 8,
+      }}
     >
-      {/* Marca e busca, fixas. A marca diz onde a pessoa está, e sumiria
-          justo quando a lista ficasse longa. */}
-      <div className="shrink-0" style={{ paddingInline: LAYOUT.sidebarPad }}>
-        <div
-          className="flex items-center"
-          style={{ height: TOPBAR.height, paddingLeft: LAYOUT.navItemPadX + LAYOUT.glyphInset }}
-        >
-          <WeknowLogo />
-        </div>
-        <p
-          className="text-[12px]"
-          style={{
-            fontFamily: FONT,
-            color: COLOR.textMuted,
-            paddingLeft: LAYOUT.navItemPadX + LAYOUT.glyphInset,
-            paddingBottom: 16,
-          }}
-        >
-          Design System
-        </p>
-
-        <DocsSearch onNavigate={onNavigate} />
-      </div>
-
-      {/* Cinco itens não rolam, mas a região tem rolagem própria de qualquer
-          forma: em janela baixa é o menu que cede, não o rodapé. */}
-      <nav
-        className="flex-1 min-h-0 overflow-y-auto flex flex-col gap-1"
-        style={{ paddingInline: LAYOUT.sidebarPad, paddingTop: 24 }}
-      >
+      <div className="flex flex-col gap-1" style={{ paddingTop: 8 }}>
         {GROUPS.map((group) => (
           <NavRow
             key={group.id}
             icon={group.icon}
             label={group.label}
             active={active.id === group.id}
+            collapsed={collapsed}
             /* Abrir o grupo é abrir a primeira página dele: não há tela de
-               índice separada, a lista ao lado do texto já é o índice. */
+               índice separada, a coluna ao lado já é o índice. */
             onClick={() => onNavigate(group.pages[0].id)}
           />
         ))}
-      </nav>
+      </div>
 
-      <div
-        className="shrink-0 flex flex-col gap-1 pt-2"
-        style={{ paddingInline: LAYOUT.sidebarPad, borderTop: `1px solid ${COLOR.border}` }}
-      >
-        <FooterLink icon="text_snippet" label="Versão para agentes" href="/llms.txt" />
-        <FooterLink icon="design_services" label="Arquivo no Figma" href="https://www.figma.com" />
-
-        <div
-          className="w-full flex items-center"
-          style={{
-            height: LAYOUT.navItemHeight,
-            gap: LAYOUT.navItemGap,
-            paddingInline: LAYOUT.navItemPadX,
-          }}
-        >
-          <span
-            className="shrink-0 flex items-center justify-center"
-            style={{ width: LAYOUT.navIconSize, height: LAYOUT.navIconSize }}
-          >
-            <Icon name="palette" size={24} color={COLOR.navLabel} />
-          </span>
-          <span className="flex-1 text-[14px]" style={{ fontFamily: FONT, color: COLOR.navText }}>
-            Tema
-          </span>
-          <ThemeSwitch />
-        </div>
+      {/* Rodapé, colado na base. O pb-2 soma 8 aos 8 do menu: a última linha
+          fica a 16 do pé. */}
+      <div className="flex-1 flex flex-col justify-end gap-1 pb-2">
+        <NavRow
+          icon="text_snippet"
+          label="Versão para agentes"
+          href="/llms.txt"
+          collapsed={collapsed}
+        />
+        <NavRow
+          icon="design_services"
+          label="Arquivo no Figma"
+          href="https://www.figma.com"
+          collapsed={collapsed}
+        />
+        {/* Recolhido não cabe a chave: o próprio ícone passa a alternar. */}
+        <NavRow
+          icon="palette"
+          label="Tema"
+          collapsed={collapsed}
+          onClick={collapsed ? toggleTheme : undefined}
+          trailing={collapsed ? undefined : <ThemeSwitch />}
+        />
       </div>
     </aside>
   )
