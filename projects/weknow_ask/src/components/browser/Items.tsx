@@ -6,6 +6,7 @@ import type { ViewMode } from '@/components/browser/prefs'
 import { Dropdown, MenuAction } from '@/components/browser/Menu'
 import { useEllipsisTooltip } from '@/components/Tooltip'
 import { APPEARANCE_COLORS, APPEARANCE_ICONS, setAppearance, useAppearance } from '@/components/browser/appearance'
+import { FormField } from '@/components/Field'
 
 /**
  * `meta`: coluna de metadado da Lista (conteúdo da pasta ou onde o item mora).
@@ -455,7 +456,7 @@ function CardMenu({
   return (
     <div className="relative shrink-0">
       <Dropdown
-        minWidth={customizing ? 244 : 220}
+        minWidth={customizing ? 300 : 220}
         trigger={({ open, toggle }) => (
           <button
             type="button"
@@ -494,55 +495,74 @@ function CardMenu({
               />
             </>
           ) : (
-          <div className="flex flex-col gap-3 p-2" style={{ fontFamily: FONT }}>
-            {/* Dashboard não oferece a grade: o ícone dele é fixo. */}
-            {!fixedIcon(item) && (
-              <>
-            <span className="text-[12px] font-semibold" style={{ color: COLOR.textMuted }}>
-              Ícone
-            </span>
-            <div className="grid grid-cols-6 gap-1">
-              {APPEARANCE_ICONS.map((name) => (
-                <button
-                  key={name}
-                  type="button"
-                  onClick={() => setAppearance(item.id, { icon: name })}
-                  aria-label={name}
-                  aria-pressed={name === icon}
-                  className="flex items-center justify-center rounded-md h-8 transition-colors hover:bg-[var(--wk-menu-hover)]"
-                  style={
-                    name === icon
-                      ? { background: `color-mix(in srgb, ${color} 14%, transparent)`, color }
-                      : { color: COLOR.textSecondary }
-                  }
-                >
-                  <Icon name={name} size={20} weight={250} color="currentColor" />
-                </button>
-              ))}
-            </div>
-              </>
-            )}
-            <span className="text-[12px] font-semibold" style={{ color: COLOR.textMuted }}>
-              Cor
-            </span>
-            <div className="flex gap-2">
-              {APPEARANCE_COLORS.map((c) => (
-                <button
-                  key={c}
-                  type="button"
-                  onClick={() => setAppearance(item.id, { color: c })}
-                  aria-label={`Cor ${c}`}
-                  aria-pressed={c === color}
-                  className="rounded-full"
-                  style={{
-                    width: 22,
-                    height: 22,
-                    background: c,
-                    boxShadow: c === color ? `0 0 0 2px var(--wk-card-surface), 0 0 0 4px ${c}` : undefined,
-                  }}
-                />
-              ))}
-            </div>
+          /* p-3 aqui mais os 4 que o menu já tem dão 16 de respiro em volta, um
+             passo da grade — a mesma conta do painel do Portal. */
+          <div className="flex flex-col p-3" style={{ fontFamily: FONT }}>
+            {/* Ícone e cor num campo só, "Aparência", com o rótulo de 16 do
+                design system. Eram dois rótulos de 12 em semibold, um para cada
+                grupo: num painel desse tamanho eles pesavam mais que a escolha
+                que nomeavam, e as escolhas ficavam soltas embaixo. Os dois
+                produzem uma coisa só — o disco colorido do card —, e o ícone
+                escolhido aparece preenchido na cor escolhida, no mesmo desenho
+                que vai para o card: trocar a cor repinta o ícone na hora.
+                Dashboard não oferece a grade, o ícone dele é fixo. */}
+            <FormField label="Aparência">
+              <div className="flex flex-col gap-3">
+                {!fixedIcon(item) && (
+                  <div className="grid grid-cols-6 gap-y-1 justify-items-center">
+                    {APPEARANCE_ICONS.map((name) => {
+                      const on = name === icon
+                      return (
+                        <button
+                          key={name}
+                          type="button"
+                          onClick={() => setAppearance(item.id, { icon: name })}
+                          aria-label={name}
+                          aria-pressed={on}
+                          className={`flex items-center justify-center size-8 rounded-full transition-colors ${
+                            on ? '' : 'hover:bg-[var(--wk-menu-hover)]'
+                          }`}
+                          style={
+                            on
+                              ? {
+                                  // A cor com a luz que o tema pede, como no disco
+                                  // do card (ver --wk-icon-lift).
+                                  background: `color-mix(in srgb, #fff var(--wk-icon-lift), ${color})`,
+                                  color: '#fff',
+                                }
+                              : { color: COLOR.textSecondary }
+                          }
+                        >
+                          <Icon name={name} size={20} weight={on ? 400 : 300} color="currentColor" />
+                        </button>
+                      )
+                    })}
+                  </div>
+                )}
+                {/* As cores seguem a mesma coluna óptica da grade: o px-1 alinha
+                    a primeira bolinha com o primeiro glifo. */}
+                <div className="flex items-center justify-between px-1">
+                  {APPEARANCE_COLORS.map((c) => (
+                    <button
+                      key={c}
+                      type="button"
+                      onClick={() => setAppearance(item.id, { color: c })}
+                      aria-label={`Cor ${c}`}
+                      aria-pressed={c === color}
+                      className="rounded-full"
+                      style={{
+                        width: 20,
+                        height: 20,
+                        background: c,
+                        // O anel sai da superfície do menu, que é onde ele é desenhado.
+                        boxShadow:
+                          c === color ? `0 0 0 2px var(--wk-surface), 0 0 0 4px ${c}` : undefined,
+                      }}
+                    />
+                  ))}
+                </div>
+              </div>
+            </FormField>
             <button
               type="button"
               onClick={() => {
