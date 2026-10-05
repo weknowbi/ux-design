@@ -26,6 +26,11 @@ type BtnProps = {
  * As cores saem de variáveis, não de constantes: o mesmo componente serve os
  * dois temas. No escuro o primário inverte — fundo #8AB4F8 com texto #0D1B2A —
  * porque texto branco sobre azul claro não passa em contraste.
+ *
+ * O fantasma é o único que não usa o azul de marca: ele é a ação de menor
+ * peso da tela (o "Cancelar" ao lado de um "Salvar"), e em azul disputava
+ * atenção com a ação principal. Fica na cor de texto secundária, e o hover
+ * continua dizendo que é clicável.
  */
 export function Btn({
   variant = 'primary',
@@ -53,7 +58,7 @@ export function Btn({
     primary:   { background: hovered ? COLOR.primaryHover : COLOR.primary, color: 'var(--wk-btn-on-primary)', border: '1.5px solid transparent', boxShadow: hovered ? 'var(--wk-btn-primary-shadow)' : ring ?? 'none' },
     secondary: { background: hovered ? COLOR.tintHover : COLOR.tint, color: COLOR.primary, border: '1.5px solid transparent', boxShadow: ring ?? 'none' },
     outlined:  { background: hovered ? 'var(--wk-btn-outlined-hover-bg)' : 'transparent', color: hovered ? 'var(--wk-btn-outlined-hover-fg)' : COLOR.primary, border: `1.5px solid ${COLOR.primary}`, boxShadow: hovered ? 'var(--wk-btn-outlined-shadow)' : ring ?? 'none' },
-    ghost:     { background: hovered ? 'var(--wk-btn-ghost-hover)' : 'transparent', color: COLOR.primary, border: '1.5px solid transparent', boxShadow: ring ?? 'none' },
+    ghost:     { background: hovered ? 'var(--wk-btn-ghost-hover)' : 'transparent', color: COLOR.textSecondary, border: '1.5px solid transparent', boxShadow: ring ?? 'none' },
     danger:    { background: hovered ? 'var(--wk-btn-danger-hover)' : 'var(--wk-btn-danger)', color: 'var(--wk-btn-on-danger)', border: '1.5px solid transparent', boxShadow: hovered ? 'var(--wk-btn-danger-shadow)' : ring ?? 'none' },
   }
   const dis: StyleMap = {
