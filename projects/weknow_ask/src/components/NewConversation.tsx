@@ -16,6 +16,11 @@ import { CONFIGURED_PROVIDERS, META_CONTEXTS, contextLabel, type MetaContext } f
  *
  * O campo só fica vermelho depois de uma tentativa de criar sem escolher:
  * marcar erro antes de a pessoa agir apenas ensina a ignorar o aviso.
+ *
+ * Metadado com erro de execução segue a mesma regra do campo: borda em
+ * `--wk-danger` e o motivo no lugar do auxílio, sem caixa colorida em volta.
+ * O texto do aviso é a única coisa vermelha além da borda — o vermelho
+ * aponta o problema, o resto da frase diz o que fazer, em tom normal.
  */
 
 const COLUMN = 720
@@ -57,6 +62,7 @@ export function NewConversation({
   const [open, setOpen] = useState(false)
   const [focused, setFocused] = useState(false)
   const [invalid, setInvalid] = useState(false)
+  const failed = picked?.failed ?? false
   const rootRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -91,6 +97,7 @@ export function NewConversation({
   }
 
   const create = () => {
+    if (failed) return
     if (!picked) {
       setInvalid(true)
       return
@@ -120,12 +127,25 @@ export function NewConversation({
         <FormField
           label="Contexto de dados"
           hint="Seus dados não serão enviados nem compartilhados, exceto quando houver liberação expressa."
-          error={invalid ? 'Escolha um metadado para continuar.' : undefined}
+          error={
+            failed ? (
+              <div role="alert" className="flex items-start" style={{ gap: 6, lineHeight: '20px' }}>
+                <Icon name="error" size={18} color={COLOR.danger} className="shrink-0" />
+                <span style={{ color: COLOR.textSecondary }}>
+                  <strong style={{ fontWeight: 600, color: COLOR.danger }}>Este metadado está com erro.</strong>{' '}
+                  Não é possível usá-lo porque a execução dele falhou. Fale com o responsável pelo
+                  sistema ou escolha outro metadado.
+                </span>
+              </div>
+            ) : invalid ? (
+              'Escolha um metadado para continuar.'
+            ) : undefined
+          }
         >
           <div ref={rootRef} className="relative">
             <div
               className="flex items-center"
-              style={{ ...fieldBoxStyle({ invalid, focused: focused || open }), gap: 8 }}
+              style={{ ...fieldBoxStyle({ invalid: invalid || failed, focused: focused || open }), gap: 8 }}
             >
               <input
                 value={query}
@@ -140,7 +160,7 @@ export function NewConversation({
                 }}
                 onBlur={() => setFocused(false)}
                 placeholder="Digite para buscar um metadado..."
-                aria-invalid={invalid}
+                aria-invalid={invalid || failed}
                 aria-expanded={open}
                 role="combobox"
                 className="flex-1 min-w-0 bg-transparent outline-none"
@@ -180,10 +200,20 @@ export function NewConversation({
                         onClick={() => choose(c)}
                         role="option"
                         aria-selected={picked?.id === c.id}
-                        className="w-full text-left px-4 transition-colors hover:bg-[var(--wk-menu-hover)]"
-                        style={{ height: 36, fontFamily: FONT, fontSize: 14, color: COLOR.text }}
+                        className="w-full flex items-center text-left px-4 transition-colors hover:bg-[var(--wk-menu-hover)]"
+                        style={{ height: 36, gap: 8, fontFamily: FONT, fontSize: 14, color: COLOR.text }}
                       >
-                        {contextLabel(c)}
+                        <span className="flex-1 min-w-0 truncate">{contextLabel(c)}</span>
+                        {/* Avisa já na lista, para ninguém escolher às cegas. */}
+                        {c.failed && (
+                          <span
+                            className="shrink-0 flex items-center"
+                            style={{ gap: 4, fontSize: 12, color: COLOR.danger }}
+                          >
+                            <Icon name="error" size={16} color={COLOR.danger} />
+                            Com erro
+                          </span>
+                        )}
                       </button>
                     ))}
                   </div>
@@ -231,7 +261,7 @@ export function NewConversation({
         </FormField>
 
         <div className="flex justify-end" style={{ paddingTop: 8 }}>
-          <Btn variant="primary" onClick={create} disabled={semProvedor}>
+          <Btn variant="primary" onClick={create} disabled={semProvedor || failed}>
             Criar conversa
           </Btn>
         </div>

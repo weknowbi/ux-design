@@ -346,8 +346,11 @@ export const FILTER_TREE: FilterGroup[] = [
  * Metadado que dá contexto à conversa. `group` é a área de negócio, `id` o
  * código e `name` a descrição — três atributos separados, porque cada tela
  * mostra uma combinação diferente deles.
+ *
+ * `failed` marca o metadado cuja execução deu erro: ele continua na lista,
+ * para a pessoa achar o que procura, mas não serve de contexto.
  */
-export type MetaContext = { id: string; name: string; group: string }
+export type MetaContext = { id: string; name: string; group: string; failed?: boolean }
 
 /** Como o metadado é citado em lista, chip e título de conversa: "código - nome". */
 export const contextLabel = (c: MetaContext) => `${c.id} - ${c.name}`
@@ -362,6 +365,7 @@ export const META_CONTEXTS: MetaContext[] = [
   { id: '90', name: 'Contas Pendentes', group: '2024 Maicon' },
   { id: '12', name: 'Beneficiários', group: 'ANS' },
   { id: '15', name: 'Procedimentos', group: 'ANS' },
+  { id: '16', name: 'MAPA', group: 'ANS', failed: true },
 ]
 
 export type AiProvider = { id: string; label: string }

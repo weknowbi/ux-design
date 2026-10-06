@@ -58,7 +58,7 @@ export function FormField({
 }: {
   label: string
   hint?: string
-  error?: string
+  error?: React.ReactNode
   children: React.ReactNode
 }) {
   return (
@@ -71,9 +71,9 @@ export function FormField({
         </span>
       )}
       {error && (
-        <span className="mt-2 text-[13px]" style={{ fontFamily: FONT, color: COLOR.danger }}>
+        <div className="mt-2 text-[13px]" style={{ fontFamily: FONT, color: COLOR.danger }}>
           {error}
-        </span>
+        </div>
       )}
     </div>
   )
