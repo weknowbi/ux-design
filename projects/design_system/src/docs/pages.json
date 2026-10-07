@@ -80,6 +80,14 @@
           "figma": "4454:8719"
         },
         {
+          "id": "cartao",
+          "title": "Cartão",
+          "icon": "grid_view",
+          "summary": "O item do portal em três visualizações. Caixa sem contorno, altura fixa, cor só no ícone.",
+          "status": "rascunho",
+          "source": "portal/src/components/browser/Items.tsx"
+        },
+        {
           "id": "tabela",
           "title": "Tabela",
           "icon": "table",
@@ -91,7 +99,7 @@
           "id": "navegacao",
           "title": "Menu lateral e barra de topo",
           "icon": "menu",
-          "summary": "Item de 40px, raio 8, ícone 24. Barra de 56px com busca de 328.",
+          "summary": "A casca do portal: faixa de 56, menu de 255 que recolhe em trilho de 56 e a folha do conteúdo.",
           "status": "rascunho",
           "source": "weknow_ask/src/components/PortalSidebar.tsx",
           "figma": "sidebar white (WP-832)"

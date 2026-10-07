@@ -97,8 +97,7 @@ export function Specimen({ label, children }: { label: string; children: React.R
  * Par de acerto e erro.
  *
  * Duas colunas lado a lado, porque a regra fica clara na comparação e não na
- * descrição. A cor da borda é a única pista colorida: primária para o que
- * fazer, `danger` para o que evitar.
+ * descrição.
  */
 export function DoDont({ children }: { children: React.ReactNode }) {
   return (
@@ -111,6 +110,20 @@ export function DoDont({ children }: { children: React.ReactNode }) {
   )
 }
 
+/**
+ * O card é o do portal na visualização Expandido: palco em cima, faixa de
+ * texto embaixo, caixa recortada por sombra em vez de contorno.
+ *
+ * A versão anterior marcava o veredito com um fio de 2px no topo. O fio
+ * corria por cima do canto arredondado e ficava torto, e era a única peça da
+ * página com aquele desenho. Agora a divisão é reta: o palco tem a cor do
+ * veredito bem diluída, a faixa fica no branco do card, e a mudança de tom
+ * separa os dois sem precisar de risco.
+ *
+ * Diluição de 7%: o suficiente para ler verde ou vermelho de relance, baixo
+ * o bastante para não mudar o contraste do componente em exibição, que é o
+ * que a pessoa veio comparar.
+ */
 export function DoDontCard({
   kind,
   label,
@@ -125,29 +138,29 @@ export function DoDontCard({
 
   return (
     <div
+      className="flex flex-col overflow-hidden"
       style={{
-        border: `1px solid ${COLOR.border}`,
-        borderTop: `2px solid ${accent}`,
+        background: 'var(--wk-card-surface)',
         borderRadius: RADIUS.lg,
-        overflow: 'hidden',
+        boxShadow: 'var(--wk-clean-shadow)',
       }}
     >
       <div
-        className="flex items-center justify-center"
-        style={{ padding: 24, minHeight: 108 }}
+        className="flex flex-wrap items-center justify-center gap-4"
+        style={{
+          padding: 24,
+          minHeight: 108,
+          background: `color-mix(in srgb, ${accent} 7%, var(--wk-card-surface))`,
+        }}
       >
         {children}
       </div>
+
       <p
         className="flex items-start gap-2 text-[13px]"
-        style={{
-          fontFamily: FONT,
-          color: COLOR.textSecondary,
-          padding: '12px 16px',
-          borderTop: `1px solid ${COLOR.border}`,
-        }}
+        style={{ fontFamily: FONT, color: COLOR.textSecondary, padding: '12px 16px' }}
       >
-        <Icon name={ok ? 'check' : 'close'} size={18} color={accent} />
+        <Icon name={ok ? 'check' : 'close'} size={18} color={accent} className="shrink-0" />
         <span style={{ flex: 1 }}>{label}</span>
       </p>
     </div>
