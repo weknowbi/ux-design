@@ -14,10 +14,6 @@ const TITLE_GAP = 12
 const TITLE_LINE = 36
 const TITLE_INDENT = TITLE_ICON + TITLE_GAP
 
-/** Como área de negócio e código aparecem no cabeçalho (comparação temporária). */
-export type MetaHeader = 'rotulado' | 'sobretitulo' | 'linha'
-export const META_HEADERS: MetaHeader[] = ['rotulado', 'sobretitulo', 'linha']
-
 /**
  * `context` é o metadado escolhido na conversa — o chip leva para cá. O
  * cabeçalho segue a seleção: área de negócio por cima, "código - nome" no
@@ -27,18 +23,8 @@ export const META_HEADERS: MetaHeader[] = ['rotulado', 'sobretitulo', 'linha']
  * como colunas da tabela (repetiriam o mesmo valor em toda linha).
  * Sem contexto (as conversas de exemplo), cai no metadado do conjunto de
  * exemplo — a aba nunca aparece sem área e código.
- *
- * `header` é temporário, para comparar variantes pelo menu "…": a área com
- * rótulo (a escolhida), em caixa alta sem rótulo, ou área e código rotulados
- * numa linha abaixo do nome (a primeira versão).
  */
-export function MetadataTab({
-  context = DATASET_CONTEXT,
-  header = 'rotulado',
-}: {
-  context?: MetaContext
-  header?: MetaHeader
-}) {
+export function MetadataTab({ context = DATASET_CONTEXT }: { context?: MetaContext }) {
   const [filter, setFilter] = useState('')
   const [sortKey, setSortKey] = useState('title')
   const [sortDir, setSortDir] = useState<SortDir>('asc')
@@ -108,35 +94,17 @@ export function MetadataTab({
             ícone). Rotulada, é texto: sem caixa alta, e o nome mantém a grafia
             ("SQLite"). 12px fica abaixo da descrição (13) — é o dado menos lido
             dos três —, e colada ao título, porque é dele que fala. */}
-        {header === 'rotulado' && (
-          <p
-            style={{
-              fontFamily: FONT,
-              fontSize: 12,
-              lineHeight: '18px',
-              color: COLOR.textSecondary,
-              paddingLeft: TITLE_INDENT,
-            }}
-          >
-            <span style={{ color: COLOR.textMuted }}>Área de negócio:</span> {context.group}
-          </p>
-        )}
-        {/* Variante: sem rótulo, como o cabeçalho de grupo da seleção. */}
-        {header === 'sobretitulo' && (
-          <p
-            className="uppercase"
-            style={{
-              fontFamily: FONT,
-              fontSize: 11,
-              fontWeight: 600,
-              letterSpacing: '.04em',
-              color: COLOR.textMuted,
-              paddingLeft: TITLE_INDENT,
-            }}
-          >
-            {context.group}
-          </p>
-        )}
+        <p
+          style={{
+            fontFamily: FONT,
+            fontSize: 12,
+            lineHeight: '18px',
+            color: COLOR.textSecondary,
+            paddingLeft: TITLE_INDENT,
+          }}
+        >
+          <span style={{ color: COLOR.textMuted }}>Área de negócio:</span> {context.group}
+        </p>
 
         {/* Identificação do conjunto de dados — mesmo título das outras
             telas: Inter Regular 26/36. "código - nome", como na seleção, no
@@ -157,7 +125,7 @@ export function MetadataTab({
               color: COLOR.text,
             }}
           >
-            {header === 'linha' ? context.name : contextLabel(context)}
+            {contextLabel(context)}
           </h1>
           <span className="shrink-0 flex items-center whitespace-nowrap" style={{ height: TITLE_LINE }}>
             <TableChip>
@@ -165,21 +133,6 @@ export function MetadataTab({
             </TableChip>
           </span>
         </div>
-
-        {/* Variante anterior: área e código rotulados numa linha abaixo do nome. */}
-        {header === 'linha' && (
-          <p
-            className="text-[13px] flex flex-wrap items-center gap-x-6"
-            style={{ fontFamily: FONT, color: COLOR.textSecondary, lineHeight: 1.6 }}
-          >
-            <span>
-              <span style={{ color: COLOR.textMuted }}>Área de negócio:</span> {context.group}
-            </span>
-            <span>
-              <span style={{ color: COLOR.textMuted }}>Código:</span> {context.id}
-            </span>
-          </p>
-        )}
 
         {/* Documentação cortada em duas linhas. O corte é por altura, não por
             número de caracteres — assim vale em qualquer largura de tela. */}
