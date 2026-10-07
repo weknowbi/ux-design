@@ -368,6 +368,9 @@ export const META_CONTEXTS: MetaContext[] = [
   { id: '16', name: 'MAPA', group: 'ANS', failed: true },
 ]
 
+/** O metadado por trás do DATASET — contexto das conversas de exemplo, que já nascem sem a escolha. */
+export const DATASET_CONTEXT = META_CONTEXTS.find((c) => c.id === '34')!
+
 export type AiProvider = { id: string; label: string }
 
 export const AI_PROVIDERS: AiProvider[] = [

@@ -2,19 +2,43 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { COLOR, FONT, LAYOUT } from '@/design/tokens'
 import { Table, TableChip, type Column, type SortDir } from '@/components/Table'
 import { Icon, IconDatabase, IconSearch } from '@/components/icons'
-import { DATASET, type MetaContext, type MetaField } from '@/data/conversation'
+import { DATASET, DATASET_CONTEXT, contextLabel, type MetaContext, type MetaField } from '@/data/conversation'
 
 /** Largura da coluna "Tipo". */
 const TYPE_COL = 140
 
+/** Título: ícone, respiro e altura da linha. A área de negócio recua o mesmo
+ *  que o texto do título, para alinhar com ele e não com o ícone. */
+const TITLE_ICON = 24
+const TITLE_GAP = 12
+const TITLE_LINE = 36
+const TITLE_INDENT = TITLE_ICON + TITLE_GAP
+
+/** Como área de negócio e código aparecem no cabeçalho (comparação temporária). */
+export type MetaHeader = 'rotulado' | 'sobretitulo' | 'linha'
+export const META_HEADERS: MetaHeader[] = ['rotulado', 'sobretitulo', 'linha']
+
 /**
  * `context` é o metadado escolhido na conversa — o chip leva para cá. O
- * título é o nome, e área de negócio e código ficam numa linha logo abaixo:
- * são atributos do metadado inteiro, os mesmos que a pessoa viu ao escolhê-lo,
- * e não cabem como colunas da tabela (repetiriam o mesmo valor em toda linha).
- * Sem contexto, cai no nome do conjunto de exemplo.
+ * cabeçalho segue a seleção: área de negócio por cima, "código - nome" no
+ * título. A área leva rótulo porque, solta, ninguém sabe o que ela é; o código
+ * não precisa — "34 - Vendas" é o formato em todo lugar do Ask. São atributos
+ * do metadado inteiro, os mesmos que a pessoa viu ao escolhê-lo, e não cabem
+ * como colunas da tabela (repetiriam o mesmo valor em toda linha).
+ * Sem contexto (as conversas de exemplo), cai no metadado do conjunto de
+ * exemplo — a aba nunca aparece sem área e código.
+ *
+ * `header` é temporário, para comparar variantes pelo menu "…": a área com
+ * rótulo (a escolhida), em caixa alta sem rótulo, ou área e código rotulados
+ * numa linha abaixo do nome (a primeira versão).
  */
-export function MetadataTab({ context }: { context?: MetaContext }) {
+export function MetadataTab({
+  context = DATASET_CONTEXT,
+  header = 'rotulado',
+}: {
+  context?: MetaContext
+  header?: MetaHeader
+}) {
   const [filter, setFilter] = useState('')
   const [sortKey, setSortKey] = useState('title')
   const [sortDir, setSortDir] = useState<SortDir>('asc')
@@ -80,28 +104,70 @@ export function MetadataTab({ context }: { context?: MetaContext }) {
        lista — sair da tela ao rolar é justamente o que não se quer deles. */
     <div className="flex-1 flex flex-col min-h-0 px-6 pt-6">
       <div className="mx-auto w-full shrink-0" style={column}>
+        {/* Área de negócio por cima, alinhada ao texto do título (não ao
+            ícone). Rotulada, é texto: sem caixa alta, e o nome mantém a grafia
+            ("SQLite"). 12px fica abaixo da descrição (13) — é o dado menos lido
+            dos três —, e colada ao título, porque é dele que fala. */}
+        {header === 'rotulado' && (
+          <p
+            style={{
+              fontFamily: FONT,
+              fontSize: 12,
+              lineHeight: '18px',
+              color: COLOR.textSecondary,
+              paddingLeft: TITLE_INDENT,
+            }}
+          >
+            <span style={{ color: COLOR.textMuted }}>Área de negócio:</span> {context.group}
+          </p>
+        )}
+        {/* Variante: sem rótulo, como o cabeçalho de grupo da seleção. */}
+        {header === 'sobretitulo' && (
+          <p
+            className="uppercase"
+            style={{
+              fontFamily: FONT,
+              fontSize: 11,
+              fontWeight: 600,
+              letterSpacing: '.04em',
+              color: COLOR.textMuted,
+              paddingLeft: TITLE_INDENT,
+            }}
+          >
+            {context.group}
+          </p>
+        )}
+
         {/* Identificação do conjunto de dados — mesmo título das outras
-            telas: Inter Regular 26/36. */}
-        <div className="flex items-center gap-3 mb-1">
-          <IconDatabase size={24} color={COLOR.navLabel} />
+            telas: Inter Regular 26/36. "código - nome", como na seleção, no
+            chip e no título da conversa. Nome longo quebra em duas linhas:
+            ícone e chip ficam presos à primeira (caixas de 36, a altura da
+            linha), e o chip nunca quebra. */}
+        <div className="flex items-start mb-1" style={{ gap: TITLE_GAP }}>
+          <span className="shrink-0 flex items-center" style={{ height: TITLE_LINE }}>
+            <IconDatabase size={TITLE_ICON} color={COLOR.navLabel} />
+          </span>
           <h1
+            className="min-w-0"
             style={{
               fontFamily: FONT,
               fontSize: 26,
-              lineHeight: '36px',
+              lineHeight: `${TITLE_LINE}px`,
               fontWeight: 400,
               color: COLOR.text,
             }}
           >
-            {context?.name ?? DATASET.name}
+            {header === 'linha' ? context.name : contextLabel(context)}
           </h1>
-          <TableChip>
-            {total} {total === 1 ? 'campo' : 'campos'}
-          </TableChip>
+          <span className="shrink-0 flex items-center whitespace-nowrap" style={{ height: TITLE_LINE }}>
+            <TableChip>
+              {total} {total === 1 ? 'campo' : 'campos'}
+            </TableChip>
+          </span>
         </div>
 
-        {/* Área e código, com o mesmo rótulo e a mesma ordem da seleção. */}
-        {context && (
+        {/* Variante anterior: área e código rotulados numa linha abaixo do nome. */}
+        {header === 'linha' && (
           <p
             className="text-[13px] flex flex-wrap items-center gap-x-6"
             style={{ fontFamily: FONT, color: COLOR.textSecondary, lineHeight: 1.6 }}

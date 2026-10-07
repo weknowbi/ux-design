@@ -3,7 +3,8 @@ import { COLOR, FONT, LAYOUT } from '@/design/tokens'
 import { useSidebar } from '@/design/sidebar'
 import { Chip } from '@/components/Chip'
 import { Composer } from '@/components/Composer'
-import { MetadataTab } from '@/components/MetadataTab'
+import { META_HEADERS, MetadataTab, type MetaHeader } from '@/components/MetadataTab'
+import { usePref } from '@/components/browser/prefs'
 import { NewConversation } from '@/components/NewConversation'
 import { FolderScreen } from '@/components/FolderScreen'
 import { Header } from '@/components/Header'
@@ -22,6 +23,13 @@ const TABS: { id: Tab; label: string }[] = [
   { id: 'metadado', label: 'Metadado' },
 ]
 
+/** Rótulos do menu "…" para a comparação temporária do cabeçalho do metadado. */
+const META_HEADER_MENU: Record<MetaHeader, { icon: string; label: string }> = {
+  sobretitulo: { icon: 'title', label: 'Metadado: área em caixa alta, sem rótulo' },
+  rotulado: { icon: 'label', label: 'Metadado: área com rótulo, acima do título' },
+  linha: { icon: 'view_headline', label: 'Metadado: área e código numa linha abaixo' },
+}
+
 const DEFAULT_CHIPS: FilterChip[] = [{ id: 'f1', label: 'birth.Mês/ano', value: 'Todos' }]
 
 let seq = 0
@@ -36,6 +44,7 @@ export function AskScreen({ onNavigate }: { onNavigate?: (route: PortalRoute) =>
   const [folders, setFolders] = useState<Folder[]>(FOLDERS)
   const [activeId, setActiveId] = useState(CONVERSATIONS[0].id)
   const [tab, setTab] = useState<Tab>('conversa')
+  const [metaHeader, setMetaHeader] = usePref<MetaHeader>('wk-ask-meta-header', META_HEADERS, 'rotulado')
   const [chips, setChips] = useState<FilterChip[]>(DEFAULT_CHIPS)
   const [loading, setLoading] = useState(false)
   /** Pasta aberta por inteiro — ocupa a área principal no lugar da conversa. */
@@ -227,6 +236,15 @@ export function AskScreen({ onNavigate }: { onNavigate?: (route: PortalRoute) =>
               },
               { label: 'Weknow Ask' },
             ]}
+            /* Temporário: compara as formas de mostrar área e código na aba
+               Metadado. Mostra sempre as que você NÃO está vendo. */
+            menuItems={META_HEADERS.filter((h) => h !== metaHeader).map((h) => ({
+              ...META_HEADER_MENU[h],
+              onClick: () => {
+                setMetaHeader(h)
+                setTab('metadado')
+              },
+            }))}
           />
         </div>
       </div>
@@ -324,7 +342,7 @@ export function AskScreen({ onNavigate }: { onNavigate?: (route: PortalRoute) =>
               </>
             )
           ) : (
-            <MetadataTab context={active.context} />
+            <MetadataTab context={active.context} header={metaHeader} />
           )}
             </>
           )}
