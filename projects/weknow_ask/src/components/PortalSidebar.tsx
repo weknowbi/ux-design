@@ -26,7 +26,11 @@ const FOOTER = [
 ]
 
 
-function NavRow({
+/**
+ * Linha do menu. Exportada porque o design system mostra a peça sozinha,
+ * fora da barra, nos estados que ela tem.
+ */
+export function NavRow({
   icon,
   label,
   active,
@@ -40,12 +44,21 @@ function NavRow({
   trailing?: React.ReactNode
 }) {
   const [hovered, setHovered] = useState(false)
+  /**
+   * A linha "Tema" carrega a chave de tema, que é um controle por si só, e
+   * botão dentro de botão é HTML inválido: o React reclamava disso a cada
+   * pintura. Quando a linha tem um controle na ponta, ela deixa de ser botão.
+   * Ali não há o que clicar na linha inteira, só na chave.
+   *
+   * A mesma correção já estava na cópia do portal; esta ficou para trás.
+   */
+  const Tag = trailing ? 'div' : 'button'
   const background = active ? COLOR.navActive : hovered ? COLOR.navHover : 'transparent'
   const color = active ? COLOR.navActiveText : hovered ? COLOR.navHoverText : COLOR.navText
   const iconColor = active ? COLOR.navActiveText : COLOR.navLabel
 
   return (
-    <button
+    <Tag
       onClick={onClick}
       title={label}
       onMouseEnter={() => setHovered(true)}
@@ -72,7 +85,7 @@ function NavRow({
         {label}
       </span>
       {trailing}
-    </button>
+    </Tag>
   )
 }
 
