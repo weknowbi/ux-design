@@ -29,3 +29,20 @@ Bootstrap 5: `6 + 24 (16 × 1.5) + 6 + 2 de borda = 38` exatos. As medidas de
 6. O seletor é uma lista `role="listbox"` de verdade, com fecho por `Escape` e
    por clique fora. Não troque por `<select>` nativo: ele não aceita o desenho
    e cria uma segunda linguagem visual dentro do formulário.
+
+## As três buscas
+
+Elas não são o mesmo componente, e a diferença é de lugar, não de gosto:
+
+| Onde | Caixa |
+| --- | --- |
+| Barra de topo | pílula de 328 × 36, raio total, fundo `--wk-search-pill`, ícone à esquerda |
+| Dentro de modal | 38 de altura, raio 8, borda de controle, ícone à direita |
+| Formulário | é campo normal, com rótulo |
+
+A busca da barra de topo não tem rótulo porque o ícone de lupa e o lugar dela
+já dizem o que é — é a única exceção à regra 1, e ela vale só ali.
+
+O tom da pílula depende da superfície embaixo: `--wk-search-pill` sobre o fundo
+tingido da faixa e do menu, `--wk-search-pill-light` sobre a folha branca. Fixar
+um só tom faz a busca sumir numa das duas.

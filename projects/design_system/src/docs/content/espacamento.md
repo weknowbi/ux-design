@@ -9,7 +9,7 @@ veio, e às vezes vem mesmo: os 6px de respiro do chip são consequência do
 
 ## Raio
 
-Cinco raios, cada um com um trabalho:
+Seis raios, cada um com um trabalho:
 
 | Token | Valor | Onde |
 | --- | --- | --- |
@@ -25,14 +25,23 @@ faz o botão parecer uma pílula malfeita.
 
 ## Elevação
 
-Duas sombras, e nenhuma decorativa:
+Nenhuma sombra é decorativa: cada uma diz a que distância da folha a peça está.
 
-- `--wk-shadow-composer` levanta a caixa de pergunta da folha.
-- `--wk-shadow-menu` levanta um painel flutuante (menu, seletor aberto).
-  Desfoque curto e deslocamento pequeno: o painel já tem borda de 1px, a sombra
-  só precisa tirá-lo do fundo, não anunciá-lo.
+| Token | Levanta |
+| --- | --- |
+| `--wk-shadow-composer` | A caixa de pergunta do ASK, acima da folha |
+| `--wk-shadow-menu` | Painel flutuante: menu suspenso, seletor aberto, modal, dica |
+| `--wk-clean-shadow` | Cartão em repouso, no lugar do contorno |
+| `--wk-clean-shadow-hover` | O mesmo cartão sob o ponteiro |
 
-No tema escuro as duas ficam pretas e mais opacas. Véu claro sobre fundo quase
+O painel flutuante usa desfoque curto e deslocamento pequeno: ele já tem borda
+de 1px, a sombra só precisa tirá-lo do fundo, não anunciá-lo.
+
+O cartão é o caso oposto: ele **não** tem contorno, então a sombra é a única
+coisa que diz onde a caixa começa. Por isso são duas, e a de hover é um degrau
+acima, não uma cor diferente.
+
+No tema escuro todas ficam pretas e mais opacas. Véu claro sobre fundo quase
 preto simplesmente some.
 
 ## Métricas do produto

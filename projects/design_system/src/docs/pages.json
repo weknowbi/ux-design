@@ -2,6 +2,20 @@
   "$comment": "Índice do documento. É a ÚNICA lista de páginas: a barra lateral mostra os grupos, a tela mostra as páginas do grupo aberto, e o gerador de /llms.txt lê este mesmo arquivo.",
   "groups": [
     {
+      "id": "comecar",
+      "label": "Começar",
+      "icon": "rocket_launch",
+      "pages": [
+        {
+          "id": "comecar",
+          "title": "Como montar uma tela",
+          "icon": "map",
+          "summary": "O ponto de entrada: onde está cada verdade, a moldura que não se reinventa e qual peça serve a qual trabalho.",
+          "status": "pronto"
+        }
+      ]
+    },
+    {
       "id": "fundamentos",
       "label": "Fundamentos",
       "icon": "foundation",
@@ -25,9 +39,9 @@
           "id": "espacamento",
           "title": "Espaçamento, raio e elevação",
           "icon": "straighten",
-          "summary": "Grade de 4, cinco raios com significado e duas sombras.",
+          "summary": "Grade de 4, seis raios com significado e quatro sombras, nenhuma decorativa.",
           "status": "pronto",
-          "source": "weknow_ask/src/design/tokens.ts"
+          "source": "design_system/src/lib/tokens.ts"
         },
         {
           "id": "icones",
@@ -35,7 +49,7 @@
           "icon": "emoji_symbols",
           "summary": "Material Symbols Outlined em wght 200, GRAD 0, opsz 24. FILL 1 é estado ativo.",
           "status": "pronto",
-          "source": "weknow_ask/src/components/icons.tsx"
+          "source": "design_system/src/lib/icons.tsx"
         },
         {
           "id": "tema",
@@ -43,7 +57,14 @@
           "icon": "contrast",
           "summary": "A inversão de profundidade, o que muda de cor no escuro e por quê.",
           "status": "pronto",
-          "source": "weknow_ask/src/design/theme.ts"
+          "source": "design_system/src/lib/theme.ts"
+        },
+        {
+          "id": "voz",
+          "title": "Voz e microcopy",
+          "icon": "format_quote",
+          "summary": "Português do Brasil, direto. Frase capitalizada, ação no infinitivo, erro que diz o que fazer.",
+          "status": "rascunho"
         }
       ]
     },
@@ -58,8 +79,26 @@
           "icon": "smart_button",
           "summary": "Cinco variantes, três tamanhos. Uma primária por tela.",
           "status": "pronto",
-          "source": "weknow_ask/src/components/Btn.tsx",
+          "source": "design_system/src/lib/Btn.tsx",
           "figma": "Make / Button variations with animations"
+        },
+        {
+          "id": "campo",
+          "title": "Campo e seletor",
+          "icon": "list_alt",
+          "summary": "Caixa de 38px, raio 6, borda de controle. Rótulo sempre visível.",
+          "status": "pronto",
+          "source": "design_system/src/lib/Field.tsx",
+          "figma": "4454:8719"
+        },
+        {
+          "id": "controles",
+          "title": "Chave e caixa de seleção",
+          "icon": "toggle_on",
+          "summary": "A chave age na hora, a caixa espera o Aplicar. É isso que decide qual usar.",
+          "status": "rascunho",
+          "source": "weknow_ask/src/components/ThemeSwitch.tsx",
+          "figma": "5121:2948"
         },
         {
           "id": "chip",
@@ -69,15 +108,6 @@
           "status": "pronto",
           "source": "weknow_ask/src/components/Chip.tsx",
           "figma": "4454:7159"
-        },
-        {
-          "id": "campo",
-          "title": "Campo e seletor",
-          "icon": "list_alt",
-          "summary": "Caixa de 38px, raio 6, borda de controle. Rótulo sempre visível.",
-          "status": "pronto",
-          "source": "weknow_ask/src/components/Field.tsx",
-          "figma": "4454:8719"
         },
         {
           "id": "cartao",
@@ -96,6 +126,39 @@
           "source": "weknow_ask/src/components/Table.tsx"
         },
         {
+          "id": "menu",
+          "title": "Menu suspenso",
+          "icon": "more_horiz",
+          "summary": "Painel ancorado no gatilho, com as ações secundárias de um item. Vira para cima sozinho quando não cabe.",
+          "status": "pronto",
+          "source": "design_system/src/lib/Menu.tsx"
+        },
+        {
+          "id": "modal",
+          "title": "Modal",
+          "icon": "web_asset",
+          "summary": "Uma moldura para os três modais do produto. 420 para um campo, 610 para escolha em lista.",
+          "status": "pronto",
+          "source": "weknow_ask/src/components/PromptModal.tsx",
+          "figma": "11977:5035"
+        },
+        {
+          "id": "dica",
+          "title": "Dica",
+          "icon": "info",
+          "summary": "Revela o que o texto cortou, depois de 400ms. Não explica, e não substitui o rótulo acessível.",
+          "status": "pronto",
+          "source": "design_system/src/lib/Tooltip.tsx"
+        },
+        {
+          "id": "aviso",
+          "title": "Aviso",
+          "icon": "priority_high",
+          "summary": "Texto pequeno e cinza, não faixa colorida. O único padrão de aviso permanente do sistema.",
+          "status": "rascunho",
+          "source": "weknow_ask/src/components/ExperimentalNotice.tsx"
+        },
+        {
           "id": "navegacao",
           "title": "Menu lateral e barra de topo",
           "icon": "menu",
@@ -103,6 +166,20 @@
           "status": "rascunho",
           "source": "weknow_ask/src/components/PortalSidebar.tsx",
           "figma": "sidebar white (WP-832)"
+        }
+      ]
+    },
+    {
+      "id": "padroes",
+      "label": "Padrões",
+      "icon": "pattern",
+      "pages": [
+        {
+          "id": "estados",
+          "title": "Vazio, carregando e erro",
+          "icon": "hourglass_empty",
+          "summary": "Lacuna declarada de propósito. Só o aviso temporário já existe no produto, e nem ele é regra.",
+          "status": "pendente"
         }
       ]
     }

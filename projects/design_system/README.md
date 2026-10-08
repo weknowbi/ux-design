@@ -23,16 +23,24 @@ este projeto  →  julgamento: quando usar, por quê, o que evitar, o que falta
 
 ## Os componentes não são copiados
 
-O alias `@` aponta para `../weknow_ask/src`. Cada exemplo da página é o
-componente de produção sendo renderizado, não uma reprodução dele, nem uma
-captura de tela.
+Cada exemplo da página é o componente de produção sendo renderizado, não uma
+reprodução dele, nem uma captura de tela. Se o botão mudar, ele muda aqui,
+inclusive para pior: documentação que não quebra junto com o código não está
+documentando o código.
 
-Consequência boa: se o botão mudar no ASK, ele muda aqui, inclusive para pior.
-Documentação que não quebra junto com o código não está documentando o código.
+As peças vêm de dois lugares, e a diferença importa:
 
-Consequência a saber: este projeto **precisa** de `../weknow_ask` no disco para
-rodar. Quando o design system virar pacote próprio, os componentes se mudam
-para cá, o ASK passa a consumi-los e só o alias muda de lado.
+| Alias | Aponta para | O que é |
+| --- | --- | --- |
+| `@ds` | `./src/lib` | A biblioteca. Uma cópia só, consumida também pelo ASK e pelo portal. |
+| `@` | `../weknow_ask/src` | O resto do produto, que ainda não se mudou. |
+
+O `@ds` é a mudança que este README prometia: **os componentes começaram a se
+mudar para cá, e os dois produtos passaram a consumi-los.** Botão, campo,
+tokens e ícones já vieram; `src/lib/LEIA-ME.md` lista o que falta e por quê.
+
+O `@` continua existindo porque a mudança é parcial, e este projeto ainda
+**precisa** de `../weknow_ask` no disco para rodar.
 
 ## Rodar
 
@@ -54,6 +62,7 @@ src/
     content/*.md        o texto, um arquivo por página
     demos/*.tsx         demonstrações ao vivo, com os componentes do ASK
     registry.ts         junta as três coisas acima
+    _fora/              páginas tiradas do índice, nada depende delas
   shell/
     DocsShell.tsx       casca: menu 255 + barra 56 + folha (frame `home`)
     DocsSidebar.tsx     menu, na espec. do `sidebar white`
@@ -64,7 +73,8 @@ src/
     Example.tsx         palco de demonstração, bloco de código, acerto/erro
   index.css             importa o CSS do ASK e acrescenta a prosa
 scripts/
-  build-agent-docs.mjs  gera public/llms.txt, public/docs/, public/tokens.json
+  build-agent-docs.mjs  gera public/llms.txt, public/docs/, tokens.json, api.json
+  read-api.mjs          lê a assinatura dos componentes no TypeScript real
 ```
 
 ## Como acrescentar uma página
@@ -81,16 +91,32 @@ Não há nenhuma quarta lista para atualizar. O menu, o sumário, a busca, o
 
 | Arquivo | O que é |
 | --- | --- |
-| `/llms.txt` | O documento inteiro em texto, com índice. ~33 KB. |
+| `/llms.txt` | O documento inteiro em texto, com índice. ~45 KB. |
 | `/docs/<id>.md` | Uma página isolada. |
 | `/tokens.json` | As variáveis `--wk-*` nos dois temas. |
+| `/api.json` | A assinatura dos componentes: propriedades, tipos, constantes. |
 
-Os três são **gerados**, nunca escritos à mão: o texto vem dos mesmos `.md` que
-a página renderiza, e os tokens são extraídos de `weknow_ask/src/index.css`. É
-essa derivação que impede a versão para agentes de divergir da versão para
-gente, o modo de falha clássico de documentação de design system.
+Os quatro são **gerados**, nunca escritos à mão: o texto vem dos mesmos `.md`
+que a página renderiza, os tokens saem de `weknow_ask/src/index.css` e as
+assinaturas saem do TypeScript de produção, lido com o compilador. É essa
+derivação que impede a versão para agentes de divergir da versão para gente, o
+modo de falha clássico de documentação de design system.
 
 O gerador também avisa quando um token existe no tema claro e some no escuro.
+
+### Por que o `api.json` existe e o bloco de código não
+
+A página **não** mostra a chamada ao lado do exemplo, de propósito: ver o
+código junto da peça convida a copiá-lo, e enquanto o design system não for
+pacote essa chamada é a do protótipo, não um contrato publicado.
+
+Um agente, porém, não compõe tela nenhuma sem os nomes das propriedades. O
+`api.json` resolve os dois lados — o dado existe, rotulado pelo que é, e não
+aparece onde seria copiado sem ler o rótulo.
+
+O extrator não adivinha: quando não consegue ler as propriedades de um
+componente, ele devolve `props: null` em vez de uma lista incompleta. Lista
+pela metade é pior do que ausência, porque a ausência manda perguntar.
 
 ## Estado das páginas
 
