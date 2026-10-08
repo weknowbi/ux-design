@@ -74,8 +74,8 @@ segunda linguagem visual dentro do mesmo produto, e ela nunca sai sozinha.
    `/tokens.json`, nos dois temas.
 2. **Uma ação primária por tela.** Se duas parecem igualmente importantes,
    nenhuma delas é a primária.
-3. **Cor sozinha não indica estado.** O item de menu selecionado muda o fundo, a
-   cor do texto e o preenchimento do ícone, os três ao mesmo tempo.
+3. **Cor sozinha não indica estado.** O item de menu selecionado muda o fundo,
+   a cor do texto e o preenchimento do ícone, os três ao mesmo tempo.
 4. **Espaço na grade de 4.** Um valor fora dela precisa de um motivo escrito, e
    às vezes há mesmo: os 6 de respiro do chip vêm do ícone de 24, não de uma
    escolha.

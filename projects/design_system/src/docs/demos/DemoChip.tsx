@@ -16,7 +16,7 @@ export function DemoChip() {
         </Specimen>
       </Example>
 
-      <Example title="Chip dentro de tabela" note="Outro componente: 22 de altura, neutro.">
+      <Example title="Chip dentro de tabela" note="É outro componente, com 22 de altura e sempre neutro.">
         <TableChip>texto</TableChip>
         <TableChip>número</TableChip>
         <TableChip>data</TableChip>

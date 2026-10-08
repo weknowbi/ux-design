@@ -17,7 +17,7 @@ export function DemoTipografia() {
     <>
       <Example
         title="A escala inteira"
-        note="Uma família, quatro pesos. O cabeçalho de tabela é menor que o corpo: o peso é que o distingue."
+        note="Uma família e quatro pesos. O cabeçalho de tabela é menor que o corpo, porque quem o distingue é o peso."
       >
         <div className="flex flex-col gap-4 w-full">
           {ESCALA.map((e) => (
@@ -46,7 +46,7 @@ export function DemoTipografia() {
 
       <Example
         title="Hierarquia por peso, não por cor"
-        note="O item atual se distingue só pelo peso 600."
+        note="O item atual se distingue apenas pelo peso 600."
       >
         <div className="flex items-center gap-2" style={{ fontFamily: FONT, fontSize: 15 }}>
           <span style={{ color: COLOR.textSecondary }}>Portal</span>

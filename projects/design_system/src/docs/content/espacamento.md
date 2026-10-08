@@ -2,14 +2,14 @@
 
 ## Espaço
 
-Grade de **4**. Os passos que aparecem de verdade são 4, 8, 12, 16, 24, 32, 48
-e 64. Qualquer valor fora da grade precisa de um comentário dizendo de onde
-veio, e às vezes vem mesmo: os 6px de respiro do chip são consequência do
-ícone de 24 dentro de uma caixa de 36, não escolha.
+A grade é de **4**. Os passos que aparecem de verdade são 4, 8, 12, 16, 24, 32,
+48 e 64. Qualquer valor fora da grade precisa de um comentário dizendo de onde
+ele veio, e às vezes vem mesmo de algum lugar: a folga de 6px do chip é
+consequência do ícone de 24 dentro de uma caixa de 36, e não uma escolha.
 
 ## Raio
 
-Seis raios, cada um com um trabalho:
+São seis raios, e cada um tem um trabalho.
 
 | Token | Valor | Onde |
 | --- | --- | --- |
@@ -20,33 +20,34 @@ Seis raios, cada um com um trabalho:
 | `RADIUS.composer` | 20 | Caixa de pergunta do ASK |
 | `RADIUS.pill` | 9999 | Chip, busca da barra de topo, alternador de tema |
 
-O raio cresce com o tamanho do bloco. Um raio de 16 num botão de 32px de altura
-faz o botão parecer uma pílula malfeita.
+O raio cresce junto com o tamanho do bloco. Um raio de 16 num botão de 32px de
+altura faz o botão parecer uma pílula malfeita.
 
 ## Elevação
 
-Nenhuma sombra é decorativa: cada uma diz a que distância da folha a peça está.
+Nenhuma sombra é decorativa. Cada uma informa a que distância da folha o
+elemento está.
 
 | Token | Levanta |
 | --- | --- |
 | `--wk-shadow-composer` | A caixa de pergunta do ASK, acima da folha |
-| `--wk-shadow-menu` | Painel flutuante: menu suspenso, seletor aberto, modal, dica |
+| `--wk-shadow-menu` | Painel flutuante, como menu suspenso, seletor aberto, modal e dica |
 | `--wk-clean-shadow` | Cartão em repouso, no lugar do contorno |
 | `--wk-clean-shadow-hover` | O mesmo cartão sob o ponteiro |
 
-O painel flutuante usa desfoque curto e deslocamento pequeno: ele já tem borda
-de 1px, a sombra só precisa tirá-lo do fundo, não anunciá-lo.
+O painel flutuante usa desfoque curto e deslocamento pequeno porque ele já tem
+borda de 1px, então a sombra só precisa separá-lo do fundo sem anunciá-lo.
 
-O cartão é o caso oposto: ele **não** tem contorno, então a sombra é a única
-coisa que diz onde a caixa começa. Por isso são duas, e a de hover é um degrau
-acima, não uma cor diferente.
+Com o cartão acontece o contrário. Ele não tem contorno, e a sombra é a única
+coisa que mostra onde a caixa começa. Por isso são duas sombras, e a de hover é
+um degrau acima da outra em vez de uma cor diferente.
 
-No tema escuro todas ficam pretas e mais opacas. Véu claro sobre fundo quase
-preto simplesmente some.
+No tema escuro todas elas ficam pretas e mais opacas, porque um véu claro sobre
+fundo quase preto simplesmente some.
 
 ## Métricas do produto
 
-Estas não são preferência, são o desenho do frame `home` (WP-832):
+Estas medidas não são preferência. São o desenho do frame `home` (WP-832).
 
 | Medida | Valor |
 | --- | --- |
@@ -55,4 +56,4 @@ Estas não são preferência, são o desenho do frame `home` (WP-832):
 | Raio da folha de conteúdo | 16, só no topo |
 | Margem direita da folha | 48 |
 | Largura máxima da conversa | 896 |
-| Item de menu | 40 de altura, raio 8, ícone 24, gap 8 |
+| Item de menu | 40 de altura, raio 8, ícone 24, intervalo 8 |

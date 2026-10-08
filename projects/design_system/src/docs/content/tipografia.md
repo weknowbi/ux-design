@@ -1,10 +1,11 @@
 # Tipografia
 
-Uma família: **Inter**, nos pesos 400, 500, 600 e 700. Uma segunda família
-seria a primeira coisa a fazer o produto parecer montado por partes.
+O sistema usa uma família só, a **Inter**, nos pesos 400, 500, 600 e 700. Uma
+segunda família seria a primeira coisa a fazer o produto parecer montado por
+partes.
 
-O design system original pede Roboto em tabelas, herança do Bootstrap 5. O
-redesign usa Inter em tudo, inclusive nas tabelas. Quando as duas
+O design system original pede Roboto nas tabelas, por herança do Bootstrap 5,
+mas o redesign usa Inter em tudo, tabelas inclusive. Quando as duas
 especificações discordam, vale o redesign.
 
 ## Escala em uso
@@ -15,7 +16,7 @@ especificações discordam, vale o redesign.
 | Título de seção | 20 / 1.35 | 600 |
 | Rótulo de seção no menu | 12 / 1.5, caixa alta | 600 |
 | Item de menu | 14 / 1.5 | 400 |
-| Caminho (breadcrumb) | 15 / 1.2 | 400, atual em 600 |
+| Caminho (breadcrumb) | 15 / 1.2 | 400, e o item atual em 600 |
 | Corpo e campo | 16 / 1.5 | 400 |
 | Corpo de documento | 15 / 1.7 | 400 |
 | Botão médio | 14 | 400 |
@@ -24,17 +25,18 @@ especificações discordam, vale o redesign.
 | Corpo de tabela | 13 | 400 |
 | Legenda | 11 a 13 | 400 |
 
-Repare no cabeçalho da tabela: **menor** que o corpo. Rótulo de coluna é
-sinalização, não conteúdo, e o que o distingue é o peso 600, não o tamanho.
+Note que o cabeçalho da tabela é **menor** que o corpo. Rótulo de coluna serve
+para sinalizar, e não para ser lido como conteúdo, então quem o destaca é o
+peso 600 e não o tamanho.
 
 ## Regras
 
-1. Peso antes de cor, cor antes de tamanho. Só suba de tamanho quando peso e
-   cor já não resolverem.
-2. Texto de leitura longa fica em cerca de 72 caracteres de largura. Acima
-   disso o olho perde a linha seguinte.
-3. Botão usa peso 400. O contorno e o fundo já dizem que é botão; peso extra só
-   engorda o traço.
-4. No tema escuro o corpo recebe suavização em escala de cinza. Sem isso, texto
-   claro sobre fundo escuro irradia e parece mais pesado, embora o peso seja o
-   mesmo dos dois lados.
+1. Peso antes de cor, e cor antes de tamanho. Só aumente o tamanho quando peso
+   e cor já não resolverem.
+2. Texto de leitura longa fica em torno de 72 caracteres de largura. Acima
+   disso o olho se perde ao voltar para a linha seguinte.
+3. Botão usa peso 400. O contorno e o fundo já dizem que ali é um botão, e peso
+   a mais só engorda o traço.
+4. No tema escuro o corpo recebe suavização em escala de cinza. Sem ela, o
+   texto claro sobre fundo escuro irradia e parece mais pesado, mesmo com o
+   peso igual ao do tema claro.

@@ -1,6 +1,6 @@
 # Dica
 
-A caixinha que revela o que o texto cortou. Ela substitui o `title` do
+A caixinha que mostra o que o texto cortou. Ela substitui o `title` do
 navegador, que ignora o tema, a tipografia e o raio de tudo em volta.
 
 | Parte | Espec. |
@@ -12,25 +12,25 @@ navegador, que ignora o tema, a tipografia e o raio de tudo em volta.
 | Espera | 400ms |
 
 A caixa vai para o `body` por portal e tem `pointer-events: none`, então ela
-não recebe clique, não entra no caminho do ponteiro e não é recortada pelo
-bloco que rola.
+não recebe clique, não atrapalha o ponteiro e não é recortada pelo bloco que
+rola.
 
-## Ela só aparece quando há o que revelar
+## Ela só aparece quando há o que mostrar
 
-A dica arma quando o texto foi de fato cortado, ou seja, quando o conteúdo
-passa da caixa que o contém. Um nome que cabe inteiro não tem o que revelar, e
-uma dica repetindo o que já está na tela é ruído que atrasa o ponteiro.
+A dica aparece quando o texto foi cortado de fato, ou seja, quando o conteúdo
+passa da caixa que o contém. Um nome que cabe inteiro não tem nada a revelar, e
+uma dica repetindo o que já está escrito na tela é ruído que atrasa o ponteiro.
 
-Os 400ms de espera existem pelo mesmo motivo: passar o mouse de raspão a
-caminho de outro lugar não deve disparar nada.
+Os 400ms de espera existem pelo mesmo motivo. Passar o mouse de raspão, a
+caminho de outro lugar, não deve disparar nada.
 
 ## Regras
 
-1. Dica revela, mas não explica. Para explicar existe o auxílio do campo, que
+1. A dica mostra, mas não explica. Para explicar existe o auxílio do campo, que
    fica sempre visível.
 2. Nunca coloque numa dica a informação que a pessoa precisa para decidir, já
    que quem navega por teclado ou por toque não passa o mouse.
 3. Botão só de ícone precisa de dica **e** de rótulo acessível. A dica serve a
    quem vê, e o `aria-label` a quem ouve.
-4. Texto curto, sem ponto final, porque é um rótulo e não uma frase.
+4. O texto é curto e sem ponto final, porque ele é um rótulo e não uma frase.
 5. Não use dica para erro. O erro fica escrito, no lugar do auxílio.

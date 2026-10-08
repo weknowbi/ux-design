@@ -37,7 +37,7 @@ export function DemoMenu() {
     <>
       <Example
         title="Ações de um item"
-        note="O que as reticências de uma linha ou de um cartão abrem: separador antes do destrutivo, e o menu fecha ao escolher. Repare que o Excluir NÃO está em vermelho, o MenuAction ainda não tem a variante, e a página explica por quê."
+        note="O que as reticências de uma linha ou de um cartão abrem, com separador antes do destrutivo e fechamento ao escolher. Note que o Excluir não está em vermelho: o MenuAction ainda não tem essa variante, e a página explica o caso."
       >
         <div style={{ paddingBottom: 150 }}>
           <Dropdown trigger={Reticencias} align="left">
@@ -61,7 +61,7 @@ export function DemoMenu() {
 
       <Example
         title="Escolha única"
-        note="Com uma opção marcada, o check fica à esquerda e o item é role=menuitemradio. É o seletor de visualização do portal."
+        note="Com uma opção marcada, o check fica à esquerda e o item vira role=menuitemradio. É o seletor de visualização do portal."
       >
         <div style={{ paddingBottom: 130 }}>
           <Dropdown
@@ -92,8 +92,8 @@ export function DemoMenu() {
       </Example>
 
       <Example
-        title="Ele vira quando não cabe"
-        note="O mesmo menu com pouco espaço embaixo: abre para cima, sem o componente ser avisado. Role a página até o gatilho ficar perto da base e abra."
+        title="Ele se reposiciona quando não cabe"
+        note="O mesmo menu com pouco espaço embaixo. Ele abre para cima sozinho, sem ninguém avisar o componente. Role até o gatilho ficar perto da base e abra."
       >
         <div className="w-full overflow-y-auto" style={{ height: 180 }}>
           <div className="flex items-end justify-center" style={{ height: 320 }}>

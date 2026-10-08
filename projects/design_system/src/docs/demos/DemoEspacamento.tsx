@@ -67,7 +67,7 @@ export function DemoEspacamento() {
 
       <Example
         title="Elevação"
-        note="Duas sombras, nenhuma decorativa."
+        note="Duas sombras, e nenhuma delas é decorativa."
       >
         {[
           ['--wk-shadow-composer', 'Caixa de pergunta'],

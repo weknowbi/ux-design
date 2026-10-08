@@ -22,7 +22,7 @@ import { Example, DoDont, DoDontCard } from '@docs/blocks/Example'
  * modal verdadeiro.
  */
 
-/** Linha de preferência genérica, para o switch aparecer onde ele vive. */
+/** Linha de preferência genérica, para o switch aparecer no contexto em que é usado. */
 function Linha({
   rotulo,
   ligado,
@@ -58,7 +58,7 @@ export function DemoControles() {
 
       <Example
         title="Alternador de tema"
-        note="O mesmo switch com light_mode à esquerda e dark_mode à direita. Clique: o tema desta página vira junto."
+        note="O mesmo switch com light_mode à esquerda e dark_mode à direita. Ao clicar, o tema desta página muda junto."
         align="center"
       >
         <ThemeSwitch />
@@ -66,7 +66,7 @@ export function DemoControles() {
 
       <Example
         title="Na linha de preferência"
-        note="A linha carrega o controle na ponta, e por isso ela não é clicável inteira. Botão dentro de botão é HTML inválido."
+        note="A linha tem o controle na ponta, e por isso ela não é clicável inteira. Botão dentro de botão é HTML inválido."
       >
         <div
           style={{
@@ -83,7 +83,7 @@ export function DemoControles() {
 
       <Example
         title="Checkbox"
-        note="Não há palco solto porque o checkbox ainda não é componente: ele vive no modal de filtros. Abra para ver o de verdade, 16 × 16, raio 3, marcado na primária."
+        note="Não há exemplo solto porque o checkbox ainda não é componente, e sim parte do modal de filtros. Abra para ver o de verdade, 16 × 16, raio 3, marcado na primária."
       >
         <Btn variant="outlined" onClick={() => setFiltros(true)}>
           Abrir filtros

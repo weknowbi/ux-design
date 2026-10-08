@@ -23,9 +23,9 @@ Texto cinza com um trecho sublinhado resolve os dois lados: quem já sabe passa
 direto, quem quer saber tem onde clicar, e a explicação longa não precisa caber
 na tela o tempo todo.
 
-A explicação abre para cima porque o aviso mora na borda de baixo. Ela se
-ancora na linha inteira, e não no trecho sublinhado, já que o trecho fica fora
-do centro do texto e uma caixa centrada nele poderia sair da tela.
+A explicação abre para cima porque o aviso fica na borda de baixo da tela. Ela
+se ancora na linha inteira, e não no trecho sublinhado, já que o trecho fica
+fora do centro do texto e uma caixa centrada nele poderia sair da tela.
 
 ## Regras
 

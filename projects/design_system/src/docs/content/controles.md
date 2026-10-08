@@ -56,9 +56,9 @@ numa caixa de 16 o Material Symbols cai um pixel fora do centro.
 
 1. A linha inteira recebe o clique, e não só o quadradinho de 16. Um alvo de
    16px é pequeno demais para o ponteiro, e muito mais para o dedo.
-2. Quando a linha carrega o controle na ponta, ela deixa de ser clicável
-   inteira. Botão dentro de botão é HTML inválido, e é por isso que a linha
-   "Tema" do menu não responde ao clique no rótulo.
+2. Quando a linha tem o controle na ponta, ela deixa de ser clicável inteira.
+   Botão dentro de botão é HTML inválido, e é por isso que a linha "Tema" do
+   menu não responde ao clique no rótulo.
 3. O switch não tem estado intermediário. Lista parcialmente marcada é problema
    do checkbox, e o sistema ainda não tem o desenho desse estado, então
    pergunte antes de inventar um.

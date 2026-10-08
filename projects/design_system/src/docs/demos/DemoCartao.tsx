@@ -72,7 +72,7 @@ export function DemoCartao() {
     <>
       <Example
         title="Expandido"
-        note="A imagem cadastrada na pasta em cima, a faixa do nome embaixo. Sem imagem, o palco mostra o ícone do tema sobre a própria cor diluída."
+        note="A imagem cadastrada na pasta fica em cima e a faixa do nome embaixo. Sem imagem, o espaço de cima mostra o ícone do tema sobre a própria cor diluída."
       >
         <div className="w-full">
           <ItemCollection entries={ENTRIES.slice(0, 3)} view="thumbs" {...comum} />
@@ -81,7 +81,7 @@ export function DemoCartao() {
 
       <Example
         title="Compacto"
-        note="O mesmo cartão sem o palco: 64px de altura, sempre, com o nome cortado na segunda linha."
+        note="O mesmo cartão sem a imagem, com 64px de altura em qualquer caso e o nome cortado na segunda linha."
       >
         <div className="w-full">
           <ItemCollection entries={ENTRIES} view="grid" {...comum} />
@@ -90,7 +90,7 @@ export function DemoCartao() {
 
       <Example
         title="Lista"
-        note="Mesma coleção, uma linha por item. Passe o ponteiro para ver a estrela e o menu."
+        note="A mesma coleção com uma linha por item. Passe o ponteiro para ver a estrela e o menu."
       >
         <div className="w-full">
           <ItemCollection

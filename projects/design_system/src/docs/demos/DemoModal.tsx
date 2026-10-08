@@ -32,7 +32,7 @@ export function DemoModal() {
     <>
       <Example
         title="Um campo só (420)"
-        note="Cabeçalho de 64, campo do design system e rodapé com fantasma + primário. O primário só habilita com o campo preenchido."
+        note="Cabeçalho de 64, campo do design system e rodapé com o fantasma ao lado do primário. O primário só habilita quando o campo tem conteúdo."
       >
         <Btn onClick={() => setPrompt(true)}>Criar pasta</Btn>
         <Eco texto={eco} />
@@ -50,7 +50,7 @@ export function DemoModal() {
 
       <Example
         title="Escolha em lista (610)"
-        note="A mesma moldura, mais larga, com busca e árvore. É aqui que a caixa de seleção aparece no produto."
+        note="A mesma moldura, mais larga, com busca e árvore. É aqui que o checkbox aparece no produto."
       >
         <Btn variant="outlined" onClick={() => setFiltros(true)}>
           Adicionar filtros

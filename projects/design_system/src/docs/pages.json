@@ -10,7 +10,7 @@
           "id": "comecar",
           "title": "Como montar uma tela",
           "icon": "map",
-          "summary": "O ponto de entrada: onde está cada verdade, a moldura que não se reinventa e qual peça serve a qual trabalho.",
+          "summary": "A página de entrada: onde está cada verdade, qual é a moldura que toda tela herda e qual componente serve a cada trabalho.",
           "status": "pronto"
         }
       ]
@@ -24,7 +24,7 @@
           "id": "cor",
           "title": "Cor",
           "icon": "palette",
-          "summary": "Cada cor é nomeada pelo que faz, não pelo tom que tem, e existe nos dois temas.",
+          "summary": "Cada cor recebe o nome do trabalho que faz, e não do tom que tem, e todas existem nos dois temas.",
           "status": "pronto",
           "source": "weknow_ask/src/index.css"
         },
@@ -32,14 +32,14 @@
           "id": "tipografia",
           "title": "Tipografia",
           "icon": "text_fields",
-          "summary": "Inter 400/500/600/700 e a escala em uso; peso como hierarquia, não tamanho.",
+          "summary": "A família Inter nos pesos 400 a 700, com a escala em uso. A hierarquia vem do peso antes de vir do tamanho.",
           "status": "pronto"
         },
         {
           "id": "espacamento",
           "title": "Espaçamento, raio e elevação",
           "icon": "straighten",
-          "summary": "Grade de 4, seis raios com significado e quatro sombras, nenhuma decorativa.",
+          "summary": "Grade de 4, seis raios com significado próprio e quatro sombras, nenhuma delas decorativa.",
           "status": "pronto",
           "source": "design_system/src/lib/tokens.ts"
         },
@@ -47,7 +47,7 @@
           "id": "icones",
           "title": "Ícones",
           "icon": "emoji_symbols",
-          "summary": "Material Symbols Outlined em wght 200, GRAD 0, opsz 24. FILL 1 é estado ativo.",
+          "summary": "Material Symbols Outlined em wght 200, GRAD 0 e opsz 24, com FILL 1 marcando o estado ativo.",
           "status": "pronto",
           "source": "design_system/src/lib/icons.tsx"
         },
@@ -55,7 +55,7 @@
           "id": "tema",
           "title": "Tema claro e escuro",
           "icon": "contrast",
-          "summary": "A inversão de profundidade, o que muda de cor no escuro e por quê.",
+          "summary": "Como a profundidade se inverte no escuro, o que muda de cor e por que cada mudança existe.",
           "status": "pronto",
           "source": "design_system/src/lib/theme.ts"
         },
@@ -63,7 +63,7 @@
           "id": "voz",
           "title": "Voz e microcopy",
           "icon": "format_quote",
-          "summary": "Português do Brasil, direto. Frase capitalizada, ação no infinitivo, erro que diz o que fazer.",
+          "summary": "Português do Brasil, direto: frase capitalizada, ação no infinitivo e erro que diz o que fazer.",
           "status": "rascunho"
         }
       ]
@@ -77,7 +77,7 @@
           "id": "botao",
           "title": "Botão",
           "icon": "smart_button",
-          "summary": "Cinco variantes, três tamanhos. Uma primária por tela.",
+          "summary": "Cinco variantes e três tamanhos, com uma única ação primária por tela.",
           "status": "pronto",
           "source": "design_system/src/lib/Btn.tsx",
           "figma": "Make / Button variations with animations"
@@ -86,7 +86,7 @@
           "id": "campo",
           "title": "Campo e seletor",
           "icon": "list_alt",
-          "summary": "Caixa de 38px, raio 6, borda de controle. Rótulo sempre visível.",
+          "summary": "Caixa de 38px com raio 6 e borda de controle, e o rótulo sempre visível.",
           "status": "pronto",
           "source": "design_system/src/lib/Field.tsx",
           "figma": "4454:8719"
@@ -95,7 +95,7 @@
           "id": "controles",
           "title": "Switch e checkbox",
           "icon": "toggle_on",
-          "summary": "O switch age na hora e o checkbox espera o Aplicar. É isso que decide qual dos dois usar.",
+          "summary": "O switch age na hora e o checkbox espera o Aplicar, e é isso que decide qual dos dois usar.",
           "status": "rascunho",
           "source": "design_system/src/lib/Switch.tsx",
           "figma": "5121:2948"
@@ -104,7 +104,7 @@
           "id": "chip",
           "title": "Chip",
           "icon": "label",
-          "summary": "Pílula de 36px para contexto e filtro. Neutro quando está dentro de tabela.",
+          "summary": "A pílula de 36px que mostra contexto e filtro, sempre neutra quando está dentro de tabela.",
           "status": "pronto",
           "source": "weknow_ask/src/components/Chip.tsx",
           "figma": "4454:7159"
@@ -113,7 +113,7 @@
           "id": "cartao",
           "title": "Cartão",
           "icon": "grid_view",
-          "summary": "O item do portal em três visualizações. Caixa sem contorno, altura fixa, cor só no ícone.",
+          "summary": "O item do portal em três visualizações, com caixa sem contorno, altura fixa e cor apenas no ícone.",
           "status": "rascunho",
           "source": "portal/src/components/browser/Items.tsx"
         },
@@ -121,7 +121,7 @@
           "id": "tabela",
           "title": "Tabela",
           "icon": "table",
-          "summary": "Um padrão só, com e sem moldura. Sem zebra e sem divisória vertical.",
+          "summary": "Um padrão só, com e sem moldura, sem zebra e sem divisória vertical.",
           "status": "pronto",
           "source": "weknow_ask/src/components/Table.tsx"
         },
@@ -129,7 +129,7 @@
           "id": "menu",
           "title": "Menu suspenso",
           "icon": "more_horiz",
-          "summary": "Painel ancorado no gatilho, com as ações secundárias de um item. Vira para cima sozinho quando não cabe.",
+          "summary": "O painel ancorado no gatilho que reúne as ações secundárias de um item e se reposiciona quando não cabe.",
           "status": "pronto",
           "source": "design_system/src/lib/Menu.tsx"
         },
@@ -137,7 +137,7 @@
           "id": "modal",
           "title": "Modal",
           "icon": "web_asset",
-          "summary": "Uma moldura para os três modais do produto. 420 para um campo, 610 para escolha em lista.",
+          "summary": "Uma moldura para os três modais do produto: 420 para um campo e 610 para escolha em lista.",
           "status": "pronto",
           "source": "weknow_ask/src/components/PromptModal.tsx",
           "figma": "11977:5035"
@@ -146,7 +146,7 @@
           "id": "dica",
           "title": "Dica",
           "icon": "info",
-          "summary": "Revela o que o texto cortou, depois de 400ms. Não explica, e não substitui o rótulo acessível.",
+          "summary": "Mostra o que o texto cortou, depois de 400ms. Ela não explica nem substitui o rótulo acessível.",
           "status": "pronto",
           "source": "design_system/src/lib/Tooltip.tsx"
         },
@@ -154,7 +154,7 @@
           "id": "aviso",
           "title": "Aviso",
           "icon": "priority_high",
-          "summary": "Texto pequeno e cinza, não faixa colorida. O único padrão de aviso permanente do sistema.",
+          "summary": "Texto pequeno e cinza em vez de faixa colorida, no único padrão de aviso permanente do sistema.",
           "status": "rascunho",
           "source": "weknow_ask/src/components/ExperimentalNotice.tsx"
         },
@@ -162,7 +162,7 @@
           "id": "navegacao",
           "title": "Menu lateral e barra de topo",
           "icon": "menu",
-          "summary": "A casca do portal: faixa de 56, menu de 255 que recolhe em trilho de 56 e a folha do conteúdo.",
+          "summary": "A casca do portal: faixa de 56, menu de 255 que recolhe em trilho de 56, e a folha do conteúdo.",
           "status": "rascunho",
           "source": "weknow_ask/src/components/PortalSidebar.tsx",
           "figma": "sidebar white (WP-832)"
@@ -178,7 +178,7 @@
           "id": "estados",
           "title": "Vazio, carregando e erro",
           "icon": "hourglass_empty",
-          "summary": "Lacuna declarada de propósito. Só o aviso temporário já existe no produto, e nem ele é regra.",
+          "summary": "Lacuna declarada de propósito. Só o aviso temporário já existe no produto, e nem ele virou regra.",
           "status": "pendente"
         }
       ]

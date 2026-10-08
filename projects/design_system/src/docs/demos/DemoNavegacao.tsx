@@ -22,7 +22,7 @@ import { Example, Specimen } from '@docs/blocks/Example'
 /** Altura dos palcos que mostram a barra inteira. */
 const PALCO = 400
 
-/** Fundo de canvas: a barra não tem fundo próprio, ela vive sobre o canvas. */
+/** Fundo de canvas: a barra não tem fundo próprio, ela se apoia no canvas. */
 function Canvas({ children, style }: { children: React.ReactNode; style?: React.CSSProperties }) {
   return (
     <div
@@ -84,7 +84,7 @@ export function DemoNavegacao() {
     <>
       <Example
         title="A casca"
-        note="As três peças montadas: faixa de topo de 56 com a marca e o caminho, barra de 255 embaixo dela, folha do conteúdo à direita. Use o botão de menu para recolher."
+        note="As três partes montadas: faixa de topo de 56 com a marca e o caminho, menu de 255 abaixo dela e folha do conteúdo à direita. Use o botão de menu para recolher."
       >
         <Larga>
           <Canvas style={{ height: PALCO, flexDirection: 'column' }}>
@@ -105,7 +105,7 @@ export function DemoNavegacao() {
 
       <Example
         title="Item do menu"
-        note="Altura 40, raio 8, ícone de 24, texto 14/1.5. Clique para trocar o ativo, passe o ponteiro para ver o hover. A última linha carrega um controle na ponta e por isso não é botão."
+        note="Altura 40, raio 8, ícone de 24 e texto 14/1.5. Clique para trocar o item ativo e passe o ponteiro para ver o hover. A última linha tem um controle na ponta, e por isso não é um botão."
       >
         {/* A coluna tem a largura e a margem do menu real, senão o item
             apareceria num comprimento que não existe em lugar nenhum. */}
@@ -145,7 +145,7 @@ export function DemoNavegacao() {
         </div>
       </Example>
 
-      <Example title="Marca" note="Mora na faixa de topo, não no menu. Aberta tem a largura da barra; no trilho, a do próprio conteúdo." align="center">
+      <Example title="Marca" note="Ela fica na faixa de topo, e não no menu. Aberta, tem a largura da barra; no trilho, tem a largura do próprio conteúdo." align="center">
         <Specimen label="aberta">
           <div style={{ background: COLOR.canvas, borderRadius: RADIUS.md }}>
             <SidebarBrand collapsed={false} onToggle={() => {}} />
@@ -160,7 +160,7 @@ export function DemoNavegacao() {
 
       <Example
         title="Barra de topo"
-        note="Caminho à esquerda, busca à direita, avatar de 36 e o menu de reticências. A busca mede 240 até 1536px de janela e 328 acima disso: quem cede espaço é ela, porque o nome da pasta cresce e o caminho não pode encolher."
+        note="Caminho à esquerda, busca à direita, avatar de 36 e o menu de reticências. A busca mede 240 até 1536px de janela e 328 acima disso, porque quem cede espaço é ela: o nome da pasta cresce e o caminho não pode encolher."
       >
         {/* 880, e não 700: com três itens o caminho pede 404 e só para de
             apertar a partir de 840. Abaixo disso ele transborda por baixo da

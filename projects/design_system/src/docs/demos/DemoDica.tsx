@@ -37,7 +37,7 @@ function Nome({ texto }: { texto: string }) {
   )
 }
 
-/** Botão de ícone: aqui a dica arma sempre, porque não há texto nenhum. */
+/** Botão de ícone: aqui a dica aparece sempre, porque não há texto para cortar. */
 function Acao({ icone, rotulo }: { icone: string; rotulo: string }) {
   const dica = useEllipsisTooltip<HTMLSpanElement>(rotulo, true)
   return (
@@ -56,8 +56,8 @@ export function DemoDica() {
   return (
     <>
       <Example
-        title="Só arma quando o texto foi cortado"
-        note="Mesma caixa nos dois. Passe o ponteiro e espere 400ms: o nome curto não revela nada, porque não há nada escondido."
+        title="Só aparece quando o texto foi cortado"
+        note="A caixa é a mesma nos dois. Passe o ponteiro e espere 400ms. O nome curto não mostra nada, porque não há nada escondido."
       >
         <div className="flex flex-col gap-3">
           <Nome texto="Glosas 2024" />
@@ -67,7 +67,7 @@ export function DemoDica() {
 
       <Example
         title="Botão só de ícone"
-        note="Aqui não há texto para cortar, então a dica arma sempre. O título também vira o rótulo acessível: a dica serve a quem vê, o aria-label a quem ouve."
+        note="Aqui não há texto para cortar, então a dica aparece sempre. O título também vira o rótulo acessível, já que a dica serve a quem vê e o aria-label a quem ouve."
       >
         <Acao icone="share" rotulo="Compartilhar pasta" />
         <Acao icone="download" rotulo="Baixar como planilha" />

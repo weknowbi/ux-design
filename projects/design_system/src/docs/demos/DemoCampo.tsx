@@ -43,7 +43,7 @@ export function DemoCampo() {
     <>
       <Example
         title="Campo, auxílio e erro"
-        note="Rótulo sempre visível. O erro muda a borda e escreve o motivo."
+        note="O rótulo fica sempre visível, e o erro muda a borda e escreve o motivo."
       >
         <Specimen label="com auxílio">
           <div style={{ width: 320 }}>
@@ -63,7 +63,7 @@ export function DemoCampo() {
 
       <Example
         title="Seletor"
-        note="Não é o select nativo. Fecha por Escape e por clique fora."
+        note="Não é o select nativo. Ele fecha por Escape e por clique fora."
       >
         <div style={{ width: 320 }}>
           <FormField label="Pasta">

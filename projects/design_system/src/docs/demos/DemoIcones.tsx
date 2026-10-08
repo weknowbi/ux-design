@@ -48,7 +48,7 @@ export function DemoIcones() {
 
       <Example
         title="Em uso no produto"
-        note="O último é SVG próprio: marca não se aproxima por símbolo parecido."
+        note="O último é um SVG próprio, porque marca não se representa com um símbolo parecido."
       >
         <div className="flex flex-wrap gap-2">
           {EM_USO.map((n) => (

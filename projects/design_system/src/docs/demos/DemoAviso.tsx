@@ -33,7 +33,7 @@ export function DemoAviso() {
     <>
       <Example
         title="O aviso do produto"
-        note="Texto de 12/16 na cor terciária. Clique no trecho sublinhado: a explicação abre para cima, e o vazio acima do aviso é o espaço que ela ocupa."
+        note="Texto de 12/16 na cor terciária. Clique no trecho sublinhado e a explicação abre para cima. O vazio acima do aviso é o espaço que ela ocupa."
         align="center"
       >
         <div style={{ maxWidth: 520, paddingTop: 108 }}>

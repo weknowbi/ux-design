@@ -20,8 +20,8 @@ e não se encaixa em nenhum dos dois. Hoje o código não tem nenhum deles.
 
 **Erro.** Falta separar o que é erro de bloco, como uma tabela que não
 carregou, do que é erro de tela inteira, e definir onde entra a ação de tentar
-de novo. O que existe hoje é apenas o erro de campo, descrito em
-[Campo e seletor](#/campo).
+de novo. O que existe hoje é apenas o erro de campo, descrito em [Campo e
+seletor](#/campo).
 
 ## Sucesso: existe, mas ainda não é regra
 

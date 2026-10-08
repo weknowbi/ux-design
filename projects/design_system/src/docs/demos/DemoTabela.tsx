@@ -38,7 +38,7 @@ export function DemoTabela() {
     <>
       <Example
         title="Com moldura (boxed)"
-        note="Quando a tabela está dentro de outro conteúdo. Clique no cabeçalho para ordenar."
+        note="Use quando a tabela estiver dentro de outro conteúdo. Clique no cabeçalho para ordenar."
       >
         <div className="w-full">
           <Table
@@ -54,7 +54,7 @@ export function DemoTabela() {
 
       <Example
         title="Sem moldura (plain)"
-        note="Quando a tabela é o conteúdo da tela."
+        note="Use quando a tabela for o conteúdo da tela."
       >
         <div className="w-full">
           <Table variant="plain" columns={COLUNAS} rows={linhas} rowKey={(r) => r.nome} />
