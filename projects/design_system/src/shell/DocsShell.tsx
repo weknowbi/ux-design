@@ -12,7 +12,7 @@ import { findPage, groupOf, HOME, type Page, type Status } from '@docs/docs/regi
 /**
  * A casca deste documento é a do produto.
  *
- * Portal e Ask dividem a mesma moldura — faixa de topo com marca e caminho,
+ * Portal e Ask dividem a mesma moldura: faixa de topo com marca e caminho,
  * menu lateral que recolhe em trilho, e a folha branca de cantos arredondados
  * sobre o canvas, com 48 de margem à direita. O design system mora dentro
  * dela, no mesmo lugar em que o portal mostra as pastas: documentar a
@@ -181,7 +181,7 @@ export function DocsShell() {
           onLogoClick={() => navigate(HOME.id)}
         />
         {/* Vão da coluna do grupo. O caminho é o rótulo da folha, então
-            começa onde a folha começa — e fica lá, recolhido ou não. Sem ele
+            começa onde a folha começa, e fica lá, recolhido ou não. Sem ele
             o caminho colava no logo quando o menu virava trilho, e a mesma
             informação mudava de lugar só porque o menu encolheu.
 

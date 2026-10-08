@@ -1,6 +1,6 @@
 Páginas fora do índice.
 
-Saíram de `pages.json` a pedido — "no momento vamos manter apenas fundamentos
+Saíram de `pages.json` a pedido: "no momento vamos manter apenas fundamentos
 e componentes".
 
 Em outubro de 2026 a maioria voltou: `cor-texto.md` virou o texto que faltava

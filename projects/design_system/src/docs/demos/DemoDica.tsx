@@ -6,7 +6,7 @@ import { Example } from '@docs/blocks/Example'
 
 /**
  * A dica de produção. Os dois blocos abaixo têm a MESMA largura de propósito:
- * o de cima tem nome que cabe e o de baixo não. Passe o ponteiro nos dois —
+ * o de cima tem nome que cabe e o de baixo não. Passe o ponteiro nos dois,
  * só o cortado arma a dica, e é essa a regra que a página descreve.
  */
 
@@ -61,7 +61,7 @@ export function DemoDica() {
       >
         <div className="flex flex-col gap-3">
           <Nome texto="Glosas 2024" />
-          <Nome texto="Faturamento e glosas por convênio — consolidado 2024" />
+          <Nome texto="Faturamento e glosas por convênio, consolidado 2024" />
         </div>
       </Example>
 

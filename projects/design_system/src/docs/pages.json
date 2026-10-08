@@ -93,11 +93,11 @@
         },
         {
           "id": "controles",
-          "title": "Chave e caixa de seleção",
+          "title": "Switch e checkbox",
           "icon": "toggle_on",
-          "summary": "A chave age na hora, a caixa espera o Aplicar. É isso que decide qual usar.",
+          "summary": "O switch age na hora e o checkbox espera o Aplicar. É isso que decide qual dos dois usar.",
           "status": "rascunho",
-          "source": "weknow_ask/src/components/ThemeSwitch.tsx",
+          "source": "design_system/src/lib/Switch.tsx",
           "figma": "5121:2948"
         },
         {

@@ -9,7 +9,7 @@ import { WeknowLogo } from './WeknowLogo'
  * No protótipo mobile do redesign (nó 5121:3576) a barra de topo tem 56px e
  * três coisas: o botão de menu à esquerda, a marca no meio e a conta à
  * direita. O menu lateral não cabe ao lado do conteúdo numa tela de 375px,
- * então ele vira gaveta — o padrão do Gmail e do Drive.
+ * então ele vira gaveta: o padrão do Gmail e do Drive.
  *
  * O que mudou em relação ao protótipo: os alvos de toque. Lá o menu é um
  * ícone de 24px solto dentro de uma caixa de 56; aqui o botão inteiro tem
@@ -75,7 +75,7 @@ export function MobileTopBar({
 /**
  * Gaveta do menu: entra pela esquerda por cima do conteúdo, com um véu atrás.
  *
- * Fecha no véu, no Esc e ao navegar — três saídas, porque numa tela pequena
+ * Fecha no véu, no Esc e ao navegar: três saídas, porque numa tela pequena
  * a gaveta cobre tudo e ficar preso nela é o pior que pode acontecer. Sai do
  * fluxo com `inert` quando fechada: sem isso o menu continuaria recebendo
  * foco do teclado atrás do conteúdo.
@@ -112,7 +112,7 @@ export function MobileDrawer({
         }`}
       />
       <div
-        // Fechada, a gaveta sai do alcance do teclado e do leitor de tela —
+        // Fechada, a gaveta sai do alcance do teclado e do leitor de tela,
         // ela continua no DOM, deslocada para fora, e sem isto o Tab passaria
         // por dentro dela antes de chegar ao conteúdo.
         inert={!open}

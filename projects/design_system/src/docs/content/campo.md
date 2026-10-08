@@ -41,7 +41,7 @@ Elas não são o mesmo componente, e a diferença é de lugar, não de gosto:
 | Formulário | é campo normal, com rótulo |
 
 A busca da barra de topo não tem rótulo porque o ícone de lupa e o lugar dela
-já dizem o que é — é a única exceção à regra 1, e ela vale só ali.
+já dizem o que ela é. Essa é a única exceção à regra 1, e vale só ali.
 
 O tom da pílula depende da superfície embaixo: `--wk-search-pill` sobre o fundo
 tingido da faixa e do menu, `--wk-search-pill-light` sobre a folha branca. Fixar

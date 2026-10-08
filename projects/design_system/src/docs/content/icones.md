@@ -13,9 +13,9 @@ Tamanho padrão 24px. Cor padrão `--wk-nav-label`.
    distingue, junto com fundo e cor. Não use preenchido por gosto estético.
 2. Não troque o eixo `wght`. 200 é a espessura que combina com o traço da
    Inter nos tamanhos que usamos; 300 já parece outra biblioteca. **A única
-   exceção é dentro do botão**, que usa 400: em 200 o glifo de 20px sumia
-   sobre um fundo preenchido. O componente aplica sozinho — não é para repetir
-   à mão em outro lugar.
+   exceção é dentro do botão**, que usa 400, porque em 200 o glifo de 20px sumia
+   sobre um fundo preenchido. O componente aplica esse peso sozinho, então não
+   repita à mão em outro lugar.
 3. Tamanhos em uso: 20 dentro de botão e linha densa, 24 no padrão (menu,
    barra de topo, chip, campo), 44 em miniatura vazia.
 4. Ícone sozinho como botão precisa de `title` e `aria-label`. Um ícone de casa

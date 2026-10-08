@@ -13,12 +13,12 @@ Português do Brasil. Direto, sem exclamação e sem simpatia forçada.
    "OK", nunca "Enviar" sozinho quando dá para dizer o quê.
 3. Rótulo de campo é substantivo: "Pasta", "Nome da conversa".
 4. Erro diz o que aconteceu e o que fazer. "Não foi possível salvar. Tente de
-   novo em instantes." — não "Erro 500".
+   novo em instantes.", e não "Erro 500".
 5. Sem jargão de interface no texto para a pessoa: "menu lateral" e "modal" são
    palavras nossas, não dela.
 6. Não use "simplesmente", "apenas" nem "é só". Se fosse só, ela já teria
    feito.
-7. Número em algarismo, sempre — inclusive de zero a nove.
+7. Número em algarismo, sempre, inclusive de zero a nove.
 
 ## Em aberto
 

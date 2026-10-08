@@ -1,4 +1,4 @@
-/** "3 dashboards · 1 subpasta" — só o que existe, dashboards primeiro. */
+/** "3 dashboards · 1 subpasta": só o que existe, dashboards primeiro. */
 export function describeCounts({ folders, dashboards }: { folders: number; dashboards: number }): string {
   const parts: string[] = []
   if (dashboards) parts.push(`${dashboards} ${dashboards === 1 ? 'dashboard' : 'dashboards'}`)

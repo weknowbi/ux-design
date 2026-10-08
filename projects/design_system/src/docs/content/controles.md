@@ -1,57 +1,66 @@
-# Chave e caixa de seleção
+# Switch e checkbox
 
-> **Rascunho.** A chave é peça fechada, da espec. do nó 5121:2948. A caixa de
-> seleção existe só dentro do modal de filtros e ainda não é componente
-> compartilhado — o desenho abaixo descreve o que está no código, não uma
+> **Rascunho.** O switch é peça fechada, da espec. do nó 5121:2948. O checkbox
+> existe só dentro do modal de filtros e ainda não virou componente
+> compartilhado, então o que está descrito aqui é o que o código faz, não uma
 > decisão tomada.
 
-Dois controles de escolha, e eles não se substituem.
+São dois controles de escolha, e eles não se substituem.
 
-| | Chave | Caixa de seleção |
+| | Switch | Checkbox |
 | --- | --- | --- |
 | Responde | ligado ou desligado | marcado ou não |
-| Quantidade | uma coisa só | vários numa lista |
+| Quantidade | uma coisa só | vários itens de uma lista |
 | Efeito | imediato | depende do "Aplicar" |
 | Onde | linha de preferência | lista, árvore de filtros |
 
-A diferença que decide: **a chave age na hora, a caixa espera.** Se ao clicar a
-tela muda, é chave. Se a escolha só vale depois de confirmar, é caixa.
+A pergunta que decide é o que acontece no clique. Se a tela muda na hora, use
+switch. Se a escolha só vale depois que a pessoa confirma, use checkbox.
 
-## Chave
+## Switch
 
 | Parte | Espec. |
 | --- | --- |
 | Trilho | 36 × 20, raio total |
-| Botão | 16 de diâmetro, 2 de folga de cada lado |
-| Desligada | trilho em `--wk-border-strong` |
-| Ligada | trilho em `--wk-primary` |
-| Botão | branco nos dois estados, nos dois temas |
+| Botão | 16 de diâmetro, com 2 de folga de cada lado |
+| Desligado | trilho em `--wk-border-strong` |
+| Ligado | trilho em `--wk-primary` |
+| Botão | branco nos dois estados e nos dois temas |
 
-A chave do tema vem acompanhada de um ícone de cada lado — `light_mode` à
-esquerda, `dark_mode` à direita, gap 8 — e o do lado ativo acende no tom
-primário com `FILL 1`. Os ícones não são enfeite: a chave sozinha diz "ligado",
-mas não diz ligado para quê.
+O switch é um `role="switch"` com `aria-checked`, porque quem navega por
+teclado precisa ouvir se está ligado ou desligado, e uma caixa decorativa não
+fala. Como ele não tem texto dentro, o rótulo acessível é obrigatório.
 
-É um `role="switch"` com `aria-checked` de verdade. Quem navega por teclado
-precisa ouvir "ligado" ou "desligado", e uma caixa decorativa não fala.
+### O alternador de tema é esse switch com dois ícones
 
-## Caixa de seleção
+A linha "Tema" do menu lateral coloca `light_mode` à esquerda e `dark_mode` à
+direita, com 8 de intervalo, e acende o ícone do lado ativo no tom primário.
 
-16 × 16, raio 3, borda 1.5px. Desmarcada: borda `--wk-field-border` sobre
-`--wk-surface`. Marcada: fundo e borda em `--wk-primary`, com o sinal de
-confirmação em `--wk-btn-on-primary`.
+Os ícones existem porque o switch sozinho diz "ligado", mas não diz ligado para
+quê, e "tema ligado" não quer dizer nada. Com sol e lua nas pontas, fica claro
+para que lado é cada estado.
 
-O risco do sinal é desenhado, não é glifo de fonte: numa caixa de 16 o
-Material Symbols cai um pixel fora do centro.
+Esse par de ícones pertence ao tema e só a ele. Em qualquer outra linha de
+preferência, use o switch limpo.
+
+## Checkbox
+
+16 × 16, raio 3, borda de 1,5px. Desmarcado, a borda fica em
+`--wk-field-border` sobre `--wk-surface`. Marcado, o fundo e a borda vão para
+`--wk-primary`, com o sinal de confirmação em `--wk-btn-on-primary`.
+
+O risco do sinal é desenhado à mão, e não um glifo da fonte de ícones, porque
+numa caixa de 16 o Material Symbols cai um pixel fora do centro.
 
 ## Regras
 
-1. A linha inteira é o alvo do clique, não só o quadradinho de 16. Alvo de 16px
-   é pequeno demais para o ponteiro e muito mais para o dedo.
-2. Quando a linha carrega o controle na ponta, ela deixa de ser botão. Botão
-   dentro de botão é HTML inválido, e é por isso que a linha "Tema" do menu não
-   é clicável inteira.
-3. Chave não tem estado intermediário. Lista parcialmente marcada é problema da
-   caixa de seleção, e hoje o sistema não tem o desenho desse estado — pergunte.
-4. Nenhum dos dois leva rótulo à direita escrito "Sim"/"Não". O rótulo diz o
-   que a coisa é; o controle diz em que estado ela está.
+1. A linha inteira recebe o clique, e não só o quadradinho de 16. Um alvo de
+   16px é pequeno demais para o ponteiro, e muito mais para o dedo.
+2. Quando a linha carrega o controle na ponta, ela deixa de ser clicável
+   inteira. Botão dentro de botão é HTML inválido, e é por isso que a linha
+   "Tema" do menu não responde ao clique no rótulo.
+3. O switch não tem estado intermediário. Lista parcialmente marcada é problema
+   do checkbox, e o sistema ainda não tem o desenho desse estado, então
+   pergunte antes de inventar um.
+4. Nenhum dos dois leva um rótulo "Sim" ou "Não" ao lado. O rótulo diz o que a
+   coisa é, e o controle diz em que estado ela está.

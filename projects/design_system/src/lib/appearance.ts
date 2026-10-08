@@ -3,7 +3,7 @@ import { useSyncExternalStore } from 'react'
 /**
  * A cara que o usuário deu a cada item: nome, imagem, ícone e cor. É a parte
  * visual do "Cadastro de menus" do desk, trazida para onde a pasta aparece.
- * Aqui fica no navegador (localStorage), fora dos dados — no produto são
+ * Aqui fica no navegador (localStorage), fora dos dados: no produto são
  * campos do cadastro, gravados pelo Salvar do painel.
  */
 export type Appearance = {
@@ -38,7 +38,7 @@ export const APPEARANCE_ICONS = [
 ]
 
 /**
- * Cores do círculo — as do card de referência (azul, verde-água, roxo,
+ * Cores do círculo: as do card de referência (azul, verde-água, roxo,
  * laranja, vermelho, grafite) mais um azul-céu e um verde. Ícone branco por
  * cima. Azul é o padrão da pasta; vermelho, o do dashboard.
  */
@@ -92,7 +92,7 @@ export function setAppearance(id: string, next: Appearance | null) {
   commit(copy)
 }
 
-/** O registro como está agora — o painel tira uma foto antes de deixar mexer. */
+/** O registro como está agora: o painel tira uma foto antes de deixar mexer. */
 export function getAppearance(id: string): Appearance | undefined {
   return state[id]
 }
@@ -105,7 +105,7 @@ export function replaceAppearance(id: string, value: Appearance | undefined) {
   commit(copy)
 }
 
-/** Tudo o que foi personalizado, para quem resolve vários itens de uma vez — o nome da pasta no cabeçalho e no caminho da barra de topo. */
+/** Tudo o que foi personalizado, para quem resolve vários itens de uma vez: o nome da pasta no cabeçalho e no caminho da barra de topo. */
 export function useAppearances(): Record<string, Appearance> {
   return useSyncExternalStore(subscribe, () => state)
 }
@@ -113,7 +113,7 @@ export function useAppearances(): Record<string, Appearance> {
 /**
  * Imagem escolhida pelo usuário, reduzida antes de guardar: o card mostra a
  * miniatura em ~300px de largura e foto de celular tem 4000, então guardar o
- * arquivo como veio é megabyte à toa — e aqui ele ainda passa pelo
+ * arquivo como veio é megabyte à toa, e aqui ele ainda passa pelo
  * localStorage. Vira JPEG porque capa de pasta é foto; PNG com transparência
  * perderia o fundo, e não é esse o caso de uso.
  */

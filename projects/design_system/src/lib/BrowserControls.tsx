@@ -5,7 +5,7 @@ import { SORT_LABEL, VIEW_ICON, VIEW_LABEL, VIEW_MODES, type BrowserPrefs, type 
 
 /**
  * Controles do cabeçalho "Favoritos" do design: ordem (↑ Padrão) e
- * visualização. Baixa prioridade visual — só texto apagado e ícones, sem
+ * visualização. Baixa prioridade visual, só texto apagado e ícones, sem
  * caixa até o hover.
  *
  * A visualização era um menu de três opções; com a Lista fora, sobraram duas
@@ -20,7 +20,7 @@ export function BrowserControls({
   mobile?: boolean
 }) {
   const { view, setView, sort, setSort, dir, setDir } = prefs
-  /** A outra visualização — a que a chave oferece. */
+  /** A outra visualização: a que a chave oferece. */
   const other = VIEW_MODES.find((v) => v !== view) ?? view
 
   return (
@@ -28,7 +28,7 @@ export function BrowserControls({
       <button
         type="button"
         onClick={() => setDir(dir === 'asc' ? 'desc' : 'asc')}
-        aria-label={dir === 'asc' ? 'Ordem crescente — inverter' : 'Ordem decrescente — inverter'}
+        aria-label={dir === 'asc' ? 'Ordem crescente, inverter' : 'Ordem decrescente, inverter'}
         title={dir === 'asc' ? 'Crescente' : 'Decrescente'}
         className="wk-icon-btn flex items-center justify-center"
         style={{ width: 28, height: 28 }}
@@ -71,7 +71,7 @@ export function BrowserControls({
 
       {/* Com duas visualizações, o menu virou chave: um toque troca, em vez de
           um toque para abrir a lista e outro para escolher a única alternativa.
-          O ícone mostra para onde o botão leva, não onde você está — é o que o
+          O ícone mostra para onde o botão leva, não onde você está: é o que o
           rótulo diz, e é a leitura certa para um botão que age. */}
       {!mobile && (
         <button

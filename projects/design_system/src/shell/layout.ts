@@ -7,7 +7,7 @@ import { LAYOUT } from '@/design/tokens'
  * O portal e o Ask já dividem a mesma barra lateral (`PortalSidebar` +
  * `SidebarBrand`), mas parte do que ela usa mora em `design/sidebar.ts` do
  * produto, fora do alcance do alias `@` desta documentação. Enquanto o design
- * system não virar pacote, os números ficam aqui — **com os mesmos valores**,
+ * system não virar pacote, os números ficam aqui: **com os mesmos valores**,
  * para não existir uma segunda espec. por descuido.
  */
 
@@ -24,7 +24,7 @@ export const SIDEBAR_TRANSITION = '220ms cubic-bezier(0.2, 0, 0, 1)'
 export const SIDEBAR_PAD = 8
 
 /**
- * Menu recolhido: só a coluna de ícones. 8 de margem + item de 40 + 8 — o
+ * Menu recolhido: só a coluna de ícones. 8 de margem + item de 40 + 8, o
  * item vira quadrado e o ícone fica no mesmo x do menu aberto.
  */
 export const SIDEBAR_RAIL_WIDTH = 56
@@ -32,12 +32,12 @@ export const SIDEBAR_RAIL_WIDTH = 56
 /** Botão do menu, no canto superior esquerdo. */
 export const BRAND_BTN = 40
 
-/** 28 × 1,29 — altura inteira, mesma proporção do logo. */
+/** 28 × 1,29: altura inteira, mesma proporção do logo. */
 export const LOGO_H = 36
 export const LOGO_W = (91.95 * LOGO_H) / 28
 
 /**
- * Divisória entre as duas colunas do menu — só com o menu aberto.
+ * Divisória entre as duas colunas do menu: só com o menu aberto.
  *
  * Abertas, as duas listas têm o mesmo fundo e larguras parecidas, e a segunda
  * parecia continuação da primeira. Recolhido, o trilho já se distingue pela

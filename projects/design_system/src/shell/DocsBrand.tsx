@@ -11,17 +11,17 @@ import {
 } from '@docs/shell/layout'
 
 /**
- * Canto superior esquerdo: botão do menu e marca — o mesmo bloco do portal e
+ * Canto superior esquerdo, com o botão do menu e a marca: o mesmo bloco do portal e
  * do Ask (`SidebarBrand`), com o rótulo do documento no lugar do caminho.
  *
  * Mora na faixa de topo, não no menu lateral. O menu encolhe por baixo e isto
  * não se move: o logo fica sempre inteiro e o botão sempre no mesmo lugar.
  *
- * O bloco tem exatamente a largura do menu embaixo dele — 255 aberto, 56 no
- * trilho —, no mesmo tempo da transição. No trilho o logo não cabe nos 56 e
+ * O bloco tem exatamente a largura do menu embaixo dele: 255 aberto, 56 no
+ * trilho, e acompanha a mesma transição. No trilho o logo não cabe nos 56 e
  * transborda para a direita de propósito: ali embaixo está a coluna do grupo,
  * que começa abaixo da faixa, então o logo fica inteiro sem empurrar nada. O
- * caminho não vem atrás dele — tem lugar fixo, sobre a folha (`DocsShell`).
+ * caminho não vem atrás dele: tem lugar fixo, sobre a folha (`DocsShell`).
  */
 export function DocsBrand({
   collapsed,

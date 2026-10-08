@@ -3,7 +3,7 @@ import { useCallback, useState } from 'react'
 /**
  * O que a ordenação precisa saber de um item, e nada além.
  *
- * Antes isto era `Item`, o tipo do acervo do portal — e a biblioteca passava
+ * Antes isto era `Item`, o tipo do acervo do portal, e a biblioteca passava
  * a conhecer pasta, painel e apresentação para comparar duas cadeias de
  * caracteres. O `Item` do produto continua servindo a este contrato sem
  * mudar nada: ele tem `name` e `updatedAt` desde sempre.
@@ -14,8 +14,8 @@ export type ViewMode = 'list' | 'grid' | 'thumbs'
 /**
  * Ordem do menu: do mais visual ao mais denso.
  *
- * A Lista saiu das opções. Ela era uma tabela — cabeçalho de colunas,
- * "Detalhes", "Última alteração" —, e tabela se lê como relatório, não como
+ * A Lista saiu das opções. Ela era uma tabela (cabeçalho de colunas,
+ * "Detalhes", "Última alteração"), e tabela se lê como relatório, não como
  * acervo: ali o ícone do tipo cabia em 20px e voltava a ser a pasta cinza
  * genérica, sem o ícone nem a cor que o cliente cadastrou. Eram duas telas
  * para o mesmo conteúdo, e a mais densa era justamente a que dizia menos.

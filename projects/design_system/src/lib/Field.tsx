@@ -3,7 +3,7 @@ import { COLOR, FONT } from './tokens'
 import { Icon } from './icons'
 
 /**
- * Campo de formulário do design system — espec. do nó `form-item` (4454:8719):
+ * Campo de formulário do design system: espec. do nó `form-item` (4454:8719):
  *
  *   bloco    flex coluna, 16 de respiro abaixo
  *   rótulo   Inter Regular 16/1.5 em #363E49, 8 de respiro abaixo
@@ -13,9 +13,9 @@ import { Icon } from './icons'
  *
  * A caixa é o `form-control`/`form-select` do Bootstrap 5: 6 + 24 (16 × 1.5)
  * + 6 + 2 de borda = 38 exatos. As medidas de 13/7 que o Figma reporta
- * incluem a borda — descontá-la é o que fecha a conta na altura certa.
+ * incluem a borda: descontá-la é o que fecha a conta na altura certa.
  *
- * Repare que o raio aqui é 6 — os campos de busca dos modais usam 8, por
+ * Repare que o raio aqui é 6: os campos de busca dos modais usam 8, por
  * especificação própria. Não são o mesmo componente.
  *
  * O portal tinha uma segunda cópia deste arquivo, idêntica salvo por aceitar

@@ -7,7 +7,7 @@ import { useCallback, useEffect, useState } from 'react'
  * variáveis de `index.css`. Guardar no `localStorage` evita o pisca-pisca de
  * voltar ao claro a cada recarga.
  *
- * A escolha inicial segue o sistema quando a pessoa nunca escolheu — mas uma
+ * A escolha inicial segue o sistema quando a pessoa nunca escolheu, mas uma
  * escolha explícita manda, mesmo que o sistema mude depois. Por isso o
  * listener de `prefers-color-scheme` só age quando não há nada guardado.
  */

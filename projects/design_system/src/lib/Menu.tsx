@@ -21,7 +21,7 @@ const MENU_MARGIN = 8
 const MENU_MIN_HEIGHT = 160
 
 /**
- * A moldura em que o menu realmente aparece — não a janela.
+ * A moldura em que o menu realmente aparece, e não a janela.
  *
  * O menu é `absolute` dentro do card, e o card mora na folha de conteúdo, que
  * rola. Quem rola, corta: nos dois eixos. O que passa do topo da folha some
@@ -30,7 +30,7 @@ const MENU_MIN_HEIGHT = 160
  * fazia a conta achar espaço onde não há.
  *
  * Nenhum eixo escapa: quando um lado é recortado e o outro é `visible`, o CSS
- * promove o `visible` a `auto` — então basta o overflow do eixo para saber se
+ * promove o `visible` a `auto`, então basta o overflow do eixo para saber se
  * ele corta.
  */
 function clipFrame(el: HTMLElement) {
@@ -69,7 +69,7 @@ export function Dropdown({
   minWidth?: number
   /**
    * Fechou, não importa como: botão, Esc ou clique fora. Quem tem rascunho
-   * dentro do menu precisa saber disso para desfazer — sem isso, clicar ao
+   * dentro do menu precisa saber disso para desfazer. Sem isso, clicar ao
    * lado valeria como salvar.
    */
   onClose?: () => void
@@ -86,7 +86,7 @@ export function Dropdown({
      continua sendo o do gatilho; isto só o traz de volta para dentro quando o
      card está na primeira coluna e o painel largo passaria por baixo do menu
      lateral. Em ref também, porque a medida seguinte precisa descontar o
-     empurrão que ela mesma já aplicou — senão a conta se persegue. */
+     empurrão que ela mesma já aplicou, senão a conta se persegue. */
   const [shiftX, setShiftX] = useState(0)
   const shiftRef = useRef(0)
   shiftRef.current = shiftX
@@ -95,7 +95,7 @@ export function Dropdown({
   const onCloseRef = useRef(onClose)
   onCloseRef.current = onClose
 
-  /* Mede depois de pintar, e remede quando o conteúdo muda de tamanho — o
+  /* Mede depois de pintar, e remede quando o conteúdo muda de tamanho: o
      mesmo menu abre com duas ações e vira um formulário de 470px. O
      ResizeObserver é o que cobre essa troca sem o componente ter de saber que
      ela existe. O scroll entra com `capture` porque quem rola é o <main>, não
@@ -123,7 +123,7 @@ export function Dropdown({
       // de vazar: o fim dele continua alcançável.
       setMaxHeight(Math.max(up ? above : below, MENU_MIN_HEIGHT))
 
-      /* No eixo deitado não há para onde virar — o menu tem a largura que tem.
+      /* No eixo deitado não há para onde virar: o menu tem a largura que tem.
          O que cabe é trazê-lo para dentro da moldura: a borda que vazou encosta
          na margem e o resto acompanha. A conta parte da posição sem empurrão
          (daí o desconto do shift atual), e a direita é conferida antes da
@@ -205,7 +205,7 @@ export function Dropdown({
 
 const ITEM = 'w-full flex items-center gap-2 rounded-md h-9 pl-2 pr-4 transition-colors hover:bg-[var(--wk-menu-hover)]'
 
-/** Opção de escolha única — check à esquerda, como no seletor de visualização do Weknow. */
+/** Opção de escolha única: check à esquerda, como no seletor de visualização do Weknow. */
 export function MenuOption({ checked, label, onSelect }: { checked: boolean; label: string; onSelect: () => void }) {
   return (
     <button type="button" role="menuitemradio" aria-checked={checked} onClick={onSelect} className={ITEM}>

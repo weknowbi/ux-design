@@ -7,7 +7,7 @@ const DELAY = 400
 const MAX_WIDTH = 420
 
 /**
- * Dica no acabamento do Weknow, no lugar do `title` do navegador — a caixinha
+ * Dica no acabamento do Weknow, no lugar do `title` do navegador. A caixinha
  * nativa ignora o tema, a tipografia e o raio de tudo em volta.
  *
  * Só arma quando o texto foi de fato cortado: nome que cabe inteiro não tem o

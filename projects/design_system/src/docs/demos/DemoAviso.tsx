@@ -8,7 +8,7 @@ import { Example, DoDont, DoDontCard } from '@docs/blocks/Example'
  * o aviso mora na borda de baixo da tela.
  */
 
-/** O contra-exemplo é desenhado aqui porque o sistema não tem faixa colorida — e essa é a questão. */
+/** O contra-exemplo é desenhado aqui porque o sistema não tem faixa colorida, e essa é a questão. */
 function FaixaInventada() {
   return (
     <div

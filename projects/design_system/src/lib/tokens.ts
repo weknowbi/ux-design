@@ -1,5 +1,5 @@
 /**
- * Weknow Design System — tokens extraídos do redesign (projeto figma_export).
+ * Weknow Design System: tokens extraídos do redesign (projeto figma_export).
  *
  * Esta é a ÚNICA cópia. O Weknow ASK e o portal reexportam este arquivo de
  * `design/tokens.ts`, então `COLOR.primary` é literalmente o mesmo objeto
@@ -35,7 +35,7 @@ export const COLOR = {
   userBubble:     'var(--wk-user-bubble)',
 
   /* superfícies */
-  canvas:         'var(--wk-canvas)',   // Variable "Card fundo 1 white" — fundo da página e do menu
+  canvas:         'var(--wk-canvas)',   // Variable "Card fundo 1 white": fundo da página e do menu
   surface:        'var(--wk-surface)',
   surfaceSubtle:  'var(--wk-surface-subtle)',
   hover:          'var(--wk-hover)',
@@ -47,7 +47,7 @@ export const COLOR = {
   searchPill:     'var(--wk-search-pill)',  // sobre o fundo tingido (topo e menu)
   searchPillLight:'var(--wk-search-pill-light)',  // sobre superfície branca (folha de conteúdo)
 
-  /* menu lateral — espec. do nó "sidebar white" do portal (WP-832) */
+  /* menu lateral: espec. do nó "sidebar white" do portal (WP-832) */
   navActive:      'var(--wk-nav-active)',
   navActiveText:  'var(--wk-nav-active-text)',
   navHover:       'var(--wk-nav-hover)',
@@ -59,7 +59,7 @@ export const COLOR = {
   border:         'var(--wk-border)',
   borderStrong:   'var(--wk-border-strong)',
 
-  /* hover de botão de ícone — nó 3630:3689 */
+  /* hover de botão de ícone: nó 3630:3689 */
   iconHover:      'var(--wk-icon-hover)',
 
   /* estados */
@@ -82,7 +82,7 @@ export const RADIUS = {
   pill: 9999,
 } as const
 
-/* Métricas de layout — do frame "home" do portal (WP-832) */
+/* Métricas de layout: do frame "home" do portal (WP-832) */
 export const LAYOUT = {
   headerHeight: 56,      // Top Bar
   sidebarWidth: 255,     // instance "sidebar white"
@@ -94,7 +94,7 @@ export const LAYOUT = {
   sheetRadius: 16,       // cantos superiores da folha branca
   sheetMarginRight: 48,  // 1920 - 255 - 1617: o conteúdo não encosta na borda
   threadMaxWidth: 896,
-  /* item de menu — nó "item camadas dashboard" */
+  /* item de menu: nó "item camadas dashboard" */
   navItemHeight: 40,
   navItemPadX: 8,
   navItemGap: 8,
@@ -110,19 +110,19 @@ export const LAYOUT = {
   /**
    * Os glifos do Material Symbols têm ~2px de recuo dentro da caixa de 24px.
    * O logo preenche a dele, então precisa desse mesmo recuo para a coluna
-   * óptica do menu bater — medido, não estimado.
+   * óptica do menu bater: medido, não estimado.
    */
   glyphInset: 2,
 } as const
 
 /**
- * Padrão único de tabela — o mesmo dentro da conversa e nas telas.
+ * Padrão único de tabela: o mesmo dentro da conversa e nas telas.
  *
  * A referência é a tabela que a resposta da IA monta: compacta, sóbria,
  * sem divisórias verticais e sem zebra. A versão anterior desta espec.
  * (linhas de 56, texto 14,4/1.6, raio 16) vinha do componente `grafico
- * tabela` do design system e ficava larga demais para listas longas — ao
- * lado da tabela da conversa, parecia outro produto.
+ * tabela` do design system e ficava larga demais para listas longas. Ao
+ * lado da tabela da conversa, ela parecia outro produto.
  *
  * O cabeçalho é menor que o corpo de propósito: rótulo de coluna é
  * sinalização, não conteúdo. O peso 600 é o que o distingue, não o tamanho.
@@ -147,7 +147,7 @@ export const TABLE = {
 } as const
 
 /**
- * Chip dentro de tabela — um só estilo, neutro.
+ * Chip dentro de tabela: um só estilo, neutro.
  *
  * Antes cada tipo de dado tinha sua cor (azul, violeta, verde). Numa tabela
  * monocromática isso vira ruído: a cor prometia um significado que o texto
@@ -164,16 +164,16 @@ export const TABLE_CHIP = {
 } as const
 
 /**
- * Barra de topo — espec. dos nós `Frame 427319838` e `pesquisar barra topo`
+ * Barra de topo: espec. dos nós `Frame 427319838` e `pesquisar barra topo`
  * (WP-832, node 4454:7125).
  */
 /**
- * Caminho (breadcrumb) — espec. do nó 5132:3761 (WP-832).
+ * Caminho (breadcrumb): espec. do nó 5132:3761 (WP-832).
  *
  *   linha      gap 8 entre todos os itens, sem exceção
  *   ícones     24px em #8C98A8 ("Fonte terciária white"), inclusive os
  *              separadores `chevron_right`
- *   rótulos    Inter 15/1.2 em #475569 ("Fonte secundária white") — a cor é
+ *   rótulos    Inter 15/1.2 em #475569 ("Fonte secundária white"), a cor é
  *              a mesma do primeiro ao último
  *   atual      o mesmo 15/1.2 na mesma cor, só que Semi Bold
  *
@@ -208,7 +208,7 @@ export const TOPBAR = {
     gap: 8,
     fontSize: 16,
     lineHeight: 20,
-    /* Cor do placeholder — fonte secundária a 75%. O texto digitado usa
+    /* Cor do placeholder: fonte secundária a 75%. O texto digitado usa
        COLOR.text. Aplicada pela regra global `::placeholder` em index.css. */
     placeholderColor: 'var(--wk-placeholder-soft)',
   },

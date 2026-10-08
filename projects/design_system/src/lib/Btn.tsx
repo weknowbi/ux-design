@@ -6,7 +6,7 @@ import { Icon } from './icons'
  * Botão do design system Weknow.
  *
  * Esta é a ÚNICA cópia: o Weknow ASK e o portal importam daqui. Antes eram
- * dois botões diferentes para o mesmo trabalho — o `Btn` do ASK, tirado do
+ * dois botões diferentes para o mesmo trabalho: o `Btn` do ASK, tirado do
  * arquivo Make "Button variations with animations", e o `Button` do portal,
  * feito depois para a tela de cadastro. Nenhum dos dois estava errado; o
  * problema era serem dois, com a documentação descrevendo um só.
@@ -24,7 +24,7 @@ import { Icon } from './icons'
  *   foco teclado   o anel só aparece para quem navega por teclado
  *
  * As cores saem de variáveis, não de constantes: o mesmo componente serve os
- * dois temas. No escuro o primário inverte — fundo #8AB4F8 com texto #0D1B2A —
+ * dois temas. No escuro o primário inverte (fundo #8AB4F8 com texto #0D1B2A)
  * porque texto branco sobre azul claro não passa em contraste.
  *
  * O fantasma é o único que não usa o azul de marca: ele é a ação de menor

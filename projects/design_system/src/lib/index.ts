@@ -2,7 +2,7 @@
  * O pacote do design system Weknow.
  *
  * Os componentes daqui têm UMA cópia. O Weknow ASK e o portal importam deste
- * lugar, e o site de documentação renderiza estes mesmos arquivos — não um
+ * lugar, e o site de documentação renderiza estes mesmos arquivos, não um
  * retrato deles.
  *
  * Antes cada app tinha a sua cópia, e o "quase igual" já tinha começado a
@@ -23,6 +23,8 @@ export * from './theme'
 /* componentes */
 export * from './Btn'
 export * from './Field'
+export * from './Switch'
+export * from './ThemeSwitch'
 export * from './Menu'
 export * from './Tooltip'
 export * from './WeknowLogo'

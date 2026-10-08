@@ -102,12 +102,12 @@
    Terceira coluna (sumário da página).
 
    O sumário é a única coluna dispensável da tela: ele repete títulos que o
-   texto logo abaixo já mostra. O menu e a lista do grupo, não — some com eles
+   texto logo abaixo já mostra. O menu e a lista do grupo, não: some com eles
    e a pessoa perde o caminho. Então é o sumário que sai quando falta largura.
 
    O corte sai de uma conta, não de um degrau do Tailwind: menu 255 + lista do
    grupo 240 + margem 48 da folha = 543, mais os 80 de respiro interno da
-   folha, e o par texto + sumário pede 760 + 40 + 176 = 976 — 1599 ao todo.
+   folha, e o par texto + sumário pede 760 + 40 + 176 = 976, que com o menu dá 1599 ao todo.
    Abaixo disso o artigo encolheria para caber o sumário, e um degrau de
    largura no texto custa mais do que o sumário entrega.
 

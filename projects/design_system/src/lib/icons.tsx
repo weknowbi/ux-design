@@ -1,13 +1,13 @@
 import { COLOR } from './tokens'
 
 /**
- * Ícones — Material Symbols Outlined (Google Fonts), nas definições do
+ * Ícones: Material Symbols Outlined (Google Fonts), nas definições do
  * design system: **weight 200, grade 0, optical size 24, cor #8C98A8**.
  *
  * É a mesma família usada nos nós do Figma, cujos nomes carregam os eixos:
  * `home_24dp_6C757D_FILL0_wght200_GRAD0_opsz24`.
  *
- * O eixo FILL alterna entre traçado e preenchido — o menu do portal usa
+ * O eixo FILL alterna entre traçado e preenchido: o menu do portal usa
  * FILL 1 no item ativo.
  */
 
@@ -23,7 +23,7 @@ export type IconProps = {
   /** Nome do símbolo, ex.: `search`, `folder`, `settings`. */
   name?: string
   size?: number
-  /** FILL 1 — usado no estado ativo. */
+  /** FILL 1: usado no estado ativo. */
   filled?: boolean
   /** Sobrescreve o eixo wght; o padrão do design system é 200. */
   weight?: number

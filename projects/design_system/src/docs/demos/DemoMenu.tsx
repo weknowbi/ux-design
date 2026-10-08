@@ -7,7 +7,7 @@ import { Example } from '@docs/blocks/Example'
 
 /**
  * O menu de produção, não um desenho dele: o `Dropdown` daqui é o mesmo que
- * abre no card do portal, com a mesma conta de espaço — por isso perto do
+ * abre no card do portal, com a mesma conta de espaço: por isso perto do
  * fim da página ele vira para cima sozinho.
  *
  * Os palcos ganham altura emprestada: solto numa página que rola, o menu
@@ -37,7 +37,7 @@ export function DemoMenu() {
     <>
       <Example
         title="Ações de um item"
-        note="O que as reticências de uma linha ou de um cartão abrem: separador antes do destrutivo, e o menu fecha ao escolher. Repare que o Excluir NÃO está em vermelho — o MenuAction ainda não tem a variante, e a página explica por quê."
+        note="O que as reticências de uma linha ou de um cartão abrem: separador antes do destrutivo, e o menu fecha ao escolher. Repare que o Excluir NÃO está em vermelho, o MenuAction ainda não tem a variante, e a página explica por quê."
       >
         <div style={{ paddingBottom: 150 }}>
           <Dropdown trigger={Reticencias} align="left">

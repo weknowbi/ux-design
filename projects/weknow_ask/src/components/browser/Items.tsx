@@ -348,7 +348,7 @@ function ItemRow({
  * linha dentro do card: dentro do card ela mudava a altura, e card de tamanho
  * diferente por seção quebra o ritmo da grade. Na Lista ela tem coluna própria.
  */
-const tileTitle = (name: string, context?: string) => (context ? `${name} — em ${context}` : name)
+const tileTitle = (name: string, context?: string) => (context ? `${name}, em ${context}` : name)
 
 /**
  * Compacto: card horizontal de altura FIXA, como as pastas do Drive.

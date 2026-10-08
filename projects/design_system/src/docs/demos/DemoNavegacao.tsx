@@ -160,9 +160,12 @@ export function DemoNavegacao() {
 
       <Example
         title="Barra de topo"
-        note="Caminho à esquerda, busca de 328 × 36 à direita, avatar de 36 e o menu de reticências."
+        note="Caminho à esquerda, busca à direita, avatar de 36 e o menu de reticências. A busca mede 240 até 1536px de janela e 328 acima disso: quem cede espaço é ela, porque o nome da pasta cresce e o caminho não pode encolher."
       >
-        <Larga min={700}>
+        {/* 880, e não 700: com três itens o caminho pede 404 e só para de
+            apertar a partir de 840. Abaixo disso ele transborda por baixo da
+            busca, porque os itens já estão no mínimo e o caminho não recorta. */}
+        <Larga min={880}>
           <div className="flex flex-col gap-3">
           <div style={{ background: COLOR.canvas, borderRadius: RADIUS.md }}>
             <Header trail={[{ label: 'Pastas' }]} />

@@ -4,7 +4,7 @@ import { Icon } from '@/components/icons'
 import { DocsSearch } from '@docs/shell/DocsSearch'
 
 /**
- * Barra de topo do documento — a mesma do produto (`Header`): 56 de altura,
+ * Barra de topo do documento: a mesma do produto (`Header`): 56 de altura,
  * px-16 py-8, gap 12, sobre o canvas, com o caminho à esquerda e a pílula de
  * busca de 328 à direita.
  *
@@ -13,7 +13,7 @@ import { DocsSearch } from '@docs/shell/DocsSearch'
  * segundo lugar para buscar seria inventar um padrão só para esta página.
  *
  * O que a barra do produto tem e esta não: avatar, "…" e expandir. Nada disso
- * tem sentido num documento sem conta nem tela cheia — a barra fica com o par
+ * tem sentido num documento sem conta nem tela cheia: a barra fica com o par
  * caminho + busca, que é o que ela entrega aqui.
  */
 

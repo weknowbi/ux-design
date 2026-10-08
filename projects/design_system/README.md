@@ -111,7 +111,7 @@ código junto da peça convida a copiá-lo, e enquanto o design system não for
 pacote essa chamada é a do protótipo, não um contrato publicado.
 
 Um agente, porém, não compõe tela nenhuma sem os nomes das propriedades. O
-`api.json` resolve os dois lados — o dado existe, rotulado pelo que é, e não
+`api.json` resolve os dois lados, o dado existe, rotulado pelo que é, e não
 aparece onde seria copiado sem ler o rótulo.
 
 O extrator não adivinha: quando não consegue ler as propriedades de um

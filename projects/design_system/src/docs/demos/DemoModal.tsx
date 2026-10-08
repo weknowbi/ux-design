@@ -6,7 +6,7 @@ import { FilterModal } from '@/components/FilterModal'
 import { Example } from '@docs/blocks/Example'
 
 /**
- * Os dois modais de produção, abertos de verdade — inclusive o véu sobre a
+ * Os dois modais de produção, abertos de verdade: inclusive o véu sobre a
  * página inteira, que é parte do componente e não do palco.
  *
  * Abrir para valer é o único jeito de mostrar o que a espec. não diz: o foco
@@ -31,7 +31,7 @@ export function DemoModal() {
   return (
     <>
       <Example
-        title="Um campo só — 420"
+        title="Um campo só (420)"
         note="Cabeçalho de 64, campo do design system e rodapé com fantasma + primário. O primário só habilita com o campo preenchido."
       >
         <Btn onClick={() => setPrompt(true)}>Criar pasta</Btn>
@@ -49,7 +49,7 @@ export function DemoModal() {
       </Example>
 
       <Example
-        title="Escolha em lista — 610"
+        title="Escolha em lista (610)"
         note="A mesma moldura, mais larga, com busca e árvore. É aqui que a caixa de seleção aparece no produto."
       >
         <Btn variant="outlined" onClick={() => setFiltros(true)}>

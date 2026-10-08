@@ -4,7 +4,7 @@ import { Icon } from '@/components/icons'
 import { PAGES } from '@docs/docs/registry'
 
 /**
- * Busca do documento — a pílula de `TOPBAR.search`, com as medidas do
+ * Busca do documento: a pílula de `TOPBAR.search`, com as medidas do
  * produto: 36 de altura, raio 200, pl-16 pr-12, gap 8, texto 16/20.
  *
  * Ela mora na barra de topo, no mesmo lugar em que o portal procura painéis e

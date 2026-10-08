@@ -4,7 +4,7 @@ import type { Group, Status } from '@docs/docs/registry'
 import { NAV_DIVIDER, SIDEBAR_PAD } from '@docs/shell/layout'
 
 /**
- * As páginas do grupo aberto — a segunda coluna, ao lado do menu.
+ * As páginas do grupo aberto: a segunda coluna, ao lado do menu.
  *
  * Ela está **no canvas**, não dentro da folha: as duas listas são o mesmo
  * sistema de navegação, e um fundo diferente para cada uma dizia que eram
@@ -17,11 +17,11 @@ import { NAV_DIVIDER, SIDEBAR_PAD } from '@docs/shell/layout'
  *
  * O item tem a altura do item da barra (40) para que as linhas das duas
  * colunas se alinhem. O que distingue os níveis é o ícone (20 contra 24) e o
- * corpo do texto (13,5 contra 14) — altura, aqui, é o que os costura.
+ * corpo do texto (13,5 contra 14), altura, aqui, é o que os costura.
  *
  * Com o menu aberto, um fio na borda esquerda separa os dois níveis: mesmo
  * fundo, mesma altura de linha e larguras próximas faziam a segunda lista
- * parecer continuação da primeira. Recolhido ele sai — o trilho de ícones já
+ * parecer continuação da primeira. Recolhido ele sai, o trilho de ícones já
  * se anuncia pela forma, e a linha seria uma segunda voz dizendo o mesmo.
  */
 
@@ -50,7 +50,7 @@ export function GroupPages({
   group: Group
   current: string
   onNavigate: (id: string) => void
-  /** Fio na borda esquerda — só com o menu aberto. */
+  /** Fio na borda esquerda: só com o menu aberto. */
   divided?: boolean
 }) {
   /* A coluna aparece mesmo num grupo de uma página só. Escondê-la devolveria
@@ -93,7 +93,7 @@ export function GroupPages({
             }}
           >
             {/* A caixa continua de 24 para o ícone de 20 cair na mesma coluna
-                óptica do menu — o glifo é que encolhe, não a coluna. */}
+                óptica do menu: o glifo é que encolhe, não a coluna. */}
             <span
               className="shrink-0 flex items-center justify-center"
               style={{ width: LAYOUT.navIconSize, height: LAYOUT.navIconSize }}

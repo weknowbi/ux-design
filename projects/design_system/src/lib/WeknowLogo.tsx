@@ -1,7 +1,7 @@
 import { COLOR } from './tokens'
 
 /**
- * Símbolo Weknow (sem o wordmark) — usado como avatar da IA, seguindo o
+ * Símbolo Weknow (sem o wordmark), usado como avatar da IA, seguindo o
  * projeto base, onde a resposta da IA é assinada pela marca.
  */
 export function WeknowMark({ size = 16 }: { size?: number }) {
@@ -23,7 +23,7 @@ export function WeknowMark({ size = 16 }: { size?: number }) {
 }
 
 /**
- * Marca Weknow — paths originais extraídos do export do Figma (Chat.svg),
+ * Marca Weknow: paths originais extraídos do export do Figma (Chat.svg),
  * normalizados para o viewBox 0 0 93 28.
  */
 /** Tamanho do protótipo: 91,95 × 28 px. */

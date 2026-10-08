@@ -7,13 +7,13 @@ import { GROUPS, groupOf } from '@docs/docs/registry'
 import { SIDEBAR_PAD, SIDEBAR_RAIL_WIDTH, SIDEBAR_TRANSITION } from '@docs/shell/layout'
 
 /**
- * Menu do documento — a barra do produto (`PortalSidebar`), item por item:
+ * Menu do documento: a barra do produto (`PortalSidebar`), item por item:
  * 40 de altura, raio 8, ícone 24, texto 14/1.5, ativo com fundo `navActive` e
  * ícone `FILL 1`, rodapé colado na base, e o mesmo recolher em trilho.
  *
  * Só o conteúdo muda. Onde o portal lista aplicativos, aqui ficam os
  * **grupos** do documento. As páginas de cada grupo aparecem na coluna ao
- * lado (`GroupPages`), que é o segundo nível — a barra fica com um só, como a
+ * lado (`GroupPages`), que é o segundo nível: a barra fica com um só, como a
  * espec. de layout pede.
  *
  * A marca e o botão de recolher não moram aqui: ficam na faixa de topo

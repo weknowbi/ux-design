@@ -49,7 +49,12 @@ function Breadcrumb({ trail }: { trail: Crumb[] }) {
       {trail.map((crumb, i) => {
         const last = i === trail.length - 1
         const content = (
-          <span className="flex items-center min-w-0" style={{ gap: BREADCRUMB.gap }}>
+          /* `relative` por causa do rótulo só para leitor de tela: `sr-only` é
+             absoluto, e sem um ancestral posicionado ele se ancora no body.
+             Fora de qualquer caixa de rolagem, ele esticava o documento até
+             a posição onde calhou de cair e criava uma segunda barra de
+             rolagem na janela. */
+          <span className="relative flex items-center min-w-0" style={{ gap: BREADCRUMB.gap }}>
             {crumb.icon && (
               <span
                 className="shrink-0 flex items-center justify-center"
