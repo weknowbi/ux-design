@@ -9,6 +9,7 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["../weknow_ask/src/*"],
+      "@ds/*": ["./src/lib/*"],
       "@docs/*": ["./src/*"]
     },
     "allowImportingTsExtensions": true,

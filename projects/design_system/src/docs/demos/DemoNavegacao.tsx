@@ -35,12 +35,21 @@ function Canvas({ children, style }: { children: React.ReactNode; style?: React.
 }
 
 /**
- * A casca inteira é mais larga que a coluna de texto deste documento: só a
- * barra e a pílula de busca já passam de 580. Em vez de encolher a peça, que
- * mostraria medidas que não existem, o palco rola na horizontal e a peça fica
- * no tamanho real.
+ * A casca inteira é mais larga que a coluna de texto deste documento. Em vez
+ * de encolher a peça, que mostraria medidas que não existem, o palco rola na
+ * horizontal e a peça fica no tamanho real.
+ *
+ * O mínimo não é chutado, é a soma das partes que não encolhem. Na faixa de
+ * topo: 16 de folga + caminho (o Figma dá 220 de teto ao último item) + 12 +
+ * busca de 328 + 12 + reticências de 24 + 12 + avatar de 36 + 16 = 660. Com o
+ * menu de 255 ao lado, a casca inteira pede 915, e 960 deixa o caminho
+ * respirar em vez de encostar na busca.
+ *
+ * Com 760, que era o valor anterior, sobravam 505 para uma faixa que precisa
+ * de 660: o caminho era espremido até virar "Pas", a busca passava por cima
+ * dele e o avatar ficava fora do palco.
  */
-function Larga({ min = 760, children }: { min?: number; children: React.ReactNode }) {
+function Larga({ min = 960, children }: { min?: number; children: React.ReactNode }) {
   return (
     <div className="w-full overflow-x-auto">
       <div style={{ minWidth: min }}>{children}</div>
@@ -153,7 +162,7 @@ export function DemoNavegacao() {
         title="Barra de topo"
         note="Caminho à esquerda, busca de 328 × 36 à direita, avatar de 36 e o menu de reticências."
       >
-        <Larga min={620}>
+        <Larga min={700}>
           <div className="flex flex-col gap-3">
           <div style={{ background: COLOR.canvas, borderRadius: RADIUS.md }}>
             <Header trail={[{ label: 'Pastas' }]} />

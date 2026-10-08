@@ -22,6 +22,7 @@ import {
 } from '@/components/browser/Items'
 import { useAppearances } from '@/components/browser/appearance'
 import { PORTAL_ROOT, findFolderPath, initialFavorites, type Folder } from '@/data/portal'
+import avatar from '@/assets/avatar.jpg'
 
 /**
  * Tela do portal — a que antecede o Weknow Ask.
@@ -274,7 +275,7 @@ export function PortalScreen({ onNavigate }: { onNavigate: (route: PortalRoute) 
         className="flex flex-col"
         style={{ width: '100%', height: '100dvh', background: COLOR.canvas, fontFamily: FONT }}
       >
-        <MobileTopBar onMenu={() => setDrawerOpen(true)} />
+        <MobileTopBar onMenu={() => setDrawerOpen(true)} avatar={avatar} />
 
         <main
           ref={mainRef}

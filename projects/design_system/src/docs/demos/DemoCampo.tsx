@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { FormField, Select, fieldBoxStyle, fieldTextStyle } from '@/components/Field'
+import { FormField, Select, fieldBoxStyle, fieldTextStyle } from '@ds/Field'
 import { Example, Specimen } from '@docs/blocks/Example'
 
 const PASTAS = [

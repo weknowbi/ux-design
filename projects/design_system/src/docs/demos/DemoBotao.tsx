@@ -1,4 +1,4 @@
-import { Btn, IconBtn, type BtnVariant } from '@/components/Btn'
+import { Btn, IconBtn, type BtnVariant } from '@ds/Btn'
 import { Icon } from '@/components/icons'
 import { Example, Specimen, DoDont, DoDontCard } from '@docs/blocks/Example'
 

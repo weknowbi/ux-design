@@ -6,6 +6,7 @@ import { Header, type Crumb, type MenuItem } from '@/components/Header'
 import { PortalSidebar, type PortalRoute } from '@/components/PortalSidebar'
 import { SidebarBrand } from '@/components/SidebarBrand'
 import { MobileDrawer, MobileTopBar } from '@/components/MobileNav'
+import avatar from '@/assets/avatar.jpg'
 
 /**
  * A moldura de toda tela do portal: marca, barra de topo, menu lateral e a
@@ -64,7 +65,7 @@ export function AppShell({
         className="flex flex-col"
         style={{ width: '100%', height: '100dvh', background: COLOR.canvas, fontFamily: FONT }}
       >
-        <MobileTopBar onMenu={() => setDrawerOpen(true)} />
+        <MobileTopBar onMenu={() => setDrawerOpen(true)} avatar={avatar} />
 
         <main
           ref={mainRef}

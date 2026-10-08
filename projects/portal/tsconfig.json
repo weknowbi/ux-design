@@ -8,7 +8,8 @@
     "moduleResolution": "bundler",
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@ds/*": ["../design_system/src/lib/*"]
     },
     "allowImportingTsExtensions": true,
     "resolveJsonModule": true,

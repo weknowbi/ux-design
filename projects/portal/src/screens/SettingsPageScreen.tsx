@@ -2,7 +2,7 @@ import { useMemo, useState, type ReactNode } from 'react'
 import { COLOR, FONT, TABLE } from '@/design/tokens'
 import { useIsMobile } from '@/design/viewport'
 import { AppShell } from '@/components/AppShell'
-import { Button } from '@/components/Button'
+import { Btn as Button } from '@ds/Btn'
 import { FolderHeader } from '@/components/FolderHeader'
 import { FilterChip, SearchField } from '@/components/Hero'
 import { Icon } from '@/components/icons'
@@ -348,7 +348,7 @@ export function SettingsPageScreen({ pageId, onRoute }: { pageId: string; onRout
         icon={page.icon}
         onBack={() => go('/configuracoes')}
         compact={isMobile}
-        aside={!isMobile && current.action ? <Button icon="add">{current.action}</Button> : undefined}
+        aside={!isMobile && current.action ? <Button iconLeft="add">{current.action}</Button> : undefined}
       />
 
       {/* As três telas de cadastro de gente são irmãs, e trocar entre elas é o
@@ -384,7 +384,7 @@ export function SettingsPageScreen({ pageId, onRoute }: { pageId: string; onRout
               <SearchField query={query} onQuery={setQuery} placeholder={`Pesquise em ${page.name}`} />
             </div>
           )}
-          {current.action && <Button icon="add">Novo</Button>}
+          {current.action && <Button iconLeft="add">Novo</Button>}
         </div>
       )}
     </>

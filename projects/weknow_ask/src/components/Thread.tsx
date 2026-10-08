@@ -1,5 +1,5 @@
 import { COLOR, FONT, LAYOUT } from '@/design/tokens'
-import { Btn } from '@/components/Btn'
+import { Btn } from '@ds/Btn'
 import { FadeScroll } from '@/components/FadeScroll'
 import { FilterChipTag } from '@/components/FilterChipTag'
 import { Table, type Column } from '@/components/Table'

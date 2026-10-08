@@ -15,8 +15,8 @@ import {
   useAppearance,
   type Appearance,
 } from '@/components/browser/appearance'
-import { Btn } from '@/components/Btn'
-import { FormField, fieldBoxStyle, fieldTextStyle } from '@/components/Field'
+import { Btn } from '@ds/Btn'
+import { FormField, fieldBoxStyle, fieldTextStyle } from '@ds/Field'
 
 /**
  * `meta`: coluna de metadado da Lista (conteúdo da pasta ou onde o item mora).

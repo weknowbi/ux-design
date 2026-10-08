@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { COLOR, FONT } from '@/design/tokens'
-import { Btn } from '@/components/Btn'
-import { FormField, fieldBoxStyle, fieldTextStyle } from '@/components/Field'
+import { Btn } from '@ds/Btn'
+import { FormField, fieldBoxStyle, fieldTextStyle } from '@ds/Field'
 import { Icon } from '@/components/icons'
 
 /**

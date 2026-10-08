@@ -23,6 +23,9 @@ export default defineConfig({
   resolve: {
     alias: {
       '@docs': path.resolve(import.meta.dirname, './src'),
+      /* As peças que JÁ se mudaram para cá. O `@` continua apontando para o
+         ASK enquanto o resto do produto não vem junto. */
+      '@ds': path.resolve(import.meta.dirname, './src/lib'),
       '@': ASK,
     },
     // Sem isso, o build de producao (diferente do "npm run dev") resolve

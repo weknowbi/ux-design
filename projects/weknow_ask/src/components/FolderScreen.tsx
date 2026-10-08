@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { COLOR, FONT, LAYOUT } from '@/design/tokens'
-import { Btn } from '@/components/Btn'
+import { Btn } from '@ds/Btn'
 import { Icon } from '@/components/icons'
 import { MENU_ITEM, MENU_PANEL, menuItemStyle } from '@/components/ChatRowMenu'
 import { PromptModal } from '@/components/PromptModal'
@@ -184,7 +184,7 @@ export function FolderScreen({
           >
             {folder.label}
           </h1>
-          <Btn variant="primary" iconLeft={<Icon name="add" size={20} />} onClick={onNewChat}>
+          <Btn variant="primary" iconLeft="add" onClick={onNewChat}>
             Nova conversa
           </Btn>
         </div>

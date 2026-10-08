@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
-import { COLOR, FONT } from '@/design/tokens'
-import { Icon } from '@/components/icons'
+import { COLOR, FONT } from './tokens'
+import { Icon } from './icons'
 
 /**
  * Campo de formulário do design system — espec. do nó `form-item` (4454:8719):
@@ -17,6 +17,10 @@ import { Icon } from '@/components/icons'
  *
  * Repare que o raio aqui é 6 — os campos de busca dos modais usam 8, por
  * especificação própria. Não são o mesmo componente.
+ *
+ * O portal tinha uma segunda cópia deste arquivo, idêntica salvo por aceitar
+ * só texto no erro. Esta versão fica com o tipo mais largo (`ReactNode`), que
+ * é superset do outro: nada que funcionava no portal deixa de funcionar.
  */
 
 export const FIELD = {

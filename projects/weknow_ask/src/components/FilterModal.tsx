@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { COLOR, FONT } from '@/design/tokens'
-import { Btn } from '@/components/Btn'
+import { Btn } from '@ds/Btn'
 import { Icon } from '@/components/icons'
 import { FILTER_TREE, type FilterChip } from '@/data/conversation'
 
