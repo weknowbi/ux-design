@@ -53,7 +53,9 @@ aconteceu porque eram dois arquivos e ninguém avisa quando só um muda.
 | `Menu.tsx` | duas cópias idênticas |
 | `Tooltip.tsx` | duas cópias idênticas |
 | `WeknowLogo.tsx` | duas cópias idênticas |
-| `MobileNav.tsx` | duas cópias idênticas; a foto da conta passou a entrar por propriedade |
+| `MobileNav.tsx` | duas cópias idênticas; a conta passou a entrar por propriedade, hoje como o `AccountMenu` |
+| `AccountMenu.tsx` | nasceu aqui: a foto das duas barras era um botão sem função nos dois apps |
+| `account.ts` | nasceu aqui: a foto escolhida pela pessoa, no navegador |
 | `BrowserControls.tsx` | duas cópias idênticas |
 | `prefs.ts` | duas cópias idênticas; o tipo do acervo virou a forma mínima `Sortable` |
 | `appearance.ts` | duas cópias idênticas |

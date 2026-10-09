@@ -6,7 +6,8 @@ import { Header, type Crumb, type MenuItem } from '@/components/Header'
 import { PortalSidebar, type PortalRoute } from '@/components/PortalSidebar'
 import { SidebarBrand } from '@/components/SidebarBrand'
 import { MobileDrawer, MobileTopBar } from '@/components/MobileNav'
-import avatar from '@/assets/avatar.jpg'
+import { AccountMenu } from '@ds/AccountMenu'
+import { CURRENT_USER } from '@/data/account'
 
 /**
  * A moldura de toda tela do portal: marca, barra de topo, menu lateral e a
@@ -65,7 +66,19 @@ export function AppShell({
         className="flex flex-col"
         style={{ width: '100%', height: '100dvh', background: COLOR.canvas, fontFamily: FONT }}
       >
-        <MobileTopBar onMenu={() => setDrawerOpen(true)} avatar={avatar} />
+        <MobileTopBar
+          onMenu={() => setDrawerOpen(true)}
+          /* 32 e não 36: a barra do celular tem 56 de altura e o alvo de toque
+             do botão é a foto inteira, com a folga de 8 das laterais. */
+          account={
+            <AccountMenu
+              name={CURRENT_USER.name}
+              email={CURRENT_USER.email}
+              photo={CURRENT_USER.photo}
+              size={32}
+            />
+          }
+        />
 
         <main
           ref={mainRef}

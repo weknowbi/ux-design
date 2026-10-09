@@ -29,6 +29,9 @@ lugar.
    tela criaria um segundo padrão para a mesma tarefa.
 8. O caminho começa onde a folha começa, com o menu aberto ou recolhido. Ele é
    o rótulo da folha, então pertence à coluna dela.
+9. A foto da barra é a porta da conta, e é a mesma nos dois tamanhos de tela.
+   Ela abre o nome, o e-mail e a troca de foto, e nada além: o que o menu
+   lateral já oferece não se repete lá dentro.
 
 ## Recolher é escolha de quem usa
 
@@ -41,6 +44,32 @@ não espera encontrar o outro aberto.
 No trilho não cabe o switch de tema, então o próprio item passa a alternar o
 tema quando recebe o clique. A transição entre os dois estados usa a curva
 `emphasized` do Material 3, que sai rápido e assenta devagar.
+
+## A conta mora na foto, não na gaveta
+
+O celular tem uma gaveta e a mesa não tem. Resolver perfil dentro da gaveta
+resolveria para metade das pessoas e deixaria a outra metade sem onde ler o
+próprio nome. Foi exatamente o que aconteceu enquanto a foto era um botão sem
+função.
+
+A foto, ao contrário da gaveta, está no mesmo canto nos dois modos. O menu que
+sai dela é um componente só, e por isso a conta responde igual no celular e na
+mesa. A foto escolhida fica no `localStorage`, na chave `wk-account-photo`,
+recortada quadrada antes de guardar.
+
+Sem foto, a cara da conta é a inicial do nome sobre o tingido de marca, com a
+letra na cor de marca: o mesmo par do item aberto no menu lateral, que está
+na coluna ao lado. Assim o círculo entra como parte da interface, e não como
+um selo colorido competindo com a foto de quem tem uma.
+
+Remover a foto leva a esse estado, e não de volta à que veio com a conta. A
+foto de origem também é foto, e devolvê-la seria devolver justamente o que a
+pessoa acabou de dispensar. Por isso "sem foto" é um estado guardado, e não a
+ausência de um valor.
+
+Dentro do menu não entram Tema, Ajuda nem Sair. Os três já estão no pé do menu
+lateral, nos dois modos, e duas portas para o mesmo lugar custam mais do que
+economizam, ainda mais quando uma delas é "Sair".
 
 ## Em aberto
 

@@ -23,14 +23,15 @@ const LOGO_W = (91.95 * LOGO_H) / 28
 
 export function MobileTopBar({
   onMenu,
-  avatar,
+  account,
 }: {
   onMenu: () => void
   /**
-   * Foto da conta. Entra por fora porque é conteúdo do produto, não peça do
-   * design system: a biblioteca não deve carregar a imagem de ninguém.
+   * A conta, à direita: o `AccountMenu` com a foto do app. Entra por fora
+   * porque a foto é conteúdo do produto, e a biblioteca não carrega a
+   * imagem de ninguém.
    */
-  avatar: string
+  account: ReactNode
 }) {
   return (
     <header
@@ -54,20 +55,7 @@ export function MobileTopBar({
         <WeknowLogo width={LOGO_W} height={LOGO_H} />
       </div>
 
-      <button
-        type="button"
-        title="Conta"
-        aria-label="Conta"
-        className="shrink-0 rounded-full overflow-hidden relative transition-opacity active:opacity-80"
-        style={{ width: 32, height: 32 }}
-      >
-        <img
-          src={avatar}
-          alt=""
-          className="absolute max-w-none"
-          style={{ width: '200%', height: '249.91%', left: '-50%', top: '-11.84%' }}
-        />
-      </button>
+      {account}
     </header>
   )
 }

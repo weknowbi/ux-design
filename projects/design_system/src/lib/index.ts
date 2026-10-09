@@ -29,10 +29,12 @@ export * from './Menu'
 export * from './Tooltip'
 export * from './WeknowLogo'
 export * from './MobileNav'
+export * from './AccountMenu'
 export * from './BrowserControls'
 
 /* estado e utilidades */
 export * from './prefs'
 export * from './appearance'
+export * from './account'
 export * from './sidebar'
 export * from './format'

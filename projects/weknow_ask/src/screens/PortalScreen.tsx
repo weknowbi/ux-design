@@ -22,7 +22,8 @@ import {
 } from '@/components/browser/Items'
 import { useAppearances } from '@/components/browser/appearance'
 import { PORTAL_ROOT, findFolderPath, initialFavorites, type Folder } from '@/data/portal'
-import avatar from '@/assets/avatar.jpg'
+import { AccountMenu } from '@ds/AccountMenu'
+import { CURRENT_USER } from '@/data/account'
 
 /**
  * Tela do portal — a que antecede o Weknow Ask.
@@ -275,7 +276,19 @@ export function PortalScreen({ onNavigate }: { onNavigate: (route: PortalRoute) 
         className="flex flex-col"
         style={{ width: '100%', height: '100dvh', background: COLOR.canvas, fontFamily: FONT }}
       >
-        <MobileTopBar onMenu={() => setDrawerOpen(true)} avatar={avatar} />
+        <MobileTopBar
+          onMenu={() => setDrawerOpen(true)}
+          /* 32 e não 36: a barra do celular tem 56 de altura e o alvo de toque
+             do botão é a foto inteira, com a folga de 8 das laterais. */
+          account={
+            <AccountMenu
+              name={CURRENT_USER.name}
+              email={CURRENT_USER.email}
+              photo={CURRENT_USER.photo}
+              size={32}
+            />
+          }
+        />
 
         <main
           ref={mainRef}

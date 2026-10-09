@@ -3,7 +3,8 @@ import { BREADCRUMB, COLOR, FONT, TOPBAR } from '@/design/tokens'
 import { Icon } from '@/components/icons'
 import { ThemeRow } from '@/components/ThemeSwitch'
 import { Dropdown, MenuAction as DropdownAction } from '@/components/browser/Menu'
-import avatar from '@/assets/avatar.jpg'
+import { AccountMenu } from '@ds/AccountMenu'
+import { CURRENT_USER } from '@/data/account'
 
 /**
  * Barra de topo — medidas do nó `Frame 427319838` (WP-832, 4454:7125):
@@ -352,20 +353,14 @@ export function Header({
       <OverflowMenu items={menuItems} />
       <TopIcon name="expand_content" title="Expandir" />
 
-      {/* Avatar — foto de 36px, recortada como no nó 3630:4012 */}
-      <button
-        title="Conta"
-        aria-label="Conta"
-        className="shrink-0 rounded-full overflow-hidden relative transition-opacity hover:opacity-90"
-        style={{ width: TOPBAR.avatarSize, height: TOPBAR.avatarSize }}
-      >
-        <img
-          src={avatar}
-          alt=""
-          className="absolute max-w-none"
-          style={{ width: '200%', height: '249.91%', left: '-50%', top: '-11.84%' }}
-        />
-      </button>
+      {/* A foto de 36 do nó 3630:4012, agora com o menu da conta atrás dela:
+          é onde se lê o próprio nome e se troca a foto. */}
+      <AccountMenu
+        name={CURRENT_USER.name}
+        email={CURRENT_USER.email}
+        photo={CURRENT_USER.photo}
+        size={TOPBAR.avatarSize}
+      />
     </header>
   )
 }
