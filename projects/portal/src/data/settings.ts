@@ -195,7 +195,7 @@ export const USERS: User[] = [
   { code: 27, name: 'Beatriz Nogueira', email: 'beatriz.nogueira@hsj.com.br', active: true, roles: LEITOR, userGroups: ['Usuarios'], contactGroups: ['Externos'], expiresAt: '2026-12-31', lastSeen: days(5) },
   { code: 8, name: 'Bruno Tavares', email: 'bruno.tavares@weknow.com.br', active: false, roles: ANALISTA, userGroups: ['Analistas'], contactGroups: [], lastSeen: days(180) },
   { code: 41, name: 'Camila Ferraz', email: 'camila.ferraz@weknow.com.br', active: true, roles: ANALISTA, userGroups: ['Analistas'], contactGroups: ['Diretoria'], lastSeen: days(1) },
-  { code: 22, name: 'Carlos Pereira', email: 'carlos.pereira@weknow.com.br', active: true, roles: ADMIN, userGroups: ['Administrators'], contactGroups: [], lastSeen: days(0) },
+  { code: 22, name: 'Matt Murdock', email: 'matt.murdock@weknow.com.br', active: true, roles: ADMIN, userGroups: ['Administrators'], contactGroups: [], lastSeen: days(0) },
   { code: 30, name: 'Cláudia Menezes, Faturamento SUS', email: 'claudia.menezes@hsj.com.br', active: true, roles: LEITOR, userGroups: ['Usuarios'], contactGroups: ['Externos', 'Faturamento'], lastSeen: days(7) },
   { code: 44, name: 'Diego Rampelotti', email: 'diego.rampelotti@weknow.com.br', active: true, roles: ANALISTA, userGroups: ['Analistas'], contactGroups: [], lastSeen: days(2) },
   { code: 17, name: 'Eduardo Hoffmann', email: 'eduardo.hoffmann@hsj.com.br', active: false, roles: LEITOR, userGroups: ['Usuarios'], contactGroups: ['Externos'], expiresAt: '2025-06-30', lastSeen: days(320) },

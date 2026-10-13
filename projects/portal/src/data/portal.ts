@@ -24,7 +24,7 @@ let seq = 0
 // O `seq` espalha as horas: sem ele, todo item cairia no mesmo minuto do dia.
 const daysAgo = (d: number) => new Date(Date.now() - d * 86_400_000 - ((seq * 97) % 540) * 60_000).toISOString()
 
-const AUTHORS = ['Admin', 'Mariana Souza', 'Carlos Pereira', 'Admin', 'Juliana Lima', 'Rafael Costa']
+const AUTHORS = ['Admin', 'Mariana Souza', 'Matt Murdock', 'Admin', 'Juliana Lima', 'Rafael Costa']
 const author = () => AUTHORS[(seq * 7) % AUTHORS.length]
 
 /**

@@ -11,8 +11,8 @@ import avatar from '@/assets/avatar.jpg'
  * No produto isto vem da sessão; aqui é constante porque não há login.
  */
 export const CURRENT_USER = {
-  name: 'Carlos Pereira',
-  email: 'carlos.pereira@weknow.com.br',
+  name: 'Matt Murdock',
+  email: 'matt.murdock@weknow.com.br',
   /** A foto de origem. A que a pessoa trocar fica no navegador (ver `account` da biblioteca). */
   photo: avatar,
 }
