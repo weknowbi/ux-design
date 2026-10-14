@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useLayoutEffect, useCallback } from 'react'
 import svgPaths from '@/imports/WeknowInsight/svg-sq3uvwlqzn'
 import imgCurrentUser from '@/imports/matt-murdock-avatar.jpg'
+import imgFoggy from '@/imports/foggy-nelson-avatar.jpg'
 import weknowIcon from '@/imports/weknow-icon.png'
 
 type RightTab = 'momento' | 'conversa' | 'ficha'
@@ -1003,7 +1004,7 @@ const ROLE_OPTIONS: { value: ShareRole; icon: string; label: string; description
 const CURRENT_USER_ID = 'u-matt'
 
 const WORKSPACE_PEOPLE: { id: string; name: string; email: string; avatar?: string }[] = [
-  { id: 'u-foggy',  name: 'Foggy Nelson', email: 'foggy.nelson@weknow.com.br' },
+  { id: 'u-foggy',  name: 'Foggy Nelson', email: 'foggy.nelson@weknow.com.br', avatar: imgFoggy },
   { id: 'u-ana',     name: 'Ana Beatriz',    email: 'ana.beatriz@weknow.com.br' },
   { id: 'u-carlos',  name: 'Carlos Nunes',   email: 'carlos.nunes@weknow.com.br' },
   { id: 'u-juliana', name: 'Juliana Prado',  email: 'juliana.prado@weknow.com.br' },
@@ -1012,7 +1013,7 @@ const WORKSPACE_PEOPLE: { id: string; name: string; email: string; avatar?: stri
 
 const INITIAL_SHARED_PEOPLE: SharePerson[] = [
   { id: CURRENT_USER_ID, name: 'Matt Murdock', email: 'matt.murdock@weknow.com.br', avatar: imgCurrentUser, role: 'owner' },
-  { id: 'u-foggy', name: 'Foggy Nelson', email: 'foggy.nelson@weknow.com.br', role: 'commenter' },
+  { id: 'u-foggy', name: 'Foggy Nelson', email: 'foggy.nelson@weknow.com.br', avatar: imgFoggy, role: 'commenter' },
 ]
 
 const AVATAR_TONES = [
@@ -1791,7 +1792,7 @@ function AnalysisEditor({
               className="-mx-3 mb-3 flex gap-3 rounded-lg px-3 py-2 cursor-pointer outline-none transition-[background-color,box-shadow] duration-150 hover:bg-[#f1f2f4] focus-visible:bg-[#f1f2f4] focus-visible:shadow-[0_0_0_2px_rgba(51,102,204,0.18)]"
             >
               <div className="shrink-0 mt-0.5">
-                <Avatar name="Foggy Nelson" size={32} />
+                <Avatar name="Foggy Nelson" avatar={imgFoggy} size={32} />
               </div>
               <div className="flex-1">
                 <div className="flex items-baseline gap-2 mb-1">
