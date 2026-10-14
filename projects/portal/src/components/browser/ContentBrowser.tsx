@@ -148,11 +148,15 @@ export function ContentBrowser({
   ) : undefined
 
   /* Tarefas e Apresentações são listas planas: nada de pasta, favorito ou
-     seção — só a mesma anatomia de lista com outros rótulos de coluna. */
-  if (section !== 'pastas') {
+     seção — só a mesma anatomia de lista com outros rótulos de coluna.
+
+     Só enquanto não há busca: digitar sai da aba e entra na busca do acervo,
+     que é sempre a mesma, venha o resultado de onde vier. Presa à aba aberta,
+     ela devolvia vazio para quem estava em Tarefas procurando um painel — e
+     foi essa a confusão que começou tudo. */
+  if (section !== 'pastas' && !q) {
     const source = section === 'tarefas' ? TASKS : PRESENTATIONS
-    const found = source.filter((item) => !q || normalize(item.name).includes(q))
-    const entries: Listed[] = sortItems(found, prefs.sort, prefs.dir).map((item) => ({ item, meta: item.code }))
+    const entries: Listed[] = sortItems([...source], prefs.sort, prefs.dir).map((item) => ({ item, meta: item.code }))
     return (
       <div className="flex flex-col gap-8">
         {entries.length ? (
@@ -167,7 +171,7 @@ export function ContentBrowser({
           />
         ) : (
           <p className="text-[14px] py-2" style={{ fontFamily: FONT, color: COLOR.textMuted }}>
-            {q ? 'Nada com esse nome por aqui.' : 'Nada cadastrado ainda.'}
+            Nada cadastrado ainda.
           </p>
         )}
       </div>

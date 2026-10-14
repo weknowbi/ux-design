@@ -39,6 +39,11 @@ const WIDE_MAX_WIDTH = 1760
 type Layout = 'dinamico' | 'padrao' | 'compacto'
 const LAYOUTS: Layout[] = ['dinamico', 'padrao', 'compacto']
 
+/* Um texto só para a busca do portal, em qualquer tela e com qualquer aba
+   aberta — ela procura sempre a mesma coisa. Antes ele seguia a aba
+   ("Pesquise em Pastas") e anunciava um recorte que a busca não faz. */
+const SEARCH_PLACEHOLDER = 'Pesquise por nome ou tag'
+
 /**
  * O menu "…" alterna o estágio do cadastro do cliente, não o desenho do card:
  * com as pastas já configuradas, ou como a atualização entra no ar, sem nenhum
@@ -172,19 +177,15 @@ export function PortalScreen({ onRoute }: { onRoute: (route: PortalRoute) => voi
     ...path.slice(hidden.length).map(toCrumb),
   ]
 
-  const searchScope = `Pesquise em ${CONTENT_TYPES.find((t) => t.id === section)!.label}`
+  /* Uma busca por tela. Na home é a do meio, e ela é a busca geral do
+     Weknow: varre o portal inteiro — pastas, subpastas e dashboards — e os
+     cards dizem de onde cada resultado veio. Enquanto a home está aberta, a
+     barra de topo recolhe a sua: duas caixas lado a lado, parecidas e com
+     escopos diferentes, deixavam o usuário sem saber qual usar.
 
-  /* Duas buscas na tela, dois papéis. A da barra de topo é a busca geral do
-     Weknow: procura no portal inteiro, de qualquer tela, e é a única cujos
-     resultados dizem o caminho — ali o item vem de qualquer lugar, e sem o
-     caminho a lista não se explica. A busca da tela ("Pesquise em Pastas",
-     "Pesquise nesta pasta") filtra o que já está listado, e por isso os cards
-     dela seguem sem caminho: seria o cabeçalho repetido card a card.
-
-     Uma caixa de texto só para as duas: o que muda é quem está com ela. Quem
-     digita assume a busca e o campo do outro lado se esvazia — dois campos com
-     o mesmo texto e escopos diferentes diriam que a tela tem duas respostas
-     para a mesma pergunta. */
+     Dentro de pasta a divisão continua: a busca do cabeçalho filtra a pasta
+     aberta e a barra de topo guarda a geral. Ali o título e o caminho de
+     volta estão na tela, e são eles que explicam o escopo. */
   const localQuery = globalSearch ? '' : query
   const onLocalQuery = useCallback((v: string) => {
     setGlobalSearch(false)
@@ -195,18 +196,24 @@ export function PortalScreen({ onRoute }: { onRoute: (route: PortalRoute) => voi
     setQuery(v)
   }, [])
 
-  /* A barra de topo fica com a busca geral do Weknow — a que procura além do
-     que está listado — sempre que a tela já tem uma busca própria: na home do
-     layout dinâmico (que leva a dela para a barra recolhida ao rolar), na do
-     padrão e dentro de qualquer pasta, que tem a sua no cabeçalho. Só a home
-     do compacto, que não tem busca, entrega a da barra para a lista.
+  /* A home tem busca no meio da tela no dinâmico, no padrão e no celular — e
+     é lá que ela fica. O compacto não tem herói nenhum, então ele é o único
+     que ainda empresta a barra de topo para filtrar a lista. */
+  const heroAtRoot = atRoot && (isMobile || dynamicHero || layout === 'padrao')
 
-     Dentro da pasta a barra já mudou de função: virava "Pesquise em <pasta>"
-     e quem entrava numa pasta perdia a busca geral sem aviso. */
-  const topbarSearch =
-    !atRoot || dynamicHero || layout === 'padrao'
-      ? { value: globalSearch ? query : '', onChange: onGlobalQuery, placeholder: 'Pesquise no Weknow', global: true }
-      : { value: localQuery, onChange: onLocalQuery, placeholder: searchScope }
+  /* Escondida, e não ausente: o campo sai de vista mas guarda o lugar dele na
+     barra, senão o caminho e o menu da conta dançariam ao entrar e sair de uma
+     pasta.
+
+     Dentro da pasta ela também fica escondida: lá a busca é a do cabeçalho,
+     que filtra a pasta aberta. Duas caixas na mesma tela, parecidas e com
+     escopos diferentes, era o que fazia o usuário não saber qual usar.
+
+     A exceção é o compacto, o único layout sem busca própria em tela alguma:
+     tirar a da barra deixaria a home sem nenhuma. */
+  const topbarSearch = heroAtRoot || !atRoot
+    ? { value: '', onChange: onGlobalQuery, placeholder: SEARCH_PLACEHOLDER, global: true, hidden: true }
+    : { value: localQuery, onChange: onLocalQuery, placeholder: SEARCH_PLACEHOLDER }
 
   const controls = <BrowserControls prefs={prefs} mobile={isMobile} />
 
@@ -275,10 +282,10 @@ export function PortalScreen({ onRoute }: { onRoute: (route: PortalRoute) => voi
     <div className="flex flex-col px-4 pb-16">
       {atRoot ? (
         <MobileHero
-          query={localQuery}
-          onQuery={onLocalQuery}
-          placeholder={searchScope}
-          section={section}
+          query={query}
+          onQuery={onGlobalQuery}
+          placeholder={SEARCH_PLACEHOLDER}
+          section={query ? null : section}
           onSection={openSection}
         />
       ) : (
@@ -309,10 +316,10 @@ export function PortalScreen({ onRoute }: { onRoute: (route: PortalRoute) => voi
   const desktopContent = dynamicHero ? (
     <div className="@container mx-auto flex flex-col px-8 pb-24" style={{ maxWidth: WIDE_MAX_WIDTH }}>
       <DynamicHero
-        query={localQuery}
-        onQuery={onLocalQuery}
-        placeholder={searchScope}
-        section={section}
+        query={query}
+        onQuery={onGlobalQuery}
+        placeholder={SEARCH_PLACEHOLDER}
+        section={query ? null : section}
         onSection={openSection}
         scrollRef={mainRef}
         onCollapsedChange={setHeroCollapsed}
@@ -362,10 +369,10 @@ export function PortalScreen({ onRoute }: { onRoute: (route: PortalRoute) => voi
     >
       {layout === 'padrao' && atRoot && (
         <Hero
-          query={localQuery}
-          onQuery={onLocalQuery}
-          placeholder={searchScope}
-          section={section}
+          query={query}
+          onQuery={onGlobalQuery}
+          placeholder={SEARCH_PLACEHOLDER}
+          section={query ? null : section}
           onSection={openSection}
         />
       )}

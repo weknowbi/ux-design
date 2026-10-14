@@ -118,7 +118,9 @@ function ContentTypeChips({
   compact = false,
   scroll = false,
 }: {
-  active: SectionId
+  /** `null` é o modo de busca: nenhuma aba acesa, porque a busca não é de
+      nenhuma delas — ela varre o acervo inteiro. */
+  active: SectionId | null
   onSelect: (id: SectionId) => void
   compact?: boolean
   /**
@@ -220,7 +222,7 @@ export function DynamicHero({
   query: string
   onQuery: (q: string) => void
   placeholder: string
-  section: SectionId
+  section: SectionId | null
   onSection: (id: SectionId) => void
   scrollRef: React.RefObject<HTMLElement | null>
   /** Ordenação e visualização: aparecem na barra quando o topo recolhe. */
@@ -407,7 +409,7 @@ export function MobileHero({
    * essa linha não tem espaço para ela. Sem ela ali, uma
    * pasta com dezenas de dashboards só se percorre rolando.
    */
-  section?: SectionId
+  section?: SectionId | null
   onSection?: (id: SectionId) => void
 }) {
   return (
@@ -418,7 +420,7 @@ export function MobileHero({
       style={{ background: COLOR.surface }}
     >
       <SearchField query={query} onQuery={onQuery} placeholder={placeholder} />
-      {section && onSection && <ContentTypeChips active={section} onSelect={onSection} scroll />}
+      {onSection && <ContentTypeChips active={section ?? null} onSelect={onSection} scroll />}
     </div>
   )
 }
@@ -434,7 +436,7 @@ export function Hero({
   query: string
   onQuery: (q: string) => void
   placeholder: string
-  section: SectionId
+  section: SectionId | null
   onSection: (id: SectionId) => void
 }) {
   return (
