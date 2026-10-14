@@ -18,9 +18,12 @@ import { PHOTO_REMOVED, readAvatarFile, setAccountPhoto, useAccountPhoto } from 
  * mesmo componente serve os dois sem bifurcar o layout. É o caminho do
  * Google (Drive, Gmail), que é onde este público já aprendeu a procurar.
  *
- * O que ele NÃO repete: Tema, Ajuda e Sair, que já moram no rodapé do menu
- * lateral nos dois modos. Duas portas para o mesmo lugar custam mais do que
- * economizam — principalmente quando uma delas é "Sair".
+ * "Alterar a minha senha" e "Sair" moram aqui porque é onde o Weknow sempre
+ * as teve: quem usa o produto abre a foto para sair, não o rodapé do menu
+ * lateral. Sair aparece nos dois lugares, e a repetição é barata perto de
+ * tirar do caminho conhecido a única ação que encerra a sessão.
+ *
+ * Tema e Ajuda ficam só no rodapé: essas ninguém vai procurar na foto.
  */
 
 /** Foto do cabeçalho do menu. Maior que a da barra, e é por ela que se troca. */
@@ -98,6 +101,8 @@ export function AccountMenu({
   photo,
   size = 36,
   align = 'right',
+  onChangePassword,
+  onSignOut,
 }: {
   name: string
   email: string
@@ -109,6 +114,13 @@ export function AccountMenu({
   /** 36 na barra de mesa (nó 3630:4012), 32 na do celular. */
   size?: number
   align?: 'left' | 'right'
+  /**
+   * Ações de conta, não de foto. As linhas existem com ou sem quem as
+   * atenda: nesta maquete elas só fecham o menu, como Ajuda e Sair do menu
+   * lateral, que também ainda não levam a lugar nenhum.
+   */
+  onChangePassword?: () => void
+  onSignOut?: () => void
 }) {
   /* Três estados, e não dois: escolheu uma foto, tirou a foto, ou não mexeu.
      `src` nulo é o caso sem foto, em que a cara vira a inicial do nome. */
@@ -231,6 +243,29 @@ export function AccountMenu({
                 Não consegui ler essa imagem.
               </p>
             )}
+
+            {/* Segundo fio: acima dele é a foto, abaixo é a conta. Sem ele,
+                "Sair" vira a quarta linha de uma lista sobre imagem — e a
+                ação mais séria do menu é a que menos pode ser lida de
+                passagem. */}
+            <div style={{ height: 1, background: COLOR.border, marginInline: -4, marginBlock: 4 }} />
+
+            <MenuAction
+              icon="lock"
+              label="Alterar a minha senha"
+              onSelect={() => {
+                onChangePassword?.()
+                close()
+              }}
+            />
+            <MenuAction
+              icon="logout"
+              label="Sair"
+              onSelect={() => {
+                onSignOut?.()
+                close()
+              }}
+            />
           </>
         )}
       </Dropdown>
