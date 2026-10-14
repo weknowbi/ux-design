@@ -3,6 +3,7 @@ import { COLOR, FONT } from './tokens'
 import { Icon } from './icons'
 import { Dropdown, MenuAction } from './Menu'
 import { PHOTO_REMOVED, readAvatarFile, setAccountPhoto, useAccountPhoto } from './account'
+import { PasswordDialog } from './PasswordDialog'
 
 /**
  * O menu da conta, ancorado na foto da barra de topo.
@@ -115,9 +116,15 @@ export function AccountMenu({
   size?: number
   align?: 'left' | 'right'
   /**
-   * Ações de conta, não de foto. As linhas existem com ou sem quem as
-   * atenda: nesta maquete elas só fecham o menu, como Ajuda e Sair do menu
-   * lateral, que também ainda não levam a lugar nenhum.
+   * Ações de conta, não de foto.
+   *
+   * Sem `onChangePassword`, "Alterar a minha senha" abre o diálogo da
+   * biblioteca — o menu já cuida do caminho inteiro da foto, e a senha é da
+   * mesma natureza. A prop existe para o produto trocar isso pelo fluxo que
+   * fala com o servidor.
+   *
+   * "Sair" continua sem quem o atenda nesta maquete, como o Sair do menu
+   * lateral: ele fecha o menu e mais nada.
    */
   onChangePassword?: () => void
   onSignOut?: () => void
@@ -134,6 +141,8 @@ export function AccountMenu({
    * não o fornecem. Aqui o erro aparece a um palmo do botão que o causou.
    */
   const [error, setError] = useState(false)
+  /** O diálogo da senha, quando o produto não traz o fluxo dele. */
+  const [senha, setSenha] = useState(false)
 
   const pick = async (file: File | undefined) => {
     if (!file) return
@@ -254,7 +263,8 @@ export function AccountMenu({
               icon="lock"
               label="Alterar a minha senha"
               onSelect={() => {
-                onChangePassword?.()
+                if (onChangePassword) onChangePassword()
+                else setSenha(true)
                 close()
               }}
             />
@@ -269,6 +279,10 @@ export function AccountMenu({
           </>
         )}
       </Dropdown>
+
+      {/* Pelo mesmo motivo do input abaixo: o painel some ao escolher a linha,
+          e o diálogo tem de sobreviver a isso. */}
+      {senha && <PasswordDialog account={email} onClose={() => setSenha(false)} />}
 
       {/* Fora do painel de propósito: o menu some ao fechar, e com o input
           dentro dele o arquivo escolhido chegaria a um elemento já removido. */}

@@ -30,6 +30,7 @@ export * from './Tooltip'
 export * from './WeknowLogo'
 export * from './MobileNav'
 export * from './AccountMenu'
+export * from './PasswordDialog'
 export * from './BrowserControls'
 
 /* estado e utilidades */
