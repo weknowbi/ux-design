@@ -1,0 +1,335 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cases — Weknow Healthtech</title>
+  <meta name="description" content="Histórias de hospitais, operadoras e clínicas que passaram a decidir com indicadores em tempo real usando o Weknow." />
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/src/styles/main.css" />
+</head>
+<body>
+
+<!-- ░░ HEADER ░░ -->
+<header class="header" id="header">
+  <div class="header__inner">
+    <a href="./" class="brand" aria-label="Weknow Healthtech, ir para o início">
+      <img class="brand__dark" src="/logo-weknow.svg" alt="Weknow Healthtech" width="92" height="28" />
+      <img class="brand__light" src="/logo-weknow-light.svg" alt="" aria-hidden="true" width="92" height="28" />
+    </a>
+
+    <nav class="nav" id="nav">
+      <a href="./">Sobre a Weknow</a>
+      <a href="./">Eventos</a>
+
+      <div class="nav__item" data-dropdown>
+        <button class="nav__toggle" aria-expanded="false" aria-controls="menu-solucoes">
+          Soluções
+          <svg viewBox="0 0 12 12" aria-hidden="true"><path d="M3 4.5L6 7.5l3-3" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <div class="nav__menu" id="menu-solucoes">
+          <a href="./"><strong>Command Centers</strong><span>A operação inteira em uma única visão</span></a>
+          <a href="./"><strong>Análise Inteligente</strong><span>IA que interpreta seus indicadores</span></a>
+          <a href="./"><strong>Inteligência Hospitalar</strong><span>Indicadores prontos por área de gestão</span></a>
+          <a href="./"><strong>Acreditações</strong><span>ONA, Qmentum e JCI com evidência pronta</span></a>
+          <a class="nav__menu-foot" href="./#como-funciona">Ver como conectamos seus sistemas</a>
+        </div>
+      </div>
+
+      <a href="./">Blog</a>
+      <a href="cases.html" aria-current="page">Cases</a>
+      <a href="./">Trabalhe conosco</a>
+      <a href="./">Contato</a>
+    </nav>
+
+    <div class="header__actions">
+      <a href="./" class="btn btn--outline">
+        Teste grátis
+        <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2.5 8h10M9 4.5L12.5 8 9 11.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </a>
+    </div>
+
+    <button class="burger" aria-label="Abrir menu" aria-expanded="false" data-burger>
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</header>
+
+<main>
+
+<!-- ░░ 1. TOPO CLARO ░░ -->
+<section class="cases-hero">
+  <div class="container container--narrow cases-hero__inner">
+    <h1>Depoimentos e cases de&nbsp;sucesso</h1>
+    <p>Saiba como instituições de saúde estão aumentando sua receita e reduzindo seus custos com o&nbsp;Weknow.</p>
+  </div>
+</section>
+
+<!-- ░░ 2. CASE EM DESTAQUE ░░ -->
+<section class="case-feature">
+  <div class="container">
+    <a class="case-video case-feature__video reveal" href="https://www.youtube.com/watch?v=Jvyyk5Oiif4"
+       target="_blank" rel="noopener noreferrer">
+      <img src="/imagens/unimed-litoral.jpeg" width="1280" height="853"
+           alt="Fachada do Hospital Unimed Litoral, em Balneário Camboriú" />
+      <span class="case-video__play" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="M9 6.5l9 5.5-9 5.5z" fill="currentColor"/></svg>
+      </span>
+      <span class="case-video__label">
+        Ver o case em vídeo
+        <small>Unimed Litoral · Balneário Camboriú · 4 min</small>
+      </span>
+    </a>
+
+    <div class="case-feature__head">
+      <h2>Unimed Litoral:<br /> o fluxo que voltou a&nbsp;andar.</h2>
+      <p>Uma visão integrada dos fluxos ajudou as equipes a identificar gargalos, antecipar necessidades e agir com mais agilidade, sem trocar o sistema de gestão.</p>
+    </div>
+
+    <ul class="case-feature__stats">
+      <li class="reveal">
+        <strong data-count="76" data-suffix="%">0%</strong>
+        <span>redução de gargalos</span>
+      </li>
+      <li class="reveal">
+        <strong data-count="11" data-prefix="+" data-suffix="%">+0%</strong>
+        <span>no giro de leitos</span>
+      </li>
+      <li class="reveal">
+        <strong data-count="13" data-suffix="%">0%</strong>
+        <span>alta mais rápida</span>
+      </li>
+      <li class="reveal">
+        <strong data-count="100" data-suffix="%">0%</strong>
+        <span>acesso unificado</span>
+      </li>
+    </ul>
+  </div>
+</section>
+
+<!-- ░░ 3. MAIS CASES — FUNDO ESCURO ░░ -->
+<section class="cases-more">
+  <div class="container">
+    <h2 class="cases-more__title">Veja nossos cases em vídeo</h2>
+
+    <div class="cases-grid">
+      <article class="case-card reveal">
+        <a class="case-card__media" href="https://www.youtube.com/watch?v=eCfu65zJNeM" target="_blank" rel="noopener noreferrer">
+          <img src="https://i.ytimg.com/vi/eCfu65zJNeM/maxresdefault.jpg" width="1280" height="720" loading="lazy"
+               alt="Depoimento em vídeo do Hospital Sagrada Família" />
+          <span class="case-card__play" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M9 6.5l9 5.5-9 5.5z" fill="currentColor"/></svg>
+          </span>
+        </a>
+        <h3>Hospital Sagrada Família</h3>
+        <p>Painel em tempo real na emergência reduziu a permanência do paciente de 4 horas para 1h45.</p>
+        <span class="case-card__who">Ivan Rodrigo de Borba · Engenheiro clínico</span>
+        <a class="case-card__link" href="https://www.youtube.com/watch?v=eCfu65zJNeM" target="_blank" rel="noopener noreferrer">Ver o case</a>
+      </article>
+
+      <article class="case-card reveal">
+        <a class="case-card__media" href="https://www.youtube.com/watch?v=pRFlItARzJU" target="_blank" rel="noopener noreferrer">
+          <img src="https://i.ytimg.com/vi/pRFlItARzJU/hqdefault.jpg" width="480" height="360" loading="lazy"
+               alt="Depoimento em vídeo da Unimed Juiz de Fora" />
+          <span class="case-card__play" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M9 6.5l9 5.5-9 5.5z" fill="currentColor"/></svg>
+          </span>
+        </a>
+        <h3>Unimed Juiz de Fora</h3>
+        <p>Certificação ONA III conquistada com os indicadores apoiando a apresentação à banca.</p>
+        <span class="case-card__who">Dr. Cláudio Reiff · Presidente</span>
+        <a class="case-card__link" href="https://www.youtube.com/watch?v=pRFlItARzJU" target="_blank" rel="noopener noreferrer">Ver o case</a>
+      </article>
+
+      <article class="case-card reveal">
+        <a class="case-card__media" href="https://www.youtube.com/watch?v=13CzVJITGXU" target="_blank" rel="noopener noreferrer">
+          <img src="https://i.ytimg.com/vi/13CzVJITGXU/maxresdefault.jpg" width="1280" height="720" loading="lazy"
+               alt="Depoimento em vídeo do Hospital Unimed Litoral" />
+          <span class="case-card__play" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M9 6.5l9 5.5-9 5.5z" fill="currentColor"/></svg>
+          </span>
+        </a>
+        <h3>Hospital Unimed Litoral</h3>
+        <p>O custo da ferramenta fica insignificante perto do que ela entrega todo dia.</p>
+        <span class="case-card__who">Mário Fernando Gonçalves da Silva · Diretor de serviços próprios</span>
+        <a class="case-card__link" href="https://www.youtube.com/watch?v=13CzVJITGXU" target="_blank" rel="noopener noreferrer">Ver o case</a>
+      </article>
+
+      <article class="case-card reveal">
+        <a class="case-card__media" href="https://www.youtube.com/watch?v=FokXY0MUrpQ" target="_blank" rel="noopener noreferrer">
+          <img src="https://i.ytimg.com/vi/FokXY0MUrpQ/maxresdefault.jpg" width="1280" height="720" loading="lazy"
+               alt="Depoimento em vídeo do Hospital Nossa Senhora das Graças" />
+          <span class="case-card__play" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M9 6.5l9 5.5-9 5.5z" fill="currentColor"/></svg>
+          </span>
+        </a>
+        <h3>Hospital Nossa Senhora das Graças</h3>
+        <p>Atendimento de 100% dos pacientes com score 8 ou mais, e com mais acuracidade.</p>
+        <span class="case-card__who">Glaucio de Souza · Diretor de informações</span>
+        <a class="case-card__link" href="https://www.youtube.com/watch?v=FokXY0MUrpQ" target="_blank" rel="noopener noreferrer">Ver o case</a>
+      </article>
+
+      <article class="case-card reveal">
+        <a class="case-card__media" href="https://www.youtube.com/watch?v=63rB2vXKZ-o" target="_blank" rel="noopener noreferrer">
+          <img src="https://i.ytimg.com/vi/63rB2vXKZ-o/hqdefault.jpg" width="480" height="360" loading="lazy"
+               alt="Depoimento em vídeo do Instituto de Neurologia de Curitiba" />
+          <span class="case-card__play" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M9 6.5l9 5.5-9 5.5z" fill="currentColor"/></svg>
+          </span>
+        </a>
+        <h3>Instituto de Neurologia de Curitiba</h3>
+        <p>Glosas filtradas por item, valor e operadora em relatórios dinâmicos.</p>
+        <span class="case-card__who">Elisandra Menezes · Coordenadora de faturamento</span>
+        <a class="case-card__link" href="https://www.youtube.com/watch?v=63rB2vXKZ-o" target="_blank" rel="noopener noreferrer">Ver o case</a>
+      </article>
+
+      <article class="case-card reveal">
+        <a class="case-card__media" href="https://www.youtube.com/watch?v=Q99XeyYDJYU" target="_blank" rel="noopener noreferrer">
+          <img src="https://i.ytimg.com/vi/Q99XeyYDJYU/maxresdefault.jpg" width="1280" height="720" loading="lazy"
+               alt="Depoimento em vídeo da Universidade PUC" />
+          <span class="case-card__play" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M9 6.5l9 5.5-9 5.5z" fill="currentColor"/></svg>
+          </span>
+        </a>
+        <h3>Universidade PUC</h3>
+        <p>Competência técnica e custo-benefício que a diretoria aprovou sem hesitar.</p>
+        <span class="case-card__who">Margareth O. Camargo · CIO do núcleo de TI</span>
+        <a class="case-card__link" href="https://www.youtube.com/watch?v=Q99XeyYDJYU" target="_blank" rel="noopener noreferrer">Ver o case</a>
+      </article>
+
+      <article class="case-card reveal">
+        <a class="case-card__media" href="https://www.youtube.com/watch?v=v95ycKVcBrY" target="_blank" rel="noopener noreferrer">
+          <img src="https://i.ytimg.com/vi/v95ycKVcBrY/maxresdefault.jpg" width="1280" height="720" loading="lazy"
+               alt="Depoimento em vídeo do Hospital Moriah" />
+          <span class="case-card__play" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M9 6.5l9 5.5-9 5.5z" fill="currentColor"/></svg>
+          </span>
+        </a>
+        <h3>Hospital Moriah</h3>
+        <p>Facilidade de uso e produtividade trouxeram resultado rápido para as metas.</p>
+        <span class="case-card__who">Weberson R. Correa Bento · Gerente de TI</span>
+        <a class="case-card__link" href="https://www.youtube.com/watch?v=v95ycKVcBrY" target="_blank" rel="noopener noreferrer">Ver o case</a>
+      </article>
+
+      <article class="case-card reveal">
+        <a class="case-card__media" href="https://www.youtube.com/watch?v=bnQ59s15fgI" target="_blank" rel="noopener noreferrer">
+          <img src="https://i.ytimg.com/vi/bnQ59s15fgI/maxresdefault.jpg" width="1280" height="720" loading="lazy"
+               alt="Depoimento em vídeo do Hospital Unimed Ribeirão Preto" />
+          <span class="case-card__play" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M9 6.5l9 5.5-9 5.5z" fill="currentColor"/></svg>
+          </span>
+        </a>
+        <h3>Hospital Unimed Ribeirão Preto</h3>
+        <p>Recursos que outras ferramentas não têm, com destaque para os cards de indicadores.</p>
+        <span class="case-card__who">Douglas Bellini Perossi · Coordenador de TI</span>
+        <a class="case-card__link" href="https://www.youtube.com/watch?v=bnQ59s15fgI" target="_blank" rel="noopener noreferrer">Ver o case</a>
+      </article>
+
+      <article class="case-card reveal">
+        <a class="case-card__media" href="https://www.youtube.com/watch?v=hAlac86B0g0" target="_blank" rel="noopener noreferrer">
+          <img src="https://i.ytimg.com/vi/hAlac86B0g0/hqdefault.jpg" width="480" height="360" loading="lazy"
+               alt="Depoimento em vídeo do Hospital Santa Catarina de Blumenau" />
+          <span class="case-card__play" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M9 6.5l9 5.5-9 5.5z" fill="currentColor"/></svg>
+          </span>
+        </a>
+        <h3>Hospital Santa Catarina de Blumenau</h3>
+        <p>Fluxo de caixa planejado contra realizado, com risco previsto e margem de segurança.</p>
+        <span class="case-card__who">Volnei Willemann · Supervisor de controladoria</span>
+        <a class="case-card__link" href="https://www.youtube.com/watch?v=hAlac86B0g0" target="_blank" rel="noopener noreferrer">Ver o case</a>
+      </article>
+
+      <article class="case-card reveal">
+        <a class="case-card__media" href="https://www.youtube.com/watch?v=kfSelMUDyOo" target="_blank" rel="noopener noreferrer">
+          <img src="https://i.ytimg.com/vi/kfSelMUDyOo/hqdefault.jpg" width="480" height="360" loading="lazy"
+               alt="Depoimento em vídeo do Hospital Santa Cruz" />
+          <span class="case-card__play" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M9 6.5l9 5.5-9 5.5z" fill="currentColor"/></svg>
+          </span>
+        </a>
+        <h3>Hospital Santa Cruz</h3>
+        <p>Indicadores viraram peça central da gestão e deram credibilidade à informação.</p>
+        <span class="case-card__who">Rejania · Superintendente adjunta administrativa</span>
+        <a class="case-card__link" href="https://www.youtube.com/watch?v=kfSelMUDyOo" target="_blank" rel="noopener noreferrer">Ver o case</a>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ░░ 4. CHAMADA FINAL ░░ -->
+<section class="cases-cta">
+  <div class="container container--narrow cases-cta__inner">
+    <h2>Comece com a Weknow</h2>
+    <p>Teste sem custo e veja seus próprios indicadores na primeira semana.</p>
+    <div class="cases-cta__actions">
+      <a href="./" class="btn btn--primary btn--lg">
+        Começar teste grátis
+        <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2.5 8h10M9 4.5L12.5 8 9 11.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </a>
+      <a href="./" class="btn btn--ghost btn--lg">Falar com especialista</a>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer__grid">
+      <div class="footer__brand">
+        <a href="./" class="brand brand--light">
+          <img class="brand__light" src="/logo-weknow-light.svg" alt="Weknow Healthtech" width="92" height="28" />
+        </a>
+        <p>Solução de BI e Analytics para gestão em saúde. Indicadores específicos para hospitais, operadoras, clínicas e laboratórios.</p>
+        <div class="social">
+          <a href="#" aria-label="LinkedIn">in</a>
+          <a href="#" aria-label="Instagram">ig</a>
+          <a href="#" aria-label="YouTube">yt</a>
+          <a href="#" aria-label="Telegram">tg</a>
+          <a href="#" aria-label="Facebook">fb</a>
+        </div>
+      </div>
+      <div class="footer__col">
+        <h4>Soluções</h4>
+        <a href="./">Command Centers</a>
+        <a href="./">Análise Inteligente</a>
+        <a href="./">Inteligência Hospitalar</a>
+        <a href="./">Acreditações</a>
+      </div>
+      <div class="footer__col">
+        <h4>Indicadores</h4>
+        <a href="./">Internação</a>
+        <a href="./">Cirurgias</a>
+        <a href="./">Faturamento</a>
+        <a href="./">Controladoria</a>
+      </div>
+      <div class="footer__col">
+        <h4>Empresa</h4>
+        <a href="./">Sobre a Weknow</a>
+        <a href="cases.html">Cases</a>
+        <a href="./">Blog</a>
+        <a href="./">Trabalhe conosco</a>
+      </div>
+      <div class="footer__col">
+        <h4>Contato</h4>
+        <a href="./">Fale com vendas</a>
+        <a href="./">Suporte</a>
+        <a href="./">Teste grátis</a>
+      </div>
+    </div>
+    <div class="footer__bottom">
+      <p>© 2026 Weknow Healthtech · Todos os direitos reservados</p>
+      <div class="footer__legal">
+        <a href="#">Política de Privacidade</a>
+        <a href="#">Termo de Uso para Contratação</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script type="module" src="/src/js/main.js"></script>
+</body>
+</html>

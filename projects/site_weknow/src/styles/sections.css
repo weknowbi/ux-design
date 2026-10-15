@@ -1,0 +1,849 @@
+/* ═══════════ ÁREAS RESERVADAS PARA IMAGEM ═══════════ */
+/* Enquanto a imagem definitiva não chega, fica um bloco desfocado.
+   Para publicar, troque a div por <img> e apague a marcação. */
+.media-slot {
+  position: relative;
+  border-radius: 20px;
+  overflow: hidden;
+  background: var(--navy);
+  box-shadow: var(--sh-lg);
+  isolation: isolate;
+}
+.media-slot::before {
+  content: '';
+  position: absolute;
+  inset: -20%;
+  background:
+    radial-gradient(38% 44% at 26% 28%, rgba(48, 167, 226, .75), transparent 70%),
+    radial-gradient(34% 40% at 74% 36%, rgba(51, 204, 204, .55), transparent 72%),
+    radial-gradient(46% 52% at 52% 82%, rgba(51, 102, 204, .8), transparent 74%);
+  filter: blur(46px);
+  opacity: .85;
+}
+.media-slot::after {
+  content: attr(data-slot);
+  position: absolute;
+  inset: auto 0 22px 0;
+  text-align: center;
+  font-size: .76rem;
+  font-weight: 600;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, .5);
+}
+.media-slot--wide { aspect-ratio: 16 / 11; }
+.media-slot--screen { aspect-ratio: 16 / 8; border-radius: 24px; }
+.media-slot--dash { aspect-ratio: 4 / 3; border-radius: 18px; }
+.media-slot--tall { aspect-ratio: 4 / 5; }
+
+/* ═══════════ 1. HERO ═══════════ */
+/* A moldura escura fica em volta do card, como no site de referência */
+.hero-frame {
+  /* Sobe atrás do header inteiro para o fundo escuro começar no topo da tela */
+  margin-top: calc((var(--nav-h) + var(--frame)) * -1);
+  padding: var(--frame) var(--frame) 0;
+  background: var(--shell);
+}
+.hero {
+  position: relative;
+  display: flex;
+  align-items: center;
+  /* Ocupa praticamente a tela inteira, como no site de referência */
+  min-height: calc(100vh - var(--frame) * 2);
+  padding: calc(var(--nav-h) + 40px) 0 56px;
+  background: var(--grad-hero);
+  border-radius: 30px;
+  overflow: hidden;
+}
+.hero::after {
+  content: '';
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 160px;
+  background: linear-gradient(180deg, transparent, rgba(255, 255, 255, .55));
+  pointer-events: none;
+}
+.hero__inner {
+  width: 100%;
+  position: relative;
+  z-index: 1;
+  max-width: var(--maxw);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+  display: grid;
+  grid-template-columns: minmax(0, 1.02fr) minmax(0, 1fr);
+  gap: clamp(32px, 5vw, 64px);
+  align-items: center;
+}
+.hero__title {
+  color: var(--ink);
+  /* Escala e peso calibrados pela referência: corpo grande, peso 700 */
+  font-size: clamp(2.1rem, 3.6vw, 3.25rem);
+  font-weight: 700;
+  letter-spacing: -.028em;
+  line-height: 1.08;
+}
+.hero__sub {
+  margin-top: 22px;
+  max-width: 34em;
+  font-size: 1rem;
+  font-weight: 400;
+  line-height: 1.55;
+  color: var(--ink-2);
+}
+.hero__cta { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 32px; }
+.hero__proof {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 22px;
+  margin-top: 30px;
+  font-size: .86rem;
+  font-weight: 500;
+  color: var(--ink-2);
+}
+.hero__proof li { display: flex; align-items: center; gap: 7px; }
+.hero__proof svg { width: 17px; height: 17px; color: var(--brand); flex: none; }
+
+.hero__media { position: relative; }
+.hero__media img { display: block; width: 100%; height: auto; border-radius: 20px; box-shadow: var(--sh-lg); }
+.hero__glow {
+  position: absolute;
+  inset: 12% -8% -12% 6%;
+  z-index: -1;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(48, 167, 226, .5), transparent 72%);
+  filter: blur(38px);
+}
+
+/* Faixa de clientes sobre o fundo escuro da moldura */
+/* Sem título: a faixa vive só das marcas, então precisa de mais ar em volta
+   e de mais distância entre os nomes */
+.press { padding: clamp(46px, 5vw, 68px) 0; }
+.press .logos { margin-bottom: 0; }
+.press .logos__track { gap: 76px; }
+.press .logos__track span {
+  font-size: 1.2rem;
+  color: rgba(255, 255, 255, .88);
+  opacity: .62;
+}
+
+/* ═══════════ 2. RESULTADOS REAIS ═══════════ */
+/* A foto do case abre o vídeo: filtro escuro por cima para o texto respirar */
+.case-video {
+  position: relative;
+  display: block;
+  aspect-ratio: 4 / 5;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: var(--sh-lg);
+  isolation: isolate;
+}
+.case-video img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform .6s cubic-bezier(.22, 1, .36, 1);
+}
+.case-video::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(6, 14, 32, .1) 0%, rgba(6, 14, 32, .18) 45%, rgba(6, 14, 32, .82) 100%),
+    linear-gradient(140deg, rgba(51, 102, 204, .3), rgba(51, 204, 204, .12));
+  transition: opacity .35s ease;
+}
+.case-video:hover img { transform: scale(1.04); }
+.case-video:hover::after { opacity: .88; }
+
+.case-video__play,
+.case-video__label { position: absolute; z-index: 1; }
+.case-video__play {
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  display: grid;
+  place-items: center;
+  width: 62px; height: 62px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, .16);
+  border: 1px solid rgba(255, 255, 255, .5);
+  backdrop-filter: blur(6px);
+  color: #fff;
+  transition: background .25s ease, transform .25s ease;
+}
+.case-video__play svg { width: 24px; height: 24px; margin-left: 2px; }
+.case-video:hover .case-video__play {
+  background: rgba(255, 255, 255, .28);
+  transform: translate(-50%, -50%) scale(1.07);
+}
+.case-video__label {
+  left: 22px; right: 22px; bottom: 20px;
+  font-size: .96rem;
+  font-weight: 600;
+  color: #fff;
+}
+.case-video__label small {
+  display: block;
+  margin-top: 3px;
+  font-size: .8rem;
+  font-weight: 400;
+  color: rgba(255, 255, 255, .72);
+}
+
+/* Mesmo degradê do hero, para o topo da página desaguar aqui */
+.results {
+  padding: clamp(64px, 8vw, 112px) 0;
+  background: var(--grad-hero);
+}
+/* Imagem à esquerda, conteúdo empilhado à direita, como na referência */
+.results__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.02fr);
+  gap: clamp(36px, 6vw, 92px);
+  align-items: center;
+}
+.results__copy h2 { margin: 14px 0 18px; }
+.results__intro {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--ink-2);
+  max-width: 38em;
+}
+
+.results__list { margin-top: 34px; }
+/* Coluna do número com largura fixa: sem ela cada linha calculava a própria
+   medida e o texto ao lado saía desalinhado entre um item e outro. */
+.results__list li {
+  display: grid;
+  grid-template-columns: 138px minmax(0, 1fr);
+  gap: 8px 24px;
+  align-items: center;
+  padding: 22px 0;
+  border-top: 1px solid rgba(30, 30, 38, .14);
+}
+.results__list li:last-child { border-bottom: 1px solid rgba(30, 30, 38, .14); }
+.results__list strong {
+  font-size: clamp(2.1rem, 3.4vw, 2.7rem);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -.04em;
+  /* Degradê discreto da marca dentro do próprio número */
+  background: linear-gradient(120deg, var(--brand-deep) 0%, var(--brand) 42%, var(--sky) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.results__list h3 {
+  margin-bottom: 5px;
+  font-size: 1.08rem;
+  font-weight: 600;
+  letter-spacing: -.02em;
+}
+.results__list p { font-size: .94rem; line-height: 1.5; color: var(--ink-soft); }
+
+.results__foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-top: 26px;
+  font-size: .87rem;
+  color: var(--ink-soft);
+}
+.link-case {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  color: var(--brand);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-color: rgba(51, 102, 204, .4);
+  transition: text-decoration-color .2s ease;
+}
+.link-case:hover { text-decoration-color: currentColor; }
+.link-case svg { width: 15px; height: 15px; transition: transform .22s cubic-bezier(.22, 1, .36, 1); }
+.link-case:hover svg { transform: translateX(3px); }
+
+/* ═══════════ 3. O PROBLEMA ═══════════ */
+.problem {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  min-height: clamp(560px, 76vh, 780px);
+  padding: clamp(72px, 9vw, 120px) 0;
+  color: #fff;
+  background:
+    radial-gradient(70% 90% at 14% 6%, #12275C 0%, transparent 62%),
+    radial-gradient(80% 80% at 88% 92%, #0B4E86 0%, transparent 64%),
+    linear-gradient(150deg, #060E20 0%, #0A1B3C 45%, #071026 100%);
+  background-color: #060E20;
+}
+.problem .container { position: relative; z-index: 1; width: 100%; }
+
+/* Duas colunas alinhadas pelo topo do texto, sem nada cruzando a leitura */
+.problem__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, .82fr);
+  gap: clamp(40px, 7vw, 104px);
+  align-items: start;
+}
+.problem__copy h2 {
+  max-width: 20ch;
+  font-size: clamp(1.75rem, 3vw, 2.5rem);
+  line-height: 1.14;
+  margin-bottom: 22px;
+  /* Distribui as linhas por igual para nenhuma palavra ficar sozinha */
+  text-wrap: balance;
+}
+/* Primeira linha entra mais leve e menor, para a ênfase cair na segunda */
+.problem__lead {
+  display: block;
+  margin-bottom: 4px;
+  font-size: .84em;
+  font-weight: 500;
+  letter-spacing: -.02em;
+  color: rgba(255, 255, 255, .78);
+  text-wrap: balance;
+}
+.problem__copy > p {
+  max-width: 44ch;
+  margin-bottom: 34px;
+  font-size: 1rem;
+  line-height: 1.65;
+  color: rgba(255, 255, 255, .72);
+}
+
+/* O número alinha com a primeira linha do título da coluna da esquerda */
+.problem__stat { padding-top: 4px; }
+.problem__stat strong {
+  display: block;
+  font-size: clamp(3rem, 6.2vw, 4.8rem);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -.045em;
+  color: var(--mint);
+}
+.problem__stat > p:first-of-type {
+  margin-top: 18px;
+  max-width: 24ch;
+  font-size: 1.06rem;
+  line-height: 1.45;
+  color: #fff;
+}
+/* Linha de apoio, separada do número principal por um fio */
+.problem__note {
+  margin-top: 30px;
+  padding-top: 24px;
+  border-top: 1px solid rgba(255, 255, 255, .18);
+  max-width: 34ch;
+  font-size: .92rem;
+  line-height: 1.55;
+  color: rgba(255, 255, 255, .62);
+}
+
+.problem__source {
+  margin-top: clamp(40px, 5vw, 64px);
+  font-size: .74rem;
+  color: rgba(255, 255, 255, .38);
+}
+
+/* ═══════════ 4. COMO FUNCIONA ═══════════ */
+/* Estrutura do site de referência: cabeçalho, abas, carrossel de cards
+   grandes com o próximo espiando na borda e navegação embaixo. */
+.how {
+  padding: clamp(64px, 8vw, 110px) 0 clamp(48px, 6vw, 72px);
+  background: #0B1220;
+  color: #fff;
+  overflow: hidden;
+}
+.how__head {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, .95fr);
+  gap: clamp(24px, 5vw, 80px);
+  align-items: start;
+  margin-bottom: clamp(30px, 4vw, 44px);
+}
+.how__head p {
+  max-width: 44ch;
+  font-size: .95rem;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, .62);
+}
+
+/* Abas sempre visíveis; a ativa vira pílula clara */
+.how__tabs {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 26px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.how__tabs::-webkit-scrollbar { display: none; }
+.how__tab {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 17px;
+  border-radius: var(--r-pill);
+  font-size: .76rem;
+  font-weight: 600;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, .55);
+  white-space: nowrap;
+  transition: background .22s ease, color .22s ease;
+}
+.how__tab i { font-style: normal; opacity: .6; }
+.how__tab:hover { color: #fff; }
+.how__tab.is-active { background: #fff; color: var(--ink); }
+.how__tab.is-active i { color: var(--brand); opacity: 1; }
+
+/* Trilho do carrossel, alinhado ao container e sangrando à direita */
+.how__viewport { overflow: hidden; }
+.how__track {
+  --card-w: min(1080px, calc(100vw - var(--gutter) * 2 - 120px));
+  --card-gap: 20px;
+  display: flex;
+  gap: var(--card-gap);
+  padding-inline-start: max(var(--gutter), calc((100% - var(--maxw)) / 2 + var(--gutter)));
+  transform: translateX(calc(var(--i) * (var(--card-w) + var(--card-gap)) * -1));
+  transition: transform .55s cubic-bezier(.4, 0, .2, 1);
+  /* Arrastável: o dedo ainda rola a página na vertical */
+  touch-action: pan-y;
+  user-select: none;
+}
+.how__track img { -webkit-user-drag: none; user-select: none; pointer-events: none; }
+.how__card {
+  flex: 0 0 var(--card-w);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  min-height: clamp(400px, 46vw, 520px);
+  border-radius: 22px;
+  background: #141C2C;
+  overflow: hidden;
+  opacity: .32;
+  transition: opacity .45s ease;
+}
+.how__card.is-active { opacity: 1; }
+
+/* Ícone no topo, texto preso embaixo, como na referência */
+.how__side {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 30px;
+  padding: clamp(26px, 2.6vw, 38px);
+}
+.how__icon { color: rgba(255, 255, 255, .45); }
+.how__icon svg { width: 26px; height: 26px; }
+.how__text h3 {
+  font-size: clamp(1.3rem, 2.1vw, 1.75rem);
+  font-weight: 600;
+  line-height: 1.22;
+  letter-spacing: -.025em;
+  margin-bottom: 14px;
+  text-wrap: balance;
+}
+.how__text > p {
+  max-width: 46ch;
+  font-size: .96rem;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, .66);
+}
+.how__support {
+  margin-top: 18px;
+  font-size: .88rem;
+  font-weight: 500;
+  color: var(--mint);
+}
+
+/* A composição sangra até as bordas do card */
+.how__media {
+  position: relative;
+  display: grid;
+  place-items: center;
+  padding: clamp(22px, 2.4vw, 34px);
+  background:
+    radial-gradient(80% 90% at 70% 30%, rgba(51, 102, 204, .28), transparent 70%),
+    rgba(255, 255, 255, .03);
+}
+.how__media img { width: 100%; height: 100%; object-fit: cover; }
+.media-slot--fill {
+  position: absolute;
+  inset: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+/* Etapa 01: as fontes convergindo para a camada analítica */
+.converge {
+  width: 100%;
+  display: grid;
+  grid-template-columns: auto minmax(40px, 1fr) auto;
+  align-items: center;
+}
+.converge__sources { display: grid; gap: 12px; }
+.converge__sources li {
+  padding: 9px 14px;
+  border-radius: 9px;
+  background: rgba(255, 255, 255, .06);
+  border: 1px solid rgba(255, 255, 255, .1);
+  font-size: .8rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, .8);
+  white-space: nowrap;
+}
+.converge__lines { width: 100%; height: 100%; min-height: 220px; }
+.converge__lines path {
+  fill: none;
+  stroke: rgba(51, 204, 204, .4);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+.converge__node {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  padding: 18px 20px;
+  border-radius: 14px;
+  background: rgba(51, 204, 204, .1);
+  border: 1px solid rgba(51, 204, 204, .32);
+  text-align: center;
+}
+.converge__node img { width: 92px; }
+.converge__node span { font-size: .7rem; color: var(--mint); }
+
+/* Etapa 02: o motor que evita a tela vazia */
+.engine { display: grid; gap: 16px; justify-items: center; width: 100%; max-width: 320px; }
+.engine__parts { display: grid; gap: 7px; width: 100%; }
+.engine__parts li {
+  position: relative;
+  padding: 10px 14px 10px 32px;
+  border-radius: 9px;
+  background: rgba(255, 255, 255, .06);
+  border: 1px solid rgba(255, 255, 255, .1);
+  font-size: .82rem;
+  color: rgba(255, 255, 255, .82);
+}
+.engine__parts li::before {
+  content: '+';
+  position: absolute;
+  left: 13px;
+  color: var(--mint);
+  font-weight: 700;
+}
+.engine__parts li:first-child::before { content: '·'; }
+.engine__core {
+  display: grid;
+  place-items: center;
+  padding: 16px 28px;
+  border-radius: 14px;
+  background: var(--grad-brand);
+  box-shadow: var(--sh-brand);
+}
+.engine__core img { width: 100px; }
+.engine__out { display: flex; gap: 9px; width: 100%; }
+.engine__out span {
+  flex: 1;
+  height: 50px;
+  border-radius: 9px;
+  background:
+    repeating-linear-gradient(90deg, rgba(51, 204, 204, .5) 0 6px, transparent 6px 13px) center bottom 11px/70% 20px no-repeat,
+    rgba(255, 255, 255, .05);
+  border: 1px solid rgba(255, 255, 255, .1);
+}
+
+/* Navegação embaixo: setas e pontos */
+.how__nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 26px;
+  margin-top: clamp(28px, 3vw, 40px);
+}
+.how__arrow {
+  display: grid;
+  place-items: center;
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, .08);
+  color: rgba(255, 255, 255, .85);
+  transition: background .22s ease, color .22s ease, opacity .22s ease;
+}
+.how__arrow svg { width: 15px; height: 15px; }
+.how__arrow:hover { background: rgba(255, 255, 255, .16); color: #fff; }
+.how__arrow[disabled] { opacity: .25; cursor: default; }
+.how__arrow[disabled]:hover { background: rgba(255, 255, 255, .08); }
+
+/* Pontos discretos: só a cor muda, sem salto de tamanho */
+.how__dots { display: flex; align-items: center; gap: 10px; }
+.how__dots button {
+  flex: none;
+  padding: 0;
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, .22);
+  transition: background .25s ease;
+}
+.how__dots button:hover { background: rgba(255, 255, 255, .45); }
+.how__dots button.is-active { background: var(--mint); }
+
+/* ═══════════ 5. EM QUALQUER TELA ═══════════ */
+/* Título partido ao meio pela composição de telas, como na referência */
+.devices {
+  padding: clamp(60px, 8vw, 104px) 0 clamp(56px, 7vw, 88px);
+  background: var(--grad-hero);
+  text-align: center;
+}
+.devices__stage {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(16px, 3vw, 44px);
+}
+/* As duas metades ocupam o mesmo espaço, então a imagem fica no centro exato
+   da página e tudo que vem abaixo alinha com ela. */
+.devices__title {
+  flex: 1 1 0;
+  min-width: 0;
+  font-size: clamp(1.6rem, 3.4vw, 2.7rem);
+  font-weight: 700;
+  letter-spacing: -.03em;
+  line-height: 1.1;
+  white-space: nowrap;
+}
+.devices__title:first-of-type { text-align: right; }
+.devices__title:last-of-type { text-align: left; }
+
+.devices__shot,
+.media-slot--devices {
+  flex: 0 0 min(560px, 42vw);
+  width: min(560px, 42vw);
+  height: auto;
+  aspect-ratio: 3 / 2;
+  object-fit: cover;
+  border-radius: 18px;
+  box-shadow: var(--sh-lg);
+}
+.devices__note {
+  margin: clamp(30px, 4vw, 44px) auto 0;
+  max-width: 52ch;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--ink-2);
+  text-wrap: balance;
+}
+
+/* ═══════════ 6. VOZES DE CLIENTES ═══════════ */
+.voices {
+  padding: clamp(64px, 8vw, 112px) 0;
+  background: #0B1220;
+  color: #fff;
+}
+.voices__top {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: clamp(36px, 6vw, 90px);
+  align-items: center;
+  margin-bottom: clamp(48px, 6vw, 80px);
+}
+.voices__copy h2 { margin-bottom: 18px; max-width: 16ch; text-wrap: balance; }
+.voices__copy p {
+  max-width: 46ch;
+  font-size: 1rem;
+  line-height: 1.65;
+  color: rgba(255, 255, 255, .66);
+}
+.voices__shot {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 5 / 4;
+  object-fit: cover;
+  border-radius: 22px;
+  box-shadow: var(--sh-lg);
+}
+
+/* O card em degradê que recebe os depoimentos */
+.voices__stage {
+  position: relative;
+  border-radius: 24px;
+  padding: clamp(34px, 4.4vw, 60px);
+  background: linear-gradient(140deg, #A9C3F5 0%, #C8DCFB 38%, #BFEDEA 72%, #E6F6F3 100%);
+  color: var(--ink);
+  overflow: hidden;
+}
+/* Os depoimentos deslizam na horizontal, um slide por vez */
+.voices__viewport { overflow: hidden; }
+.voices__track {
+  display: flex;
+  transform: translateX(calc(var(--q) * -100%));
+  transition: transform .6s cubic-bezier(.4, 0, .2, 1);
+  touch-action: pan-y;
+  user-select: none;
+}
+.voices__quote {
+  flex: 0 0 100%;
+  margin: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: clamp(20px, 4vw, 56px);
+  align-items: start;
+  min-height: clamp(200px, 20vw, 240px);
+}
+.voices__quote blockquote {
+  margin: 0;
+  /* Corpo calibrado para o depoimento mais longo caber sem esticar o card */
+  font-size: clamp(1rem, 1.55vw, 1.28rem);
+  font-weight: 500;
+  line-height: 1.45;
+  letter-spacing: -.015em;
+  max-width: 56ch;
+}
+.voices__quote blockquote::before { content: '“'; }
+.voices__quote blockquote::after { content: '”'; }
+.voices__quote figcaption { margin-top: 20px; font-size: .9rem; }
+.voices__quote figcaption strong {
+  display: block;
+  font-weight: 600;
+  color: var(--ink);
+}
+.voices__quote figcaption span { color: rgba(30, 30, 38, .6); }
+/* O nome da instituição fica à direita, como a assinatura do veículo */
+.voices__brand {
+  max-width: 22ch;
+  line-height: 1.35;
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: -.02em;
+  text-align: right;
+  color: var(--ink);
+}
+
+.voices__controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 26px;
+}
+/* Bolinhas iguais: muda só a cor da ativa, sem esticar */
+.voices__dots { display: flex; align-items: center; gap: 10px; }
+.voices__dots button {
+  flex: none;
+  padding: 0;
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: rgba(30, 30, 38, .25);
+  transition: background .25s ease;
+}
+.voices__dots button:hover { background: rgba(30, 30, 38, .45); }
+.voices__dots button.is-active { background: var(--brand); }
+.voices__pause {
+  position: absolute;
+  right: clamp(20px, 2.4vw, 30px);
+  bottom: clamp(20px, 2.4vw, 30px);
+  display: grid;
+  place-items: center;
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: rgba(30, 30, 38, .12);
+  color: var(--ink);
+  transition: background .2s ease;
+}
+.voices__pause:hover { background: rgba(30, 30, 38, .2); }
+.voices__pause svg { width: 15px; height: 15px; }
+
+.voices__badges {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px 34px;
+  margin-top: clamp(32px, 4vw, 46px);
+  font-size: .88rem;
+  color: rgba(255, 255, 255, .55);
+}
+
+/* ═══════════ 7. FAIXA DE CLIENTES ═══════════ */
+.logos {
+  position: relative;
+  overflow: hidden;
+  mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+}
+/* A faixa roda sem parar e não responde ao mouse: no lugar dos nomes
+   entram as logos dos clientes em imagem. */
+.logos, .logos * { user-select: none; pointer-events: none; }
+.logos__track {
+  display: flex;
+  gap: 46px;
+  width: max-content;
+  animation: marquee 36s linear infinite;
+}
+.logos__track span {
+  font-size: 1.12rem;
+  font-weight: 700;
+  letter-spacing: -.02em;
+  color: var(--ink-soft);
+  opacity: .55;
+  white-space: nowrap;
+}
+.logos__track img { height: 34px; width: auto; object-fit: contain; }
+@keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+/* ═══════════ RODAPÉ ═══════════ */
+.footer {
+  padding: clamp(56px, 7vw, 86px) 0 32px;
+  background: var(--navy);
+  color: rgba(255, 255, 255, .68);
+  font-size: .93rem;
+}
+.footer__grid {
+  display: grid;
+  grid-template-columns: 1.7fr repeat(4, 1fr);
+  gap: clamp(24px, 4vw, 48px);
+  padding-bottom: 44px;
+  border-bottom: 1px solid rgba(255, 255, 255, .1);
+}
+.footer__brand .brand { margin-bottom: 16px; }
+.footer__brand p { max-width: 30em; }
+.social { display: flex; gap: 10px; margin-top: 22px; }
+.social a {
+  width: 36px; height: 36px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, .07);
+  font-size: .78rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, .8);
+  transition: background .2s ease, color .2s ease, transform .2s ease;
+}
+.social a:hover { background: var(--grad-aqua); color: var(--navy); transform: translateY(-2px); }
+
+.footer__col { display: grid; gap: 11px; align-content: start; }
+.footer__col h4 {
+  margin-bottom: 4px;
+  font-size: .78rem;
+  font-weight: 700;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: #fff;
+}
+.footer__col a { transition: color .18s ease; }
+.footer__col a:hover { color: var(--mint); }
+
+.footer__bottom {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-top: 26px;
+  font-size: .86rem;
+  color: rgba(255, 255, 255, .5);
+}
+.footer__legal { display: flex; gap: 22px; }
+.footer__legal a:hover { color: var(--mint); }

@@ -44,18 +44,23 @@ function disableScripts(html) {
 }
 
 // Aplica a cortina de acesso num diretorio publicado (a raiz do site ou
-// cada /p/<slug>/): desativa os scripts do index.html dele, injeta o CSS
-// que esconde a pagina ate a liberacao, e copia o gate.js que faz a
-// verificacao da senha e reativa os scripts quando ela bate.
+// cada /p/<slug>/): em cada pagina .html do primeiro nivel dele (nao so o
+// index.html -- ha projetos com mais de uma pagina, e as outras ficariam
+// abertas), desativa os scripts, injeta o CSS que esconde a pagina ate a
+// liberacao, e copia o gate.js que faz a verificacao da senha e reativa os
+// scripts quando ela bate.
 function applyGate(dir) {
-  const indexPath = path.join(dir, "index.html");
-  if (!fs.existsSync(indexPath)) return;
+  const pages = fs.readdirSync(dir).filter((name) => name.toLowerCase().endsWith(".html"));
+  if (pages.length === 0) return;
 
-  let html = fs.readFileSync(indexPath, "utf-8");
-  html = disableScripts(html);
-  html = html.replace(/<head(\s[^>]*)?>/i, (m) => `${m}\n<style id="wsg-style">html{visibility:hidden}</style>`);
-  html = html.replace(/<\/body>/i, `<script src="./gate.js"></script>\n</body>`);
-  fs.writeFileSync(indexPath, html);
+  for (const page of pages) {
+    const pagePath = path.join(dir, page);
+    let html = fs.readFileSync(pagePath, "utf-8");
+    html = disableScripts(html);
+    html = html.replace(/<head(\s[^>]*)?>/i, (m) => `${m}\n<style id="wsg-style">html{visibility:hidden}</style>`);
+    html = html.replace(/<\/body>/i, `<script src="./gate.js"></script>\n</body>`);
+    fs.writeFileSync(pagePath, html);
+  }
 
   const gateJs = fs
     .readFileSync(path.join(ROOT, "scripts", "pages-gate.template.js"), "utf-8")

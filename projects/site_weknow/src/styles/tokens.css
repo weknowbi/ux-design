@@ -1,0 +1,52 @@
+/* ═══ Design tokens — Weknow Healthtech ═══ */
+:root {
+  /* Marca */
+  --brand:        #3366CC;
+  --brand-700:    #24499A;
+  --brand-deep:   #0037B6;
+  --brand-600:    #2B57B4;
+  --brand-400:    #6B93E0;
+  --sky:          #30A7E2;
+  --aqua:         #33CCCC;
+  --mint:         #5ADBDB;
+
+  /* Neutros */
+  --ink:          #1E1E26;
+  --ink-2:        #2A3A5C;
+  --ink-soft:     #56658A;
+  --line:         #E2E9F5;
+  --line-strong:  #CBD7EC;
+  --bg:           #FFFFFF;
+  --bg-soft:      #F4F7FC;
+  --navy:         #0B1220;
+  --shell:        #14151C;
+  --navy-2:       #0C1E42;
+
+  /* Gradientes */
+  --grad-hero:    linear-gradient(175deg, #C9DBFF 0%, #DDE8FF 34%, #EDF3FF 68%, #F7FAFF 100%);
+  --grad-brand:   linear-gradient(135deg, var(--brand-deep) 0%, var(--brand) 55%, var(--sky) 100%);
+  --grad-aqua:    linear-gradient(135deg, var(--sky), var(--aqua));
+
+  /* Raios */
+  --r-xs: 8px;
+  --r-sm: 12px;
+  --r-md: 18px;
+  --r-lg: 26px;
+  --r-xl: 36px;
+  --r-pill: 999px;
+
+  /* Sombras */
+  --sh-sm: 0 1px 2px rgba(10, 22, 51, .06), 0 2px 8px rgba(10, 22, 51, .05);
+  --sh-md: 0 4px 12px rgba(10, 22, 51, .07), 0 14px 34px rgba(10, 22, 51, .08);
+  --sh-lg: 0 18px 50px rgba(6, 30, 80, .16), 0 4px 14px rgba(6, 30, 80, .08);
+  --sh-brand: 0 10px 26px rgba(51, 102, 204, .30);
+
+  /* Layout */
+  --maxw: 1200px;
+  --gutter: 24px;
+  --nav-h: 66px;
+  --frame: 28px;   /* respiro escuro em volta do card do topo */
+
+  /* Tipografia */
+  --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+}

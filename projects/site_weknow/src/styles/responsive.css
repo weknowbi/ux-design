@@ -1,0 +1,157 @@
+/* ═══════════ Responsivo ═══════════ */
+@media (max-width: 1120px) {
+  .nav { gap: 18px; }
+  .nav > a, .nav__toggle { font-size: .87rem; }
+}
+@media (max-width: 980px) {
+  :root { --gutter: 20px; }
+  .nav { display: none; }
+  .burger { display: flex; }
+  /* O botão e o sanduíche formam um bloco só, encostado na direita.
+     Sem zerar a margem automática do sanduíche, os dois disputam a sobra
+     e o botão para no meio do caminho. */
+  .header__inner { gap: 14px; }
+  .header__actions { margin-left: auto; }
+  .burger { margin-left: 0; }
+  .header__actions .btn { padding: 8px 15px; font-size: .85rem; }
+  /* Menu mobile: painel escuro ocupando a tela inteira, com a barra por cima.
+     O padding do topo reserva a altura da barra mais a margem dela, senão o
+     painel corta o logo e o botão ao meio. */
+  /* O painel é filho do header, então quem fica por cima é decidido aqui
+     dentro: painel no nível 1, logo, botão e X no nível 2 */
+  .header:has(.nav.is-open) .brand,
+  .header:has(.nav.is-open) .header__actions,
+  .header:has(.nav.is-open) .burger { position: relative; z-index: 2; }
+  .nav.is-open {
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    display: block;
+    margin: 0;
+    padding: calc(var(--nav-h) + var(--frame) + 10px) var(--gutter) 48px;
+    background: var(--shell);
+    border: 0;
+    box-shadow: none;
+    animation: fadeUp .22s ease;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+  .nav.is-open > a,
+  .nav.is-open .nav__toggle {
+    width: 100%;
+    padding: 18px 2px;
+    border-bottom: 1px solid rgba(255, 255, 255, .13);
+    font-size: 1.08rem;
+    font-weight: 600;
+    color: #fff;
+    opacity: 1;
+  }
+  .nav.is-open > a:first-child { border-top: 1px solid rgba(255, 255, 255, .13); }
+  .nav.is-open .nav__toggle { justify-content: space-between; }
+  /* A rotação da seta já vem do componente; aqui só o tamanho */
+  .nav.is-open .nav__toggle svg { width: 15px; height: 15px; opacity: .7; }
+
+  /* No celular o submenu abre embutido na lista, sem painel flutuante */
+  .nav.is-open .nav__item { width: 100%; }
+  .nav.is-open .nav__menu {
+    position: static;
+    width: 100%;
+    padding: 6px 0 14px;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    background: transparent;
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+    display: none;
+  }
+  .nav.is-open .nav__item.is-open .nav__menu { display: block; }
+  .nav.is-open .nav__menu a { padding: 12px 2px; font-size: .98rem; font-weight: 500; }
+  .nav.is-open .nav__menu strong { color: rgba(255, 255, 255, .82); font-weight: 500; }
+  .nav.is-open .nav__menu span { display: none; }
+  /* O componente força o azul da marca, que some no fundo escuro */
+  .nav.is-open .nav__menu-foot {
+    border-top: 1px solid rgba(255, 255, 255, .13);
+    color: var(--mint) !important;
+  }
+
+  /* Com o painel aberto a barra passa a viver sobre fundo escuro */
+  .header:has(.nav.is-open) .brand__dark { opacity: 0; }
+  .header:has(.nav.is-open) .brand__light { opacity: 1; }
+  .header:has(.nav.is-open) .burger span { background: #fff; }
+  .header:has(.nav.is-open) .btn--outline {
+    background: var(--brand);
+    border-color: var(--brand);
+    color: #fff;
+  }
+  .header:has(.nav.is-open) .btn--outline svg { opacity: 1; }
+  /* Trava a página atrás do painel */
+  body:has(.nav.is-open) { overflow: hidden; }
+  /* Hero */
+  .hero-frame { padding-inline: 12px; }
+  .hero {
+    min-height: 0;
+    border-radius: 22px;
+    padding: calc(var(--nav-h) + 34px) 0 48px;
+  }
+  .hero__inner { grid-template-columns: 1fr; gap: 44px; }
+  .hero__title br { display: none; }
+  .press { padding: 26px 0 30px; }
+  /* Seções */
+  .results__grid { grid-template-columns: 1fr; gap: 40px; }
+  .case-video { aspect-ratio: 16 / 10; }
+  .footer__grid { grid-template-columns: repeat(2, 1fr); }
+  .footer__brand { grid-column: 1 / -1; }
+}
+@media (max-width: 620px) {
+  .hero__cta { flex-direction: column; align-items: stretch; }
+  .hero__cta .btn { width: 100%; }
+  .results__list li { grid-template-columns: 110px minmax(0, 1fr); gap: 6px 18px; }
+  .footer__grid { grid-template-columns: 1fr; }
+  .footer__bottom { flex-direction: column; align-items: flex-start; }
+}
+@media (max-width: 980px) {
+  .problem { min-height: 0; }
+  .problem__grid { grid-template-columns: 1fr; gap: 44px; }
+}
+
+@media (max-width: 980px) {
+  .how__head { grid-template-columns: 1fr; gap: 18px; }
+  .how__track { --card-w: calc(100vw - var(--gutter) * 2 - 34px); }
+  .how__card { grid-template-columns: 1fr; min-height: 0; }
+  .how__media { min-height: 300px; }
+  .how__head h2 br { display: none; }
+  .converge { grid-template-columns: auto minmax(40px, 1fr) auto; }
+  .converge__sources li { font-size: .76rem; padding: 8px 12px; }
+}
+
+/* A seção de depoimentos não tinha nenhuma regra de mobile: as duas grades
+   continuavam em duas colunas e espremiam o texto numa tira estreita */
+@media (max-width: 980px) {
+  .voices__top { grid-template-columns: 1fr; gap: 30px; }
+  .voices__copy h2 { max-width: none; }
+  .voices__shot { aspect-ratio: 16 / 10; }
+
+  .voices__quote {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    min-height: 0;
+  }
+  /* O nome da instituição vira parte da assinatura, embaixo e à esquerda */
+  .voices__brand {
+    max-width: none;
+    text-align: left;
+    font-size: .95rem;
+  }
+  .voices__badges { justify-content: flex-start; gap: 12px 24px; }
+}
+
+@media (max-width: 860px) {
+  .devices__stage { flex-direction: column; gap: 20px; }
+  .devices__title { flex: none; white-space: normal; }
+  .devices__title:first-of-type,
+  .devices__title:last-of-type { text-align: center; }
+  .devices__shot,
+  .media-slot--devices { flex: none; width: 100%; }
+}

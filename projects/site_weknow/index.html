@@ -1,0 +1,470 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Weknow Healthtech — BI e Analytics para Gestão em Saúde</title>
+  <meta name="description" content="Plataforma de BI e Analytics para hospitais, operadoras, clínicas e laboratórios. Command Centers, análise com IA e indicadores prontos em tempo real." />
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/src/styles/main.css" />
+</head>
+<body>
+
+<!-- ░░ HEADER ░░ -->
+<header class="header" id="header">
+  <div class="header__inner">
+    <a href="#" class="brand" aria-label="Weknow Healthtech, ir para o início">
+      <img class="brand__dark" src="/logo-weknow.svg" alt="Weknow Healthtech" width="92" height="28" />
+      <img class="brand__light" src="/logo-weknow-light.svg" alt="" aria-hidden="true" width="92" height="28" />
+    </a>
+
+    <nav class="nav" id="nav">
+      <a href="#">Sobre a Weknow</a>
+      <a href="#">Eventos</a>
+
+      <div class="nav__item" data-dropdown>
+        <button class="nav__toggle" aria-expanded="false" aria-controls="menu-solucoes">
+          Soluções
+          <svg viewBox="0 0 12 12" aria-hidden="true"><path d="M3 4.5L6 7.5l3-3" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <div class="nav__menu" id="menu-solucoes">
+          <a href="#"><strong>Command Centers</strong><span>A operação inteira em uma única visão</span></a>
+          <a href="#"><strong>Análise Inteligente</strong><span>IA que interpreta seus indicadores</span></a>
+          <a href="#"><strong>Inteligência Hospitalar</strong><span>Indicadores prontos por área de gestão</span></a>
+          <a href="#"><strong>Acreditações</strong><span>ONA, Qmentum e JCI com evidência pronta</span></a>
+          <a class="nav__menu-foot" href="#como-funciona">Ver como conectamos seus sistemas</a>
+        </div>
+      </div>
+
+      <a href="#">Blog</a>
+      <a href="cases.html">Cases</a>
+      <a href="#">Trabalhe conosco</a>
+      <a href="#">Contato</a>
+    </nav>
+
+    <div class="header__actions">
+      <a href="#" class="btn btn--outline">
+        Teste grátis
+        <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2.5 8h10M9 4.5L12.5 8 9 11.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </a>
+    </div>
+
+    <button class="burger" aria-label="Abrir menu" aria-expanded="false" data-burger>
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</header>
+
+<main>
+
+<!-- ░░ 1. HERO ░░ -->
+<div class="hero-frame">
+<section class="hero">
+  <div class="hero__inner">
+    <div class="hero__copy">
+      <h1 class="hero__title">Enxergue o problema <br /> antes que ele <br /> vire custo.</h1>
+      <p class="hero__sub">
+        Indicadores, alertas e análises por IA para acompanhar a operação
+        hospitalar em tempo real e agir antes do impacto.
+      </p>
+      <div class="hero__cta">
+        <a href="#" class="btn btn--primary btn--lg">
+          Começar teste grátis
+          <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2.5 8h10M9 4.5L12.5 8 9 11.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </a>
+        <a href="#" class="btn btn--ghost btn--lg">Falar com especialista</a>
+      </div>
+      <ul class="hero__proof">
+        <li><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10.5l4 4 8-9" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg> Indicadores prontos no primeiro dia</li>
+        <li><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10.5l4 4 8-9" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg> Sem trocar seu sistema de gestão</li>
+      </ul>
+    </div>
+
+    <div class="hero__media">
+      <!-- Ao trocar pela imagem definitiva, manter a proporção 16/11 deste bloco -->
+      <div class="media-slot media-slot--wide" data-slot="Imagem do produto" aria-hidden="true"></div>
+      <div class="hero__glow" aria-hidden="true"></div>
+    </div>
+  </div>
+</section>
+
+  <!-- Faixa de clientes, dentro da moldura escura -->
+  <div class="press">
+    <div class="logos" aria-label="Clientes">
+      <div class="logos__track">
+        <span>Hospital Regional</span><span>Instituto de Oncologia</span><span>Rede Santa Clara</span>
+        <span>Operadora Vitalis</span><span>Clínica Nova Vida</span><span>Laboratório Analisa</span>
+        <span>Hospital São Marcos</span><span>Grupo Saúde Sul</span>
+        <span>Hospital Regional</span><span>Instituto de Oncologia</span><span>Rede Santa Clara</span>
+        <span>Operadora Vitalis</span><span>Clínica Nova Vida</span><span>Laboratório Analisa</span>
+        <span>Hospital São Marcos</span><span>Grupo Saúde Sul</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ░░ 2. RESULTADOS REAIS ░░ -->
+<section class="results" id="cases">
+  <div class="container">
+    <div class="results__grid">
+      <a class="case-video reveal" href="https://www.youtube.com/watch?v=Jvyyk5Oiif4"
+         target="_blank" rel="noopener noreferrer">
+        <img src="/imagens/unimed-litoral.jpeg" width="1280" height="853"
+             alt="Fachada do Hospital Unimed Litoral, em Balneário Camboriú" />
+        <span class="case-video__play" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M9 6.5l9 5.5-9 5.5z" fill="currentColor"/></svg>
+        </span>
+        <span class="case-video__label">
+          Ver o case em vídeo
+          <small>Unimed Litoral · Balneário Camboriú</small>
+        </span>
+      </a>
+
+      <div class="results__copy">
+        <span class="eyebrow eyebrow--dot">Resultados reais</span>
+        <h2>Dados que viram resultado na operação.</h2>
+        <p class="results__intro">Na Unimed Litoral, uma visão integrada dos fluxos ajudou as equipes a identificar gargalos, antecipar necessidades e agir com mais agilidade.</p>
+
+        <ul class="results__list">
+          <li class="reveal">
+            <strong data-count="76" data-suffix="%">0%</strong>
+            <div>
+              <h3>redução de gargalos</h3>
+              <p>Menos tempo para substituição e liberação de leitos.</p>
+            </div>
+          </li>
+          <li class="reveal">
+            <strong data-count="11" data-prefix="+" data-suffix="%">+0%</strong>
+            <div>
+              <h3>no giro de leitos</h3>
+              <p>Mais pacientes atendidos com a mesma estrutura.</p>
+            </div>
+          </li>
+          <li class="reveal">
+            <strong data-count="13" data-suffix="%">0%</strong>
+            <div>
+              <h3>alta mais rápida</h3>
+              <p>Menor intervalo entre a alta médica e a liberação do leito.</p>
+            </div>
+          </li>
+          <li class="reveal">
+            <strong data-count="100" data-suffix="%">0%</strong>
+            <div>
+              <h3>acesso unificado</h3>
+              <p>Indicadores críticos reunidos em uma única visão.</p>
+            </div>
+          </li>
+        </ul>
+
+        <div class="results__foot">
+          <p>Resultados do Command Center Weknow · Case Unimed Litoral</p>
+          <a href="cases.html" class="link-case">
+            Conheça mais cases
+            <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2.5 8h10M9 4.5L12.5 8 9 11.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ░░ 3. O PROBLEMA ░░ -->
+<section class="problem" id="problema">
+  <div class="container">
+    <div class="problem__grid">
+      <div class="problem__copy">
+        <h2><span class="problem__lead">O problema não é só ter&nbsp;leitos.</span>É saber onde o fluxo está&nbsp;parando.</h2>
+        <p>Gargalos operacionais prolongam a permanência e reduzem a capacidade de atendimento.</p>
+        <!-- Leva para a seção logo abaixo, que explica o funcionamento -->
+        <a href="#como-funciona" class="btn btn--light btn--lg btn--down">
+          Entenda como o Weknow funciona
+          <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2.5v10M4.5 9L8 12.5 11.5 9" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </a>
+      </div>
+
+      <div class="problem__stat">
+        <strong data-count="62" data-suffix="%">0%</strong>
+        <p>dos dias de internação foram associados a atrasos não clínicos.</p>
+        <p class="problem__note">Diagnósticos e avaliações especializadas estiveram entre os principais fatores.</p>
+      </div>
+    </div>
+
+    <p class="problem__source">Fonte: Rev. Assoc. Med. Bras., 2025 — estudo multicêntrico com 5.423 pacientes em três hospitais brasileiros.</p>
+  </div>
+</section>
+
+
+<!-- ░░ 4. COMO FUNCIONA ░░ -->
+<section class="how" id="como-funciona">
+  <div class="container">
+    <header class="how__head">
+      <h2>Do dado à decisão,<br />sem começar do zero.</h2>
+      <p>O Weknow se conecta às fontes que sua instituição já utiliza e combina dados, indicadores específicos para saúde, especialistas e IA em uma única camada de inteligência.</p>
+    </header>
+
+    <div class="how__tabs" role="tablist" aria-label="Etapas do Weknow">
+      <button class="how__tab is-active" data-step="0" role="tab" aria-selected="true"><i>01</i> Conectamos os dados</button>
+      <button class="how__tab" data-step="1" role="tab" aria-selected="false"><i>02</i> Estruturamos a inteligência</button>
+      <button class="how__tab" data-step="2" role="tab" aria-selected="false"><i>03</i> Colocamos em ação</button>
+    </div>
+  </div>
+
+  <div class="how__viewport">
+    <div class="how__track" data-track style="--i:0">
+
+      <!-- Etapa 01 -->
+      <article class="how__card is-active">
+        <div class="how__side">
+          <span class="how__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M4 7h6M4 12h9M4 17h6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><circle cx="18" cy="12" r="3" stroke="currentColor" stroke-width="1.7" fill="none"/><path d="M13 12h2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+          </span>
+          <div class="how__text">
+            <h3>Seus sistemas continuam fazendo parte da operação.</h3>
+            <p>O Weknow se conecta às fontes de dados da instituição para que informações de diferentes áreas possam ser utilizadas em uma mesma camada analítica.</p>
+            <p class="how__support">Integração sem substituir seu sistema de gestão.</p>
+          </div>
+        </div>
+
+        <div class="how__media">
+          <div class="converge" aria-hidden="true">
+            <ul class="converge__sources">
+              <li>Assistencial</li>
+              <li>Faturamento</li>
+              <li>Suprimentos</li>
+              <li>Controladoria</li>
+              <li>Outras bases</li>
+            </ul>
+            <svg class="converge__lines" viewBox="0 0 100 100" preserveAspectRatio="none">
+              <path d="M0 10 C 50 10, 50 50, 100 50" />
+              <path d="M0 30 C 50 30, 50 50, 100 50" />
+              <path d="M0 50 H 100" />
+              <path d="M0 70 C 50 70, 50 50, 100 50" />
+              <path d="M0 90 C 50 90, 50 50, 100 50" />
+            </svg>
+            <div class="converge__node">
+              <img src="/logo-weknow-light.svg" alt="" width="92" height="28" />
+              <span>camada analítica única</span>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- Etapa 02 -->
+      <article class="how__card">
+        <div class="how__side">
+          <span class="how__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M12 3l2.2 4.6L19 9l-3.6 3.3.9 5.1-4.3-2.4-4.3 2.4.9-5.1L5 9l4.8-1.4L12 3z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+          </span>
+          <div class="how__text">
+            <h3>Você não começa com uma tela vazia.</h3>
+            <p>O Weknow combina uma estrutura de metadados com milhares de indicadores desenvolvidos para saúde, acelerando a construção de dashboards e análises para diferentes áreas da instituição.</p>
+            <p class="how__support">Do primeiro dia, com o que a saúde precisa medir.</p>
+          </div>
+        </div>
+
+        <div class="how__media">
+          <div class="engine" aria-hidden="true">
+            <ul class="engine__parts">
+              <li>Estrutura de metadados</li>
+              <li>Milhares de indicadores</li>
+              <li>Conhecimento em saúde</li>
+              <li>Especialistas Weknow</li>
+            </ul>
+            <div class="engine__core">
+              <img src="/logo-weknow-light.svg" alt="" width="92" height="28" />
+            </div>
+            <div class="engine__out"><span></span><span></span><span></span></div>
+          </div>
+        </div>
+      </article>
+
+      <!-- Etapa 03 -->
+      <article class="how__card">
+        <div class="how__side">
+          <span class="how__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M4 17l5-5 3.5 3L20 7" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 7h5v5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </span>
+          <div class="how__text">
+            <h3>Da informação ao que precisa da sua atenção.</h3>
+            <p>Dashboards, Command Centers, alertas e análises por IA ajudam sua equipe a acompanhar a operação, identificar desvios e aprofundar o que os indicadores estão mostrando.</p>
+            <p class="how__support">O dado vira decisão no ritmo da operação.</p>
+          </div>
+        </div>
+
+        <div class="how__media">
+          <!-- ÁREA RESERVADA: imagem da plataforma em uso. Trocar por <img src="..." alt="..." /> -->
+          <div class="media-slot media-slot--fill" data-slot="Weknow em operação" aria-hidden="true"></div>
+        </div>
+      </article>
+
+    </div>
+  </div>
+
+  <div class="how__nav">
+    <button class="how__arrow" data-prev aria-label="Etapa anterior">
+      <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M13.5 8h-11M7 3.5L2.5 8 7 12.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+    <div class="how__dots" data-dots>
+      <button class="is-active" aria-label="Etapa 1"></button>
+      <button aria-label="Etapa 2"></button>
+      <button aria-label="Etapa 3"></button>
+    </div>
+    <button class="how__arrow" data-next aria-label="Próxima etapa">
+      <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2.5 8h11M9 3.5L13.5 8 9 12.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+  </div>
+</section>
+
+<!-- ░░ 5. EM QUALQUER TELA ░░ -->
+<!-- Conteúdo provisório: textos e ícones ainda serão trocados -->
+<section class="devices">
+  <div class="container">
+    <div class="devices__stage">
+      <h2 class="devices__title"><span>Feito para</span></h2>
+      <img class="devices__shot" src="/imagens/WeKnow-6.jpg" width="850" height="567"
+           alt="Profissional de enfermagem ao telefone em uma unidade, com um painel do Weknow na tela ao fundo" />
+      <h2 class="devices__title"><span>a saúde</span></h2>
+    </div>
+
+    <p class="devices__note">
+      Milhares de indicadores desenvolvidos para a realidade hospitalar,
+      do assistencial à gestão.
+    </p>
+  </div>
+</section>
+
+<!-- ░░ 6. VOZES DE CLIENTES ░░ -->
+<!-- Conteúdo provisório: depoimentos reais entram no lugar dos exemplos -->
+<section class="voices">
+  <div class="container">
+    <div class="voices__top">
+      <div class="voices__copy">
+        <h2>Quem usa, decide diferente.</h2>
+        <p>Times assistenciais, administrativos e de qualidade acompanham a mesma informação, no mesmo momento. A conversa deixa de ser sobre qual número está certo e passa a ser sobre o que fazer com ele.</p>
+      </div>
+      <img class="voices__shot" src="/imagens/command-center.jpg" width="850" height="567"
+           alt="Equipe acompanhando os painéis do Weknow no Command Center" />
+    </div>
+
+    <div class="voices__stage">
+      <div class="voices__viewport">
+        <div class="voices__track" data-quotes style="--q:0">
+          <figure class="voices__quote">
+            <div class="voices__text">
+              <blockquote>Alguns relatórios que eram apresentados ao conselho do hospital eram compostos por trabalhos que demoravam duas semanas. Hoje, essa informação é colhida em tempo real, com apenas dois cliques. Isso melhorou vários processos.</blockquote>
+              <figcaption><strong>Gustavo H. Rodrigues</strong><span>Coordenador de TI</span></figcaption>
+            </div>
+            <p class="voices__brand">Centro Médico Hospitalar de Vila Velha</p>
+          </figure>
+
+          <figure class="voices__quote">
+            <div class="voices__text">
+              <blockquote>Reduzimos significativamente o custo operacional de fluxo de caixa. O indicador é focado nos valores de juros e tarifas bancárias pagas mensalmente pelo hospital. Só este indicador já pagou o investimento.</blockquote>
+              <figcaption><strong>Patrick Ramina</strong><span>Direção</span></figcaption>
+            </div>
+            <p class="voices__brand">Instituto de Neurologia de Curitiba</p>
+          </figure>
+
+          <figure class="voices__quote">
+            <div class="voices__text">
+              <blockquote>Tive uma excelente experiência com o Weknow no Hospital 5 de Outubro, em Canaã dos Carajás, e decidimos implantar o mesmo em outra unidade que estou dirigindo, em Imperatriz. É notadamente a agilidade e a velocidade precisa das tomadas de decisão. De fato, toda empresa pode otimizar seus processos.</blockquote>
+              <figcaption><strong>Prof. Israel Souza</strong><span>Diretor Corporativo Financeiro e Controladoria</span></figcaption>
+            </div>
+            <p class="voices__brand">Hospital São Rafael Imperatriz</p>
+          </figure>
+
+          <figure class="voices__quote">
+            <div class="voices__text">
+              <blockquote>Nossa experiência com a ferramenta sempre foi muito positiva. Estamos utilizando praticamente todos os recursos disponíveis: indicadores e alertas por e-mail, envio das agendas de consultas e cirurgias para os médicos via Telegram, painéis de gestão à vista e a plataforma web para todas as áreas. Também nos trouxe mobilidade no acesso à informação.</blockquote>
+              <figcaption><strong>Pablo Camargo</strong><span>Coordenador de TI</span></figcaption>
+            </div>
+            <p class="voices__brand">Hospital 10 de Julho · Unimed Pindamonhangaba</p>
+          </figure>
+        </div>
+      </div>
+
+      <div class="voices__controls">
+        <div class="voices__dots" data-quote-dots>
+          <button class="is-active" aria-label="Depoimento 1"></button>
+          <button aria-label="Depoimento 2"></button>
+          <button aria-label="Depoimento 3"></button>
+          <button aria-label="Depoimento 4"></button>
+        </div>
+        <button class="voices__pause" data-quote-pause aria-label="Pausar depoimentos">
+          <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M5.5 3.5v9M10.5 3.5v9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <ul class="voices__badges">
+      <li>Hospitais, operadoras, clínicas e laboratórios</li>
+      <li>Indicadores prontos para a saúde</li>
+      <li>Conformidade com a LGPD</li>
+      <li>Suporte com especialistas em saúde</li>
+    </ul>
+  </div>
+</section>
+
+</main>
+
+<!-- ░░ RODAPÉ ░░ -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer__grid">
+      <div class="footer__brand">
+        <a href="#" class="brand brand--light">
+          <img class="brand__light" src="/logo-weknow-light.svg" alt="Weknow Healthtech" width="92" height="28" />
+        </a>
+        <p>Solução de BI e Analytics para gestão em saúde. Indicadores específicos para hospitais, operadoras, clínicas e laboratórios.</p>
+        <div class="social">
+          <a href="#" aria-label="LinkedIn">in</a>
+          <a href="#" aria-label="Instagram">ig</a>
+          <a href="#" aria-label="YouTube">yt</a>
+          <a href="#" aria-label="Telegram">tg</a>
+          <a href="#" aria-label="Facebook">fb</a>
+        </div>
+      </div>
+      <div class="footer__col">
+        <h4>Soluções</h4>
+        <a href="#">Command Centers</a>
+        <a href="#">Análise Inteligente</a>
+        <a href="#">Inteligência Hospitalar</a>
+        <a href="#">Acreditações</a>
+      </div>
+      <div class="footer__col">
+        <h4>Indicadores</h4>
+        <a href="#">Internação</a>
+        <a href="#">Cirurgias</a>
+        <a href="#">Faturamento</a>
+        <a href="#">Controladoria</a>
+      </div>
+      <div class="footer__col">
+        <h4>Empresa</h4>
+        <a href="#">Sobre a Weknow</a>
+        <a href="cases.html">Cases</a>
+        <a href="#">Blog</a>
+        <a href="#">Trabalhe conosco</a>
+      </div>
+      <div class="footer__col">
+        <h4>Contato</h4>
+        <a href="#">Fale com vendas</a>
+        <a href="#">Suporte</a>
+        <a href="#">Teste grátis</a>
+      </div>
+    </div>
+    <div class="footer__bottom">
+      <p>© 2026 Weknow Healthtech · Todos os direitos reservados</p>
+      <div class="footer__legal">
+        <a href="#">Política de Privacidade</a>
+        <a href="#">Termo de Uso para Contratação</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script type="module" src="/src/js/main.js"></script>
+</body>
+</html>

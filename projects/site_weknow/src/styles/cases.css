@@ -1,0 +1,219 @@
+/* ═══════════ Página de Cases ═══════════ */
+/* Estrutura espelhada na referência: topo claro, destaque, grade escura e chamada final */
+
+/* ─── 1. Topo claro ─── */
+.cases-hero {
+  /* Sobe atrás do header, para o degradê começar no topo da tela e a barra
+     ficar transparente por cima, como na home */
+  margin-top: calc((var(--nav-h) + var(--frame)) * -1);
+  padding: calc(var(--nav-h) + var(--frame) + clamp(56px, 8vw, 96px)) 0 clamp(36px, 5vw, 56px);
+  background: var(--grad-hero);
+  text-align: center;
+}
+.cases-hero__inner h1 {
+  color: var(--ink);
+  font-size: clamp(2.1rem, 4.2vw, 3.3rem);
+  letter-spacing: -.03em;
+  line-height: 1.08;
+}
+.cases-hero__inner p {
+  margin: 20px auto 0;
+  max-width: 46ch;
+  font-size: 1.06rem;
+  line-height: 1.55;
+  color: var(--ink-2);
+}
+
+/* ─── 2. Case em destaque ─── */
+/* Continua sobre o mesmo degradê claro, que desce até o fim da seção */
+.case-feature {
+  padding: 0 0 clamp(64px, 8vw, 104px);
+  background: linear-gradient(180deg, #F7FAFF 0%, #F7FAFF 55%, #FFFFFF 100%);
+}
+/* O degradê do topo precisa desaguar aqui sem emenda visível */
+.cases-hero + .case-feature { margin-top: -1px; }
+
+.case-feature__video {
+  max-width: 980px;
+  margin-inline: auto;
+  aspect-ratio: 16 / 9;
+}
+
+.case-feature__head {
+  max-width: 980px;
+  margin: clamp(36px, 4vw, 52px) auto 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: clamp(24px, 4vw, 56px);
+  align-items: start;
+}
+.case-feature__head h2 {
+  font-size: clamp(1.6rem, 2.7vw, 2.2rem);
+  color: var(--ink);
+}
+.case-feature__head p {
+  padding-top: 6px;
+  font-size: 1.02rem;
+  line-height: 1.6;
+  color: var(--ink-soft);
+}
+
+.case-feature__stats {
+  max-width: 980px;
+  margin: clamp(36px, 4vw, 52px) auto 0;
+  padding-top: clamp(24px, 3vw, 34px);
+  border-top: 1px solid var(--line);
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 28px;
+}
+.case-feature__stats strong {
+  display: block;
+  font-size: clamp(1.9rem, 3.2vw, 2.6rem);
+  font-weight: 700;
+  letter-spacing: -.03em;
+  line-height: 1;
+  color: var(--brand);
+}
+.case-feature__stats span {
+  display: block;
+  margin-top: 10px;
+  font-size: .94rem;
+  line-height: 1.45;
+  color: var(--ink-soft);
+}
+
+/* ─── 3. Grade escura ─── */
+/* Azul quase preto, com um degradê de transição bem discreto */
+.cases-more {
+  padding: clamp(72px, 9vw, 116px) 0;
+  color: #fff;
+  background: linear-gradient(172deg, #060A14 0%, #08101F 46%, #050810 100%);
+  background-color: #060A14;
+}
+.cases-more__title {
+  margin-bottom: clamp(36px, 5vw, 56px);
+  text-align: center;
+  font-size: clamp(1.7rem, 3vw, 2.4rem);
+}
+
+.cases-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(32px, 4vw, 52px) clamp(24px, 3vw, 40px);
+  max-width: 980px;
+  margin-inline: auto;
+}
+
+/* Coluna, para o link "Ver o case" encostar na base mesmo com títulos de
+   alturas diferentes na mesma linha da grade */
+.case-card { display: flex; flex-direction: column; }
+
+.case-card__media {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  border-radius: var(--r-md);
+  background: rgba(255, 255, 255, .04);
+}
+.case-card__media img {
+  width: 100%;
+  /* Sem isto o atributo height do HTML vira altura fixa e ignora a proporção */
+  height: auto;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  transition: transform .5s cubic-bezier(.22, 1, .36, 1);
+}
+.case-card__media::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(5, 8, 16, .1), rgba(5, 8, 16, .42));
+  opacity: .8;
+  transition: opacity .3s ease;
+}
+.case-card__media:hover img { transform: scale(1.04); }
+.case-card__media:hover::after { opacity: .55; }
+
+.case-card__play {
+  position: absolute;
+  z-index: 1;
+  top: 50%;
+  left: 50%;
+  translate: -50% -50%;
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: rgba(10, 16, 28, .6);
+  border: 1px solid rgba(255, 255, 255, .3);
+  color: #fff;
+  backdrop-filter: blur(4px);
+  transition: background .25s ease, scale .25s cubic-bezier(.22, 1, .36, 1);
+}
+.case-card__play svg { width: 20px; height: 20px; margin-left: 2px; }
+.case-card__media:hover .case-card__play { background: var(--brand); scale: 1.08; }
+
+.case-card h3 {
+  margin: 20px 0 10px;
+  font-size: 1.2rem;
+  color: #fff;
+}
+.case-card p {
+  font-size: .97rem;
+  line-height: 1.55;
+  color: rgba(255, 255, 255, .66);
+}
+.case-card__who {
+  display: block;
+  margin-top: 12px;
+  font-size: .84rem;
+  line-height: 1.4;
+  color: rgba(255, 255, 255, .45);
+}
+.case-card__link {
+  align-self: flex-start;
+  margin-top: auto;
+  padding-top: 16px;
+  padding-bottom: 2px;
+  border-bottom: 1px solid rgba(255, 255, 255, .4);
+  font-size: .95rem;
+  font-weight: 600;
+  color: #fff;
+  transition: border-color .2s ease, color .2s ease;
+}
+.case-card__link:hover { border-color: var(--mint); color: var(--mint); }
+
+/* ─── 4. Chamada final ─── */
+.cases-cta {
+  padding: clamp(72px, 9vw, 112px) 0;
+  background: var(--bg-soft);
+  text-align: center;
+}
+.cases-cta__inner h2 { color: var(--ink); }
+.cases-cta__inner p {
+  margin: 16px auto 0;
+  max-width: 44ch;
+  font-size: 1.06rem;
+  color: var(--ink-soft);
+}
+.cases-cta__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 14px;
+  margin-top: 30px;
+}
+
+/* ─── Responsivo ─── */
+@media (max-width: 980px) {
+  .case-feature__head { grid-template-columns: 1fr; gap: 16px; }
+  .case-feature__stats { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 26px 24px; }
+  .cases-grid { grid-template-columns: 1fr; max-width: 520px; }
+}
+@media (max-width: 620px) {
+  .case-feature__video { aspect-ratio: 16 / 10; }
+  .cases-cta__actions { flex-direction: column; align-items: stretch; }
+  .cases-cta__actions .btn { width: 100%; }
+}
