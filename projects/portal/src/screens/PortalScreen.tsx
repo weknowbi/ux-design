@@ -11,10 +11,13 @@ import { useBrowserPrefs, usePref } from '@/components/browser/prefs'
 import { BrowserControls } from '@/components/browser/BrowserControls'
 import {
   CardStyleContext,
+  DASH_THUMBS,
+  DashThumbContext,
   ICON_MODES,
   IconModeContext,
   ToastContext,
   type CardStyle,
+  type DashThumb,
   type IconMode,
 } from '@/components/browser/Items'
 import { useAppearances } from '@/components/browser/appearance'
@@ -65,6 +68,19 @@ function iconModeMenuItems(mode: IconMode, onChange: (m: IconMode) => void): Men
   }))
 }
 
+/** Dashboard sem imagem: croqui do layout ou ícone. Mostra o modo em que você NÃO está. */
+const DASH_THUMB_MENU: Record<DashThumb, { icon: string; label: string }> = {
+  croqui: { icon: 'dashboard', label: 'Dashboard sem imagem: croqui' },
+  icone: { icon: 'bar_chart', label: 'Dashboard sem imagem: ícone' },
+}
+
+function dashThumbMenuItems(mode: DashThumb, onChange: (m: DashThumb) => void): MenuItem[] {
+  return DASH_THUMBS.filter((m) => m !== mode).map((m) => ({
+    ...DASH_THUMB_MENU[m],
+    onClick: () => onChange(m),
+  }))
+}
+
 /**
  * A pasta aberta vive na URL (`#/pasta/<id>`): o voltar do navegador sobe um
  * nível e o link da pasta pode ser compartilhado.
@@ -88,6 +104,7 @@ export function PortalScreen({ onRoute }: { onRoute: (route: PortalRoute) => voi
      imagem, e a mesma tela parecia outra conforme quem abria. */
   const cardStyle: CardStyle = 'padrao'
   const [iconMode, setIconMode] = usePref<IconMode>('wk-portal-icones', ICON_MODES, 'definidos')
+  const [dashThumb, setDashThumb] = usePref<DashThumb>('wk-portal-dash-thumb', DASH_THUMBS, 'croqui')
   const [heroCollapsed, setHeroCollapsed] = useState(false)
   const [section, setSection] = useState<SectionId>('pastas')
   const prefs = useBrowserPrefs()
@@ -241,6 +258,7 @@ export function PortalScreen({ onRoute }: { onRoute: (route: PortalRoute) => voi
     <ToastContext.Provider value={showToast}>
     <CardStyleContext.Provider value={cardStyle}>
       <IconModeContext.Provider value={iconMode}>
+      <DashThumbContext.Provider value={dashThumb}>
         <ContentBrowser
           root={PORTAL_ROOT}
           path={path}
@@ -255,6 +273,7 @@ export function PortalScreen({ onRoute }: { onRoute: (route: PortalRoute) => voi
           onNavigate={navigate}
           onToggleFavorite={toggleFavorite}
         />
+      </DashThumbContext.Provider>
       </IconModeContext.Provider>
     </CardStyleContext.Provider>
     </ToastContext.Provider>
@@ -400,7 +419,10 @@ export function PortalScreen({ onRoute }: { onRoute: (route: PortalRoute) => voi
         else onRoute(route)
       }}
       trail={trail}
-      menuItems={iconModeMenuItems(iconMode, setIconMode)}
+      menuItems={[
+        ...iconModeMenuItems(iconMode, setIconMode),
+        ...dashThumbMenuItems(dashThumb, setDashThumb),
+      ]}
       search={topbarSearch}
       mainRef={mainRef}
       overlay={toastBox}

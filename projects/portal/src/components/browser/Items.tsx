@@ -3,7 +3,8 @@ import { COLOR, FONT, RADIUS } from '@/design/tokens'
 import { Btn as Button } from '@ds/Btn'
 import { FormField, fieldBoxStyle, fieldTextStyle } from '@ds/Field'
 import { Icon } from '@/components/icons'
-import type { Item } from '@/data/portal'
+import { ConfirmModal } from '@/components/ConfirmModal'
+import type { Item, SketchBlock, SketchKind } from '@/data/portal'
 import type { ViewMode } from '@/components/browser/prefs'
 import { Dropdown, MenuAction } from '@/components/browser/Menu'
 import { useEllipsisTooltip } from '@/components/Tooltip'
@@ -504,6 +505,76 @@ export type IconMode = 'definidos' | 'indefinidos'
 export const ICON_MODES: IconMode[] = ['definidos', 'indefinidos']
 export const IconModeContext = createContext<IconMode>('definidos')
 
+/**
+ * Miniatura do dashboard sem imagem, em teste: o croqui do layout ou o ícone.
+ * O croqui é o que o Weknow já faz hoje, redesenhado; o ícone é o do card novo.
+ */
+export type DashThumb = 'croqui' | 'icone'
+export const DASH_THUMBS: DashThumb[] = ['croqui', 'icone']
+export const DashThumbContext = createContext<DashThumb>('croqui')
+
+/**
+ * Ícone de cada tipo de componente no croqui: os mesmos desenhos que o
+ * Weknow usa hoje (Material Design Icons), com a caixa em que cada um foi
+ * desenhado — quase todos em 24, o de barras em 30, o de filtro em 18.
+ */
+const SKETCH_ICONS: Record<SketchKind, { d: string; box: number }> = {
+  bar: { box: 30, d: 'M5,11H9.286V25H5Zm8-6h4V25H13Zm8,11.429h4V25H21Z' },
+  line: { box: 24, d: 'M3.5,18.5L9.5,12.5L13.5,16.5L22,6.92L20.59,5.5L13.5,13.5L9.5,9.5L2,17L3.5,18.5Z' },
+  pie: { box: 24, d: 'M11,2V22C5.9,21.5 2,17.2 2,12C2,6.8 5.9,2.5 11,2M13,2V11H22C21.5,6.2 17.8,2.5 13,2M13,13V22C17.7,21.5 21.5,17.8 22,13H13Z' },
+  map: { box: 24, d: 'M15,19L9,16.89V5L15,7.11M20.5,3C20.44,3 20.39,3 20.34,3L15,5.1L9,3L3.36,4.9C3.15,4.97 3,5.15 3,5.38V20.5A0.5,0.5 0 0,0 3.5,21C3.55,21 3.61,21 3.66,20.97L9,18.9L15,21L20.64,19.1C20.85,19 21,18.85 21,18.62V3.5A0.5,0.5 0 0,0 20.5,3Z' },
+  gauge: { box: 24, d: 'M12,16A3,3 0 0,1 9,13C9,11.88 9.61,10.9 10.5,10.39L20.21,4.77L14.68,14.35C14.18,15.33 13.17,16 12,16M12,3C13.81,3 15.5,3.5 16.97,4.32L14.87,5.53C14,5.19 13,5 12,5A8,8 0 0,0 4,13C4,15.21 4.89,17.21 6.34,18.65H6.35C6.74,19.04 6.74,19.67 6.35,20.06C5.96,20.45 5.32,20.45 4.93,20.07V20.07C3.12,18.26 2,15.76 2,13A10,10 0 0,1 12,3M22,13C22,15.76 20.88,18.26 19.07,20.07V20.07C18.68,20.45 18.05,20.45 17.66,20.06C17.27,19.67 17.27,19.04 17.66,18.65V18.65C19.11,17.2 20,15.21 20,13C20,12 19.81,11 19.46,10.1L20.67,8C21.5,9.5 22,11.18 22,13Z' },
+  table: { box: 24, d: 'M8,10h9V21H8Zm9,11h3a2.006,2.006,0,0,0,2-2V10H17ZM20,3H5A2.006,2.006,0,0,0,3,5V8H22V5A2.006,2.006,0,0,0,20,3ZM3,19a2.006,2.006,0,0,0,2,2H8V10H3Z' },
+  text: { box: 24, d: 'M20,20H4A2,2 0 0,1 2,18V6A2,2 0 0,1 4,4H20A2,2 0 0,1 22,6V18A2,2 0 0,1 20,20M5,13V15H16V13H5M5,9V11H19V9H5Z' },
+  label: { box: 24, d: 'M9.93 13.5h4.14L12 7.98zM20 2H4c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-4.05 16.5l-1.14-3H9.17l-1.12 3H5.96l5.11-13h1.86l5.11 13h-2.09z' },
+  image: { box: 24, d: 'M8.5,13.5L11,16.5L14.5,12L19,18H5M21,19V5C21,3.89 20.1,3 19,3H5A2,2 0 0,0 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19Z' },
+  filter: { box: 18, d: 'M16,18H2a2,2,0,0,1-2-2V2A2,2,0,0,1,2,0H16a2,2,0,0,1,2,2V16A2,2,0,0,1,16,18ZM4.77,3.561a.623.623,0,0,0-.374.132.605.605,0,0,0-.226.4.592.592,0,0,0,.124.443L7.773,9h.018v3.547a.6.6,0,0,0,.176.5l1.214,1.214a.6.6,0,0,0,.852,0,.58.58,0,0,0,.175-.5V9h.018l3.48-4.459a.592.592,0,0,0,.124-.443.605.605,0,0,0-.226-.4.623.623,0,0,0-.374-.132Z' },
+}
+
+/** O quadro do croqui do Weknow: 250×170, células com 1 de margem e raio 2. */
+const SKETCH_W = 250
+const SKETCH_H = 170
+
+/**
+ * Croqui do dashboard: a posição de cada componente e o tipo dele.
+ *
+ * É o croqui que o Weknow já desenha, refeito aqui do mesmo jeito — quadro de
+ * 250×170 no centro da miniatura, células claras com 2 de vão sobre o fundo
+ * da miniatura vazia, e no meio de cada célula o ícone do tipo de componente.
+ * Muda só a cor dos ícones: o cinza #dadada de lá dá lugar à cor padrão de
+ * ícone do design system (--wk-nav-label), que também tem par no tema escuro.
+ */
+function DashboardSketch({ layout }: { layout: SketchBlock[] }) {
+  const col = SKETCH_W / 12
+  const row = SKETCH_H / 6
+  return (
+    <svg viewBox={`0 0 ${SKETCH_W} ${SKETCH_H}`} className="h-[80%] w-auto max-w-[90%]" aria-hidden="true">
+      {layout.map(([x, y, w, h, kind], i) => {
+        const icon = SKETCH_ICONS[kind]
+        const cx = (x + w / 2) * col
+        const cy = (y + h / 2) * row
+        return (
+          <g key={i}>
+            <rect
+              x={x * col + 1}
+              y={y * row + 1}
+              width={w * col - 2}
+              height={h * row - 2}
+              rx={2}
+              fill="var(--wk-surface-subtle)"
+            />
+            <path
+              d={icon.d}
+              transform={`translate(${cx - icon.box / 2} ${cy - icon.box / 2})`}
+              fill="var(--wk-nav-label)"
+            />
+          </g>
+        )
+      })}
+    </svg>
+  )
+}
+
 const DEFAULT_APPEARANCE: Record<Item['kind'], { icon: string; color: string }> = {
   folder: { icon: 'folder', color: APPEARANCE_COLORS[0] },
   dashboard: { icon: 'bar_chart', color: APPEARANCE_COLORS[4] },
@@ -645,6 +716,13 @@ const PANEL_LINK = 'self-start text-[13px] leading-[18px] rounded-md hover:under
  * Daí o Salvar: o que se mexe aqui é o cadastro, não uma preferência do
  * navegador. Enquanto o painel está aberto o card muda junto — é o que a web
  * tem e o desk não —, e fechar sem salvar devolve tudo ao que era.
+ *
+ * E o cadastro é um só: a pasta muda para todo mundo que a vê, não só para
+ * quem editou. Num ⋮ ao lado da estrela, que é preferência pessoal, a leitura
+ * natural seria a contrária. Por isso o Salvar pergunta antes de gravar, num
+ * modal: é uma decisão sem a qual não dá para seguir, que é o caso do modal.
+ * O painel fica aberto atrás do véu, e Cancelar no modal devolve a pessoa à
+ * edição com o rascunho intacto — quem hesitou quer rever, não perder tudo.
  */
 function CardMenu({
   item,
@@ -663,6 +741,8 @@ function CardMenu({
   // abre ali mesmo o painel — sem um segundo popover.
   const [customizing, setCustomizing] = useState(false)
   const [focused, setFocused] = useState(false)
+  /** O Salvar foi clicado e o modal pergunta se vale para todos. */
+  const [confirming, setConfirming] = useState(false)
   const custom = useAppearance(item.id)
   const { name, thumbnail } = useItemFace(item)
   const toast = useContext(ToastContext)
@@ -679,6 +759,7 @@ function CardMenu({
   const openPanel = () => {
     snapshot.current = getAppearance(item.id)
     saved.current = false
+    setConfirming(false)
     setCustomizing(true)
   }
 
@@ -688,7 +769,11 @@ function CardMenu({
   const closePanel = () => {
     if (customizing && !saved.current) replaceAppearance(item.id, snapshot.current)
     setCustomizing(false)
+    setConfirming(false)
   }
+
+  /* Sem mudança não há o que confirmar: o Salvar só fecha. */
+  const changed = () => JSON.stringify(getAppearance(item.id)) !== JSON.stringify(snapshot.current)
 
   const pickImage = async (file: File | undefined) => {
     if (!file) return
@@ -835,16 +920,27 @@ function CardMenu({
                 <Button variant="ghost" onClick={close}>
                   Cancelar
                 </Button>
-                <Button
-                  onClick={() => {
-                    saved.current = true
-                    toast('Alterações salvas')
-                    close()
-                  }}
-                >
+                <Button onClick={() => (changed() ? setConfirming(true) : close())}>
                   Salvar
                 </Button>
               </div>
+
+              {confirming && (
+                <ConfirmModal
+                  title="Salvar para todos?"
+                  confirmLabel="Salvar para todos"
+                  onCancel={() => setConfirming(false)}
+                  onConfirm={() => {
+                    saved.current = true
+                    toast('Alterações salvas para todos')
+                    close()
+                  }}
+                >
+                  {kind === 'pasta'
+                    ? 'As alterações nesta pasta serão aplicadas para todos os usuários que têm acesso a ela.'
+                    : 'As alterações neste dashboard serão aplicadas para todos os usuários que têm acesso a ele.'}
+                </ConfirmModal>
+              )}
             </div>
           )
         }
@@ -1087,7 +1183,11 @@ function ItemTile({
   return (
     <div
       role="listitem"
-      onMouseEnter={tip.show}
+      // Só o mouse que entra no card de fato. O modal de confirmar a edição é
+      // filho do card na árvore do React (vem do ⋮) mas mora no <body>, e o
+      // React conta a entrada nele como entrada aqui: o nome aparecia por cima
+      // do véu.
+      onMouseEnter={(e) => e.currentTarget.contains(e.target as Node) && tip.show()}
       // Qualquer clique no card (abrir o ⋮, favoritar) derruba o tooltip do nome:
       // ele cobria as opções do menu que acabou de abrir.
       onPointerDown={tip.hide}
@@ -1145,9 +1245,19 @@ function ItemThumb({
   // Sem imagem, no limpo: o ícone do tema grande, na cor dele, sobre a mesma
   // cor bem diluída — o card vazio conversa com o círculo do rodapé.
   const cleanEmpty = isClean(style) && !thumbnail
+  // Dashboard sem imagem e com layout: o croqui no lugar do ícone, quando o
+  // teste pede. Sem layout (painel vazio) o ícone continua.
+  const sketch =
+    useContext(DashThumbContext) === 'croqui' && cleanEmpty && item.kind === 'dashboard'
+      ? item.layout
+      : undefined
   // No Expandido o card é claro nos dois estilos, então a cor diluída da
   // miniatura vazia se mistura sempre no branco dele.
-  const emptyStyle = cleanEmpty
+  // O croqui fica no fundo neutro da miniatura vazia, como no Weknow: a cor
+  // do item tingindo o quadro brigava com as células claras.
+  const emptyStyle = sketch
+    ? undefined
+    : cleanEmpty
     ? { background: `color-mix(in srgb, ${look.color} 9%, var(--wk-card-surface))` }
     : folder && !thumbnail
       ? { background: `linear-gradient(${folderTint(name)}, ${folderTint(name)}), var(--wk-card-surface)` }
@@ -1197,6 +1307,8 @@ function ItemThumb({
       >
         {thumbnail ? (
           <img src={thumbnail} alt="" className="w-full h-full object-cover" />
+        ) : sketch ? (
+          <DashboardSketch layout={sketch} />
         ) : cleanEmpty ? (
           <Icon name={look.icon} size={56} weight={300} color={look.color} className="opacity-60" />
         ) : (

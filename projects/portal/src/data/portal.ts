@@ -14,7 +14,24 @@ type Base = {
   thumbnail?: string
 }
 
-export type Dashboard = Base & { kind: 'dashboard' }
+/** Tipo de componente do dashboard: decide o ícone da célula no croqui. */
+export type SketchKind = 'bar' | 'line' | 'pie' | 'map' | 'gauge' | 'table' | 'text' | 'label' | 'image' | 'filter'
+
+/**
+ * Um componente do dashboard no croqui: coluna, linha, largura e altura numa
+ * grade de 12 colunas por 6 linhas, e o tipo dele.
+ */
+export type SketchBlock = [x: number, y: number, w: number, h: number, kind: SketchKind]
+
+export type Dashboard = Base & {
+  kind: 'dashboard'
+  /**
+   * Posição dos componentes no painel. No Weknow o croqui sai do layout real
+   * do dashboard; aqui são modelos inventados, só para a maquete. Sem layout
+   * (painel vazio, recém-criado), o card cai no ícone.
+   */
+  layout?: SketchBlock[]
+}
 export type Folder = Base & { kind: 'folder'; children: Item[] }
 export type Item = Folder | Dashboard | Task | Presentation
 
@@ -33,6 +50,26 @@ const author = () => AUTHORS[(seq * 7) % AUTHORS.length]
  */
 const photo = (id: string) => `https://images.unsplash.com/photo-${id}?w=640&q=70&auto=format&fit=crop`
 
+/**
+ * Arranjos de painel. Os dois primeiros são cópia de dashboards reais do
+ * Weknow ("Offline" e "Vínculos automáticos", no ambiente Testes); os outros
+ * são combinações comuns: indicadores no topo, gráfico grande, tabela,
+ * filtros à esquerda.
+ */
+const LAYOUTS: SketchBlock[][] = [
+  [[0, 0, 12, 2, 'bar'], [0, 2, 3, 2, 'map'], [3, 2, 4, 2, 'pie'], [7, 2, 2, 2, 'text'], [9, 2, 3, 2, 'bar'], [0, 4, 6, 2, 'line'], [6, 4, 6, 2, 'table']],
+  [[0, 0, 8, 2, 'bar'], [8, 0, 4, 2, 'label'], [0, 2, 3, 4, 'map'], [3, 2, 9, 2, 'bar'], [3, 4, 5, 2, 'table'], [8, 4, 4, 2, 'gauge']],
+  [[0, 0, 3, 2, 'gauge'], [3, 0, 3, 2, 'gauge'], [6, 0, 3, 2, 'gauge'], [9, 0, 3, 2, 'gauge'], [0, 2, 8, 4, 'line'], [8, 2, 4, 4, 'pie']],
+  [[0, 0, 2, 6, 'filter'], [2, 0, 10, 3, 'bar'], [2, 3, 5, 3, 'pie'], [7, 3, 5, 3, 'table']],
+  [[0, 0, 4, 2, 'label'], [4, 0, 4, 2, 'label'], [8, 0, 4, 2, 'label'], [0, 2, 12, 4, 'table']],
+  [[0, 0, 6, 3, 'line'], [6, 0, 6, 3, 'bar'], [0, 3, 4, 3, 'pie'], [4, 3, 4, 3, 'map'], [8, 3, 4, 3, 'text']],
+  [[0, 0, 4, 6, 'image'], [4, 0, 8, 3, 'line'], [4, 3, 4, 3, 'gauge'], [8, 3, 4, 3, 'gauge']],
+  [[0, 0, 12, 1, 'filter'], [0, 1, 6, 5, 'map'], [6, 1, 6, 3, 'bar'], [6, 4, 6, 2, 'table']],
+]
+
+/* Um em cada sete fica sem layout, para a maquete mostrar também o ícone. */
+const layoutFor = (n: number) => (n % 7 === 3 ? undefined : LAYOUTS[(n * 5) % LAYOUTS.length])
+
 const dash = (name: string, days: number, thumbnail?: string): Dashboard => ({
   kind: 'dashboard',
   id: `d${++seq}`,
@@ -40,6 +77,7 @@ const dash = (name: string, days: number, thumbnail?: string): Dashboard => ({
   updatedAt: daysAgo(days),
   updatedBy: author(),
   thumbnail,
+  layout: layoutFor(seq),
 })
 
 const folder = (name: string, days: number, children: Item[], thumbnail?: string): Folder => ({
