@@ -137,7 +137,7 @@
           "id": "modal",
           "title": "Modal",
           "icon": "web_asset",
-          "summary": "Uma moldura para os três modais do produto: 420 para um campo e 610 para escolha em lista.",
+          "summary": "Uma moldura só, o componente Modal, para todos os modais do produto: 420 para um campo e 610 para escolha em lista.",
           "status": "pronto",
           "source": "weknow_ask/src/components/PromptModal.tsx",
           "figma": "11977:5035"

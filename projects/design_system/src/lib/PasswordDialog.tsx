@@ -3,6 +3,7 @@ import { COLOR, FONT } from './tokens'
 import { Icon } from './icons'
 import { Btn } from './Btn'
 import { FIELD, FormField, fieldBoxStyle, fieldTextStyle } from './Field'
+import { Modal, ModalFooter } from './Modal'
 
 /**
  * Trocar a própria senha.
@@ -142,12 +143,6 @@ export function PasswordDialog({
   const [done, setDone] = useState(false)
   const firstRef = useRef<HTMLInputElement>(null)
 
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose()
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [onClose])
-
   const longa = next.length >= 8
   const mista = /[a-zA-Z]/.test(next) && /\d/.test(next)
   const outra = next.length > 0 && next !== current
@@ -161,133 +156,88 @@ export function PasswordDialog({
   }
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      style={{ background: 'var(--wk-backdrop)' }}
-      onClick={(e) => e.target === e.currentTarget && onClose()}
-      role="dialog"
-      aria-modal="true"
-      aria-label="Alterar senha"
-    >
-      <div
-        className="bg-[var(--wk-surface)] flex flex-col overflow-hidden"
-        style={{
-          width: 420,
-          maxWidth: '100%',
-          borderRadius: 8,
-          border: `1px solid ${COLOR.border}`,
-          boxShadow: 'var(--wk-shadow-menu)',
-        }}
-      >
-        {/* A moldura é a dos outros modais do projeto: cabeçalho de 64, título
-            em Inter Medium 20/1.5, fechar de 24 na ponta. */}
-        <div
-          className="shrink-0 flex items-center gap-2"
-          style={{ height: 64, paddingInline: 24, paddingBlock: 16 }}
-        >
-          <h2
-            className="flex-1 min-w-0 truncate"
-            style={{ fontFamily: FONT, fontWeight: 500, fontSize: 20, lineHeight: 1.5, color: COLOR.text }}
-          >
-            {done ? 'Senha alterada' : 'Alterar senha'}
-          </h2>
-          <button
-            type="button"
-            onClick={onClose}
-            title="Fechar"
-            aria-label="Fechar"
-            className="wk-icon-btn shrink-0 flex items-center justify-center"
-            style={{ width: 24, height: 24, color: COLOR.navLabel }}
-          >
-            <Icon name="close" size={24} />
-          </button>
+    <Modal title={done ? 'Senha alterada' : 'Alterar senha'} onClose={onClose}>
+      {done ? (
+        <div className="flex items-start gap-3" style={{ paddingInline: 24 }}>
+          <Icon name="check_circle" size={24} color={COLOR.primary} className="shrink-0" />
+          <p style={{ fontFamily: FONT, fontSize: 14, lineHeight: '22px', color: COLOR.text }}>
+            A senha de <strong style={{ fontWeight: 600 }}>{account}</strong> foi alterada. Use a nova no
+            próximo acesso.
+          </p>
         </div>
+      ) : (
+        <div style={{ paddingInline: 24 }}>
+          {/* A conta, em texto: responde "a senha de quem?" sem virar uma
+              pergunta que a tela já sabe responder sozinha. */}
+          <p
+            className="truncate"
+            title={account}
+            style={{
+              fontFamily: FONT,
+              fontSize: 13,
+              lineHeight: '18px',
+              color: COLOR.textSecondary,
+              paddingBottom: 16,
+            }}
+          >
+            Conta: {account}
+          </p>
 
+          <FormField label="Senha atual">
+            <PasswordField
+              label="senha atual"
+              value={current}
+              onChange={setCurrent}
+              inputRef={firstRef}
+              autoFocus
+            />
+          </FormField>
+
+          <FormField label="Nova senha">
+            <PasswordField label="nova senha" value={next} onChange={setNext} />
+            {/* A lista nasce com a tela, apagada, e não depois do primeiro
+                erro: quem lê antes de digitar acerta de primeira. */}
+            <ul className="flex flex-col gap-1" style={{ marginTop: 8 }}>
+              <Rule ok={longa}>Pelo menos 8 caracteres</Rule>
+              <Rule ok={mista}>Uma letra e um número</Rule>
+              <Rule ok={outra}>Diferente da senha atual</Rule>
+            </ul>
+          </FormField>
+
+          <FormField
+            label="Repita a nova senha"
+            error={repeat.length > 0 && repeat !== next ? 'As duas não são iguais.' : undefined}
+          >
+            <PasswordField
+              label="repetição da nova senha"
+              value={repeat}
+              onChange={setRepeat}
+              invalid={repeat.length > 0 && repeat !== next}
+              onEnter={confirmar}
+            />
+          </FormField>
+        </div>
+      )}
+
+      <ModalFooter padTop={16}>
         {done ? (
-          <div className="flex items-start gap-3" style={{ paddingInline: 24 }}>
-            <Icon name="check_circle" size={24} color={COLOR.primary} className="shrink-0" />
-            <p style={{ fontFamily: FONT, fontSize: 14, lineHeight: '22px', color: COLOR.text }}>
-              A senha de <strong style={{ fontWeight: 600 }}>{account}</strong> foi alterada. Use a nova no
-              próximo acesso.
-            </p>
-          </div>
+          <Btn variant="primary" onClick={onClose}>
+            Fechar
+          </Btn>
         ) : (
-          <div style={{ paddingInline: 24 }}>
-            {/* A conta, em texto: responde "a senha de quem?" sem virar uma
-                pergunta que a tela já sabe responder sozinha. */}
-            <p
-              className="truncate"
-              title={account}
-              style={{
-                fontFamily: FONT,
-                fontSize: 13,
-                lineHeight: '18px',
-                color: COLOR.textSecondary,
-                paddingBottom: 16,
-              }}
-            >
-              Conta: {account}
-            </p>
-
-            <FormField label="Senha atual">
-              <PasswordField
-                label="senha atual"
-                value={current}
-                onChange={setCurrent}
-                inputRef={firstRef}
-                autoFocus
-              />
-            </FormField>
-
-            <FormField label="Nova senha">
-              <PasswordField label="nova senha" value={next} onChange={setNext} />
-              {/* A lista nasce com a tela, apagada, e não depois do primeiro
-                  erro: quem lê antes de digitar acerta de primeira. */}
-              <ul className="flex flex-col gap-1" style={{ marginTop: 8 }}>
-                <Rule ok={longa}>Pelo menos 8 caracteres</Rule>
-                <Rule ok={mista}>Uma letra e um número</Rule>
-                <Rule ok={outra}>Diferente da senha atual</Rule>
-              </ul>
-            </FormField>
-
-            <FormField
-              label="Repita a nova senha"
-              error={repeat.length > 0 && repeat !== next ? 'As duas não são iguais.' : undefined}
-            >
-              <PasswordField
-                label="repetição da nova senha"
-                value={repeat}
-                onChange={setRepeat}
-                invalid={repeat.length > 0 && repeat !== next}
-                onEnter={confirmar}
-              />
-            </FormField>
-          </div>
-        )}
-
-        <div
-          className="shrink-0 flex items-center justify-end gap-2"
-          style={{ paddingInline: 24, paddingTop: 16, paddingBottom: 16 }}
-        >
-          {done ? (
-            <Btn variant="primary" onClick={onClose}>
-              Fechar
+          <>
+            <Btn variant="ghost" onClick={onClose}>
+              Cancelar
             </Btn>
-          ) : (
-            <>
-              <Btn variant="ghost" onClick={onClose}>
-                Cancelar
-              </Btn>
-              {/* O rótulo diz a ação, não o gesto: "Confirmar" serve para
-                  qualquer coisa, e é justamente numa troca de senha que a
-                  pessoa quer ler o que vai acontecer. */}
-              <Btn variant="primary" disabled={!pode} onClick={confirmar}>
-                Alterar senha
-              </Btn>
-            </>
-          )}
-        </div>
-      </div>
-    </div>
+            {/* O rótulo diz a ação, não o gesto: "Confirmar" serve para
+                qualquer coisa, e é justamente numa troca de senha que a
+                pessoa quer ler o que vai acontecer. */}
+            <Btn variant="primary" disabled={!pode} onClick={confirmar}>
+              Alterar senha
+            </Btn>
+          </>
+        )}
+      </ModalFooter>
+    </Modal>
   )
 }

@@ -1,12 +1,14 @@
 # Modal
 
-A caixa que para a tela até a pessoa decidir. Existem três no produto hoje, e
-os três usam a mesma moldura.
+A caixa que para a tela até a pessoa decidir. Todos os modais do produto
+montam a moldura pelo mesmo componente, o `Modal` da biblioteca
+(`import { Modal, ModalFooter } from '@ds/Modal'`). Ele traz o véu, a caixa,
+o cabeçalho com o fechar e o `Escape`; quem usa escreve só o corpo e o rodapé.
 
 | Parte | Espec. |
 | --- | --- |
 | Véu | `--wk-backdrop`; no escuro ele vai a preto 80% |
-| Caixa | fundo `--wk-surface`, raio 8, borda 1px `--wk-border`, `--wk-shadow-menu` |
+| Caixa | fundo `--wk-surface`, raio 8, **sem borda**, sombra `0 25px 50px -12px` a 25% |
 | Largura | 420 para um campo só; 610 para escolha em lista |
 | Cabeçalho | altura 64, `px-24 py-16`, título Inter **Medium** 20/1.5 |
 | Fechar | ícone `close` de 24 em `--wk-nav-label`, no canto do cabeçalho |
@@ -17,6 +19,13 @@ os três usam a mesma moldura.
 O título usa peso 500, e não 600. É a única peça do sistema em Medium, porque
 um 20 em Semi Bold ao lado de um corpo de 16 abriria um degrau de hierarquia
 maior do que a caixa precisa.
+
+A caixa não tem fio. Já existiram dois modelos: o da escolha em lista, sem
+fio e com sombra longa, e o de um campo só, com fio de 1px e a sombra curta
+do menu. No escuro o segundo saía como uma caixa contornada, no mesmo tom da
+página atrás do véu. Num modal quem separa a caixa do fundo é o véu e a
+sombra; o fio é recurso de painel que mora dentro da página, como menu e
+cartão, onde não há véu.
 
 ## Comportamento
 
