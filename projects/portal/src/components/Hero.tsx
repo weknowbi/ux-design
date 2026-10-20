@@ -328,51 +328,31 @@ export function DynamicHero({
 
 /**
  * Topo da pasta no layout dinâmico. É a barra da home já recolhida,
- * como se o usuário tivesse rolado: chips à esquerda, busca no meio, ordem e
- * visualização à direita, grudada no alto da folha. Entrar numa pasta não
- * troca de ferramenta; a busca e os chips continuam onde estavam.
+ * como se o usuário tivesse rolado: chips à esquerda, ordem e visualização à
+ * direita, grudada no alto da folha. Entrar numa pasta não troca de
+ * ferramenta; os chips continuam onde estavam.
  *
- * Mesma altura, mesma busca e mesma largura de busca da home recolhida, para
- * a passagem de uma para a outra não mexer em nada além do conteúdo.
+ * A busca não vem junto. Dentro da pasta ela é a da barra de topo, que varre
+ * o acervo e troca a folha pelo resultado — um campo aqui, ao lado dela,
+ * seriam de novo duas caixas parecidas na mesma tela.
  *
- * Quando a folha fica estreita demais para os três na mesma linha (menos de
- * 2 × 288 de vaga + 320 de busca), a busca desce para uma linha própria, na
- * largura toda, com chips e controles em cima — o mesmo empilhamento da home
- * aberta. A medida é a da folha, não a da janela: recolher o menu também
- * muda o espaço.
+ * Mesma altura da home recolhida, para a passagem de uma para a outra não
+ * mexer em nada além do conteúdo.
  */
 export function FolderBar({
-  query,
-  onQuery,
-  placeholder,
   section,
   onSection,
   controls,
 }: {
-  query: string
-  onQuery: (q: string) => void
-  placeholder: string
   section: SectionId
   onSection: (id: SectionId) => void
   controls?: ReactNode
 }) {
-  /* Larga: três colunas, as das pontas iguais, então a busca fica no centro
-     com a largura de `SEARCH_WIDTH` — a mesma conta da home recolhida.
-     Estreita: chips e controles na primeira linha, busca na segunda. */
   return (
-    <div className="@container sticky top-0 z-20 -mx-8 px-8 bg-[var(--wk-surface)]">
-      <div className="grid grid-cols-[1fr_auto] items-center gap-y-3 pt-4 pb-3 @min-[896px]:grid-cols-[1fr_clamp(320px,calc(100%_-_576px),800px)_1fr] @min-[896px]:h-[80px] @min-[896px]:py-0">
-        <div className="col-start-1 row-start-1 flex items-center">
-          <ContentTypeChips active={section} onSelect={onSection} compact />
-        </div>
-        <div className="col-span-2 row-start-2 @min-[896px]:col-span-1 @min-[896px]:col-start-2 @min-[896px]:row-start-1">
-          <SearchField query={query} onQuery={onQuery} placeholder={placeholder} compact />
-        </div>
-        {controls && (
-          <div className="col-start-2 row-start-1 justify-self-end flex items-center @min-[896px]:col-start-3">
-            {controls}
-          </div>
-        )}
+    <div className="sticky top-0 z-20 -mx-8 px-8 bg-[var(--wk-surface)]">
+      <div className="flex items-center justify-between gap-4 h-[80px]">
+        <ContentTypeChips active={section} onSelect={onSection} compact />
+        {controls && <div className="flex items-center">{controls}</div>}
       </div>
     </div>
   )
@@ -405,9 +385,9 @@ export function MobileHero({
   placeholder: string
   /**
    * Os chips só existem na raiz. Dentro de uma pasta a busca vem sozinha —
-   * na versão de mesa ela fica na linha do título da pasta, e no celular
-   * essa linha não tem espaço para ela. Sem ela ali, uma
-   * pasta com dezenas de dashboards só se percorre rolando.
+   * na versão de mesa ela é a da barra de topo, e a barra do celular não tem
+   * espaço para ela. Sem ela ali, uma pasta com dezenas de dashboards só se
+   * percorre rolando.
    */
   section?: SectionId | null
   onSection?: (id: SectionId) => void

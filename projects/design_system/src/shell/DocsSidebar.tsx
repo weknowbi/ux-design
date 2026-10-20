@@ -127,10 +127,13 @@ export function DocsSidebar({
       {/* Rodapé, colado na base. O pb-2 soma 8 aos 8 do menu: a última linha
           fica a 16 do pé. */}
       <div className="flex-1 flex flex-col justify-end gap-1 pb-2">
+        {/* Pela base da aplicação, não pela raiz do domínio: publicado em
+            subpasta (no portfólio ele mora em /prototipos/design-system/),
+            "/llms.txt" apontava para fora do site e dava 404. */}
         <NavRow
           icon="text_snippet"
           label="Versão para agentes"
-          href="/llms.txt"
+          href={`${import.meta.env.BASE_URL}llms.txt`}
           collapsed={collapsed}
         />
         <NavRow
