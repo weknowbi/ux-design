@@ -2,6 +2,10 @@ const grid = document.getElementById("grid");
 const empty = document.getElementById("empty");
 const count = document.getElementById("count");
 const search = document.getElementById("search");
+// Projetos de teste de usabilidade ("access": "teste") ficam numa secao
+// propria: sao os que abrem tambem com a senha dos participantes.
+const tests = document.getElementById("tests");
+const testsGrid = document.getElementById("tests-grid");
 
 // Papel definido pela senha digitada na cortina (gate.js): "edit" ou "view".
 const ROLE = document.documentElement.dataset.wsRole || "view";
@@ -69,9 +73,13 @@ function render(term) {
   const filtered = t
     ? projects.filter((p) => `${p.name} ${p.description}`.toLowerCase().includes(t))
     : projects;
-  grid.innerHTML = filtered.map(cardHtml).join("");
+  const main = filtered.filter((p) => p.group !== "teste");
+  const test = filtered.filter((p) => p.group === "teste");
+  grid.innerHTML = main.map(cardHtml).join("");
+  testsGrid.innerHTML = test.map(cardHtml).join("");
+  tests.classList.toggle("hidden", test.length === 0);
   empty.classList.toggle("hidden", filtered.length > 0);
-  count.textContent = `${filtered.length} projeto${filtered.length === 1 ? "" : "s"}`;
+  count.textContent = `${main.length} projeto${main.length === 1 ? "" : "s"}`;
 }
 
 search.addEventListener("input", () => render(search.value));
@@ -362,14 +370,16 @@ function startRename(card, project) {
 }
 
 if (CAN_EDIT) {
-  grid.classList.add("can-edit");
-  grid.addEventListener("click", (e) => {
-    const btn = e.target.closest(".card-edit");
-    if (!btn) return;
-    e.preventDefault();
-    const project = projects.find((p) => p.dir === btn.dataset.dir);
-    if (project) startRename(btn.closest(".card"), project);
-  });
+  for (const g of [grid, testsGrid]) {
+    g.classList.add("can-edit");
+    g.addEventListener("click", (e) => {
+      const btn = e.target.closest(".card-edit");
+      if (!btn) return;
+      e.preventDefault();
+      const project = projects.find((p) => p.dir === btn.dataset.dir);
+      if (project) startRename(btn.closest(".card"), project);
+    });
+  }
 }
 
 fetch("manifest.json", { cache: "no-cache" })

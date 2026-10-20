@@ -10,9 +10,15 @@
        por CSS) ate a senha certa ser digitada -- entao nao basta apagar
        uma div no inspetor pra "ver por baixo", o app realmente nao rodou.
 
-   Sao duas senhas, cada uma com um papel:
+   Sao tres senhas, cada uma com um papel:
      - "edit": pode ver tudo e renomear projetos na pagina inicial;
-     - "view": so visualizacao.
+     - "view": so visualizacao;
+     - "teste": a que vai para os participantes de teste de usabilidade.
+       So abre os projetos marcados com "access": "teste" no
+       workspace.config.json. Na pagina inicial e nos outros projetos ela
+       nao vale: o hash dela nem e copiado para o gate.js deles, e um papel
+       "teste" guardado no navegador e ignorado ali. Assim o participante
+       que apaga o fim do link nao cai no workspace.
    O papel fica em localStorage (STORAGE_KEY) e em <html data-ws-role>,
    que e onde o app.js da pagina inicial le. Forjar o papel e trivial
    (e so editar o localStorage) -- a protecao real da edicao e o token do
@@ -29,10 +35,14 @@
   // Substituidos no build -- nunca as senhas em si, so os hashes.
   var EDIT_HASH = "__EDIT_HASH__";
   var VIEW_HASH = "__VIEW_HASH__";
+  // Vazio fora dos projetos de teste (ver applyGate no build-pages.mjs).
+  var TEST_HASH = "__TEST_HASH__";
+  var TEST_PAGE = TEST_HASH !== "";
 
   function roleForHash(hash) {
     if (hash === EDIT_HASH) return "edit";
     if (hash === VIEW_HASH) return "view";
+    if (TEST_PAGE && hash === TEST_HASH) return "teste";
     return null;
   }
 
@@ -41,6 +51,7 @@
     var value = null;
     try { value = localStorage.getItem(STORAGE_KEY); } catch (e) { /* sem storage disponivel */ }
     if (value === "1") value = "edit";
+    if (value === "teste") return TEST_PAGE ? value : null;
     return value === "edit" || value === "view" ? value : null;
   }
 
@@ -286,7 +297,11 @@
       '<form class="card" role="dialog" aria-modal="true" aria-labelledby="t" aria-describedby="s" novalidate>' +
       LOGO_SVG +
       '<h1 id="t">Acesso restrito</h1>' +
-      '<p class="sub" id="s">Este workspace de protótipos é privado. Digite a senha para continuar.</p>' +
+      // Na pagina de teste a cortina nao fala em workspace nem em prototipo:
+      // o participante so ve que precisa da senha que recebeu.
+      '<p class="sub" id="s">' + (TEST_PAGE
+        ? "Digite a senha que você recebeu para continuar."
+        : "Este workspace de protótipos é privado. Digite a senha para continuar.") + "</p>" +
       '<div class="field">' +
       '<span class="lead">' + ICON_LOCK + "</span>" +
       '<input type="password" id="pass" aria-label="Senha" placeholder="Senha" autocomplete="current-password" spellcheck="false" />' +
@@ -335,7 +350,7 @@
 
       var role = roleForHash(await sha256(input.value));
       if (role) {
-        try { localStorage.setItem(STORAGE_KEY, role); } catch (e) { /* modo privado sem storage: sem persistencia, tudo bem */ }
+        try { if (!(role === "teste" && storedRole())) localStorage.setItem(STORAGE_KEY, role); } catch (e) { /* modo privado sem storage: sem persistencia, tudo bem */ }
         submit.classList.add("done");
         submit.innerHTML = ICON_CHECK + "<span>Liberado</span>";
         // Reativa a pagina por baixo ja, e so depois some com a cortina.

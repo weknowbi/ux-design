@@ -30,6 +30,11 @@ const SITE_ROOT = path.join(ROOT, "_site");
 // seguranca de verdade).
 const GATE_EDIT_HASH = "2c2bebaf13e1ea040ba145dc49dd5e01cac66f95765d81849ac8890180efa3a9";
 const GATE_VIEW_HASH = "015f027c6b45c15d936d8bc321ae08b7bedc9e81dcd349dfe05a3858ad96f60b";
+// Senha dos participantes de teste de usabilidade: so abre os projetos com
+// "access": "teste" no workspace.config.json (ver pages-gate.template.js).
+// Para trocar, gere o hash da senha nova e cole aqui:
+//   node -e "console.log(require('crypto').createHash('sha256').update('SENHA').digest('hex'))"
+const GATE_TEST_HASH = "50e936c050c7ed9af475e3502bb45c13a1c5010b175b7a553101254868cacd79";
 
 // Desativa (sem remover) os <script> de uma pagina, pra nenhum deles rodar
 // antes da senha ser confirmada -- ver reactivateScripts() no gate.
@@ -49,7 +54,7 @@ function disableScripts(html) {
 // abertas), desativa os scripts, injeta o CSS que esconde a pagina ate a
 // liberacao, e copia o gate.js que faz a verificacao da senha e reativa os
 // scripts quando ela bate.
-function applyGate(dir) {
+function applyGate(dir, { test = false } = {}) {
   const pages = fs.readdirSync(dir).filter((name) => name.toLowerCase().endsWith(".html"));
   if (pages.length === 0) return;
 
@@ -65,7 +70,9 @@ function applyGate(dir) {
   const gateJs = fs
     .readFileSync(path.join(ROOT, "scripts", "pages-gate.template.js"), "utf-8")
     .replace("__EDIT_HASH__", GATE_EDIT_HASH)
-    .replace("__VIEW_HASH__", GATE_VIEW_HASH);
+    .replace("__VIEW_HASH__", GATE_VIEW_HASH)
+    // Fora dos projetos de teste o hash da senha de teste nem vai junto.
+    .replace("__TEST_HASH__", test ? GATE_TEST_HASH : "");
   fs.writeFileSync(path.join(dir, "gate.js"), gateJs);
 }
 
@@ -148,6 +155,9 @@ function buildProject(entryName) {
   // renomeado pelo site) mantem o link /p/<slug>/ estavel mesmo com o nome
   // mudando -- sem ele, cada renomeacao quebraria os links ja compartilhados.
   const slug = config.slug || slugify(name);
+  // Projeto que vai para participantes de teste: abre tambem com a senha de
+  // teste, e so ele -- o resto do workspace continua pedindo view/edit.
+  const isTest = config.access === "teste";
   const outDir = path.join(SITE_ROOT, "p", slug);
 
   console.log(`\n== ${name} (${entryName} -> /p/${slug}/) ==`);
@@ -189,7 +199,7 @@ function buildProject(entryName) {
     }
   }
 
-  applyGate(outDir);
+  applyGate(outDir, { test: isTest });
 
   let thumbUrl = null;
   const thumbAbs = findThumbnail(projectPath, config);
@@ -205,6 +215,7 @@ function buildProject(entryName) {
     name,
     description: config.description || pkg.description || "",
     href: `p/${slug}/`,
+    group: isTest ? "teste" : "projetos",
     thumbnail: thumbUrl,
     updatedAt: lastCommitDate(projectPath),
   };

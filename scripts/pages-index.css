@@ -228,3 +228,6 @@ a { color: inherit; text-decoration: none; }
   .topbar-right { gap: 8px; }
   .role span { display: none; }
 }
+
+/* Testes de usabilidade: secao propria abaixo dos projetos. */
+.tests { margin-top: 48px; padding-top: 32px; border-top: 1px solid var(--color-border, #e8e8e8); }
