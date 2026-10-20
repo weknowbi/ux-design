@@ -17,8 +17,15 @@
        So abre os projetos marcados com "access": "teste" no
        workspace.config.json. Na pagina inicial e nos outros projetos ela
        nao vale: o hash dela nem e copiado para o gate.js deles, e um papel
-       "teste" guardado no navegador e ignorado ali. Assim o participante
-       que apaga o fim do link nao cai no workspace.
+       "teste" guardado no navegador e ignorado ali.
+   Para o participante nao descobrir o workspace:
+     - na pagina de teste a cortina so conhece a senha de teste (os hashes
+       de view/edit nem vao junto) e nao fala em workspace nem prototipo;
+     - no navegador de quem entrou como "teste", o resto do site (raiz,
+       outros projetos, 404) mostra "Pagina nao encontrada" no lugar da
+       cortina. Quem e do time e esta num navegador assim entra pela raiz
+       com ?entrar no fim do endereco.
+   O build tira os comentarios deste arquivo ao publicar.
    O papel fica em localStorage (STORAGE_KEY) e em <html data-ws-role>,
    que e onde o app.js da pagina inicial le. Forjar o papel e trivial
    (e so editar o localStorage) -- a protecao real da edicao e o token do
@@ -46,10 +53,13 @@
     return null;
   }
 
+  function rawStored() {
+    try { return localStorage.getItem(STORAGE_KEY); } catch (e) { return null; }
+  }
+
   // "1" era o valor salvo quando so existia uma senha (a de edicao).
   function storedRole() {
-    var value = null;
-    try { value = localStorage.getItem(STORAGE_KEY); } catch (e) { /* sem storage disponivel */ }
+    var value = rawStored();
     if (value === "1") value = "edit";
     if (value === "teste") return TEST_PAGE ? value : null;
     return value === "edit" || value === "view" ? value : null;
@@ -297,11 +307,9 @@
       '<form class="card" role="dialog" aria-modal="true" aria-labelledby="t" aria-describedby="s" novalidate>' +
       LOGO_SVG +
       '<h1 id="t">Acesso restrito</h1>' +
-      // Na pagina de teste a cortina nao fala em workspace nem em prototipo:
-      // o participante so ve que precisa da senha que recebeu.
-      '<p class="sub" id="s">' + (TEST_PAGE
-        ? "Digite a senha que você recebeu para continuar."
-        : "Este workspace de protótipos é privado. Digite a senha para continuar.") + "</p>" +
+      // O build poe aqui o texto da pagina: na de teste a cortina nao fala em
+      // workspace nem em prototipo, e o texto do workspace nem vai no arquivo.
+      '<p class="sub" id="s">__PROMPT_TEXT__</p>' +
       '<div class="field">' +
       '<span class="lead">' + ICON_LOCK + "</span>" +
       '<input type="password" id="pass" aria-label="Senha" placeholder="Senha" autocomplete="current-password" spellcheck="false" />' +
@@ -369,7 +377,29 @@
     });
   }
 
+  // Pagina neutra para o participante de teste que sai do link que recebeu:
+  // nada de logo, senha, workspace ou prototipo.
+  function showNotFound() {
+    document.title = "Página não encontrada";
+    var host = document.createElement("div");
+    host.id = "wsg-gate";
+    var root = host.attachShadow({ mode: "open" });
+    root.innerHTML =
+      "<style>" +
+      ":host{all:initial;position:fixed;inset:0;z-index:2147483647}" +
+      ".w{position:absolute;inset:0;display:grid;place-items:center;padding:24px;background:#fff;color:#1e1e1e;" +
+      "font-family:system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;text-align:center}" +
+      "@media (prefers-color-scheme:dark){.w{background:#0e0e10;color:#f2f2f3}}" +
+      "b{display:block;font-size:64px;font-weight:600;letter-spacing:-.03em;line-height:1}" +
+      "p{margin:12px 0 0;font-size:15px;opacity:.65}" +
+      "</style>" +
+      '<div class="w"><div><b>404</b><p>Página não encontrada.</p></div></div>';
+    document.documentElement.style.visibility = "visible";
+    document.body.appendChild(host);
+  }
+
   var role = storedRole();
   if (role) reveal(role);
+  else if (!TEST_PAGE && rawStored() === "teste" && !/[?&]entrar(?:[=&]|$)/.test(location.search)) showNotFound();
   else showPrompt();
 })();

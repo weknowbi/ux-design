@@ -62,18 +62,44 @@ function applyGate(dir, { test = false } = {}) {
     const pagePath = path.join(dir, page);
     let html = fs.readFileSync(pagePath, "utf-8");
     html = disableScripts(html);
-    html = html.replace(/<head(\s[^>]*)?>/i, (m) => `${m}\n<style id="wsg-style">html{visibility:hidden}</style>`);
+    // noindex: nem o workspace nem os testes devem aparecer em buscador.
+    html = html.replace(
+      /<head(\s[^>]*)?>/i,
+      (m) => `${m}\n<meta name="robots" content="noindex, nofollow" />\n<style id="wsg-style">html{visibility:hidden}</style>`,
+    );
     html = html.replace(/<\/body>/i, `<script src="./gate.js"></script>\n</body>`);
     fs.writeFileSync(pagePath, html);
   }
 
-  const gateJs = fs
-    .readFileSync(path.join(ROOT, "scripts", "pages-gate.template.js"), "utf-8")
-    .replace("__EDIT_HASH__", GATE_EDIT_HASH)
-    .replace("__VIEW_HASH__", GATE_VIEW_HASH)
-    // Fora dos projetos de teste o hash da senha de teste nem vai junto.
-    .replace("__TEST_HASH__", test ? GATE_TEST_HASH : "");
+  // Cada pagina leva so os hashes das senhas que ela aceita: a de teste so
+  // vai para os projetos de teste, e eles nao levam os de view/edit (quem e
+  // do time e ja entrou neste navegador passa pelo papel guardado).
+  const gateJs = stripComments(
+    fs
+      .readFileSync(path.join(ROOT, "scripts", "pages-gate.template.js"), "utf-8")
+      .replace("__EDIT_HASH__", test ? "" : GATE_EDIT_HASH)
+      .replace("__VIEW_HASH__", test ? "" : GATE_VIEW_HASH)
+      .replace("__TEST_HASH__", test ? GATE_TEST_HASH : "")
+      .replace(
+        "__PROMPT_TEXT__",
+        test
+          ? "Digite a senha que você recebeu para continuar."
+          : "Este workspace de protótipos é privado. Digite a senha para continuar.",
+      ),
+  );
   fs.writeFileSync(path.join(dir, "gate.js"), gateJs);
+}
+
+// O gate.js publicado vai sem os comentarios do template: eles explicam o
+// workspace, as senhas e o build, e qualquer um le o arquivo no navegador.
+// So tira bloco /* */ e linha que comeca com // ou termina com " // texto"
+// -- as URLs das strings ("https://...") nao tem espaco antes das barras.
+function stripComments(js) {
+  return js
+    .replace(/\/\*[\s\S]*?\*\//g, "")
+    .replace(/^[ \t]*\/\/.*$/gm, "")
+    .replace(/[ \t]+\/\/ .*$/gm, "")
+    .replace(/\n\s*\n+/g, "\n");
 }
 
 function readJsonSafe(p) {
@@ -158,9 +184,13 @@ function buildProject(entryName) {
   // Projeto que vai para participantes de teste: abre tambem com a senha de
   // teste, e so ele -- o resto do workspace continua pedindo view/edit.
   const isTest = config.access === "teste";
-  const outDir = path.join(SITE_ROOT, "p", slug);
+  // Teste sai em /s/<slug>/, longe do /p/ dos outros projetos: quem recebe
+  // o link nao chega no vizinho trocando o fim do endereco. O slug de um
+  // teste e um codigo aleatorio, com cara de link de compartilhamento.
+  const area = isTest ? "s" : "p";
+  const outDir = path.join(SITE_ROOT, area, slug);
 
-  console.log(`\n== ${name} (${entryName} -> /p/${slug}/) ==`);
+  console.log(`\n== ${name} (${entryName} -> /${area}/${slug}/) ==`);
 
   fs.mkdirSync(outDir, { recursive: true });
 
@@ -206,7 +236,7 @@ function buildProject(entryName) {
   if (thumbAbs) {
     const thumbName = "_thumb" + path.extname(thumbAbs);
     fs.copyFileSync(thumbAbs, path.join(outDir, thumbName));
-    thumbUrl = `p/${slug}/${thumbName}`;
+    thumbUrl = `${area}/${slug}/${thumbName}`;
   }
 
   return {
@@ -214,7 +244,7 @@ function buildProject(entryName) {
     dir: entryName, // pasta em projects/ -- a pagina inicial usa pra saber qual config editar
     name,
     description: config.description || pkg.description || "",
-    href: `p/${slug}/`,
+    href: `${area}/${slug}/`,
     group: isTest ? "teste" : "projetos",
     thumbnail: thumbUrl,
     updatedAt: lastCommitDate(projectPath),

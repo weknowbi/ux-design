@@ -428,7 +428,7 @@ function Stub({ name, description, icon }: { name: string; description: string; 
         {name}
       </p>
       <p className="max-w-[420px] text-[13px] leading-[20px]" style={{ fontFamily: FONT, color: COLOR.textMuted }}>
-        {description} Esta tela ainda não foi redesenhada nesta maquete.
+        {description} Esta área não está disponível no momento.
       </p>
     </div>
   )
