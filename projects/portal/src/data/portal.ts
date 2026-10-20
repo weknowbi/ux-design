@@ -137,7 +137,7 @@ export const PORTAL_ROOT: Folder = folder('Portal', 0, [
       ]),
       dash('Ocupação UTI neonatal', 3),
     ]),
-    dash('Ocupação de leitos por unidade, especialidade e convênio (atualização diária)', 1, photo('1551288049-bebda4e38f71')),
+    dash('Ocupação de leitos por unidade, especialidade e convênio (atualização diária)', 1, photo('1538108149393-fbbd81895907')),
     dash('Giro de leitos', 6),
     dash('Leitos por especialidade', 15),
   ], photo('1611587266737-cc128ffe2946')),
@@ -155,7 +155,7 @@ export const PORTAL_ROOT: Folder = folder('Portal', 0, [
     folder('Custos', 20, [dash('Custo por paciente-dia', 20), dash('Custos por centro de custo', 45)]),
     dash('5.1 IA - Análise Inteligente | Exemplos Soluções', 7),
     dash('DRE gerencial', 25),
-  ], photo('1626266061368-46a8f578ddd6')),
+  ], photo('1678940805259-e2be79fa33e4')),
   folder('Atendimento e Triagem PS Adulto e Pediátrico', 9, [
     dash('Tempo de espera no PS', 0),
     dash('Classificação de risco (Protocolo de Manchester)', 9),
@@ -189,7 +189,7 @@ export const PORTAL_ROOT: Folder = folder('Portal', 0, [
   folder('Diretoria Executiva - Painéis Estratégicos para Reunião Mensal do Conselho', 120, [
     folder('Planejamento estratégico', 120, []),
     dash('Painel executivo', 18),
-    dash('Painel executivo geral', 4, photo('1460925895917-afdab827c52f')),
+    dash('Painel executivo geral', 4, photo('1745420052490-285dbfa1cf4d')),
   ]),
   ...MAIS_PASTAS.map((name, i) =>
     folder(name, 3 + ((i * 11) % 150), [dash(`Visão geral – ${name.split(/[–(|-]/)[0].trim()}`, 3 + i), dash('Indicadores do mês', 10 + i)]),
