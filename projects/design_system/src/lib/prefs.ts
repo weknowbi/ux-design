@@ -31,9 +31,19 @@ export const VIEW_LABEL: Record<ViewMode, string> = { list: 'Lista', grid: 'Comp
 export const VIEW_ICON: Record<ViewMode, string> = { list: 'view_list', grid: 'grid_view', thumbs: 'gallery_thumbnail' }
 export const SORT_LABEL: Record<SortKey, string> = { default: 'Padrão', name: 'Nome', updated: 'Modificado' }
 
+/**
+ * Chave no localStorage. Projetos publicados no mesmo endereço (o GitHub
+ * Pages do workspace serve todos sob um domínio só) dividem o armazenamento;
+ * quem precisa do seu à parte, como o portal do teste de usabilidade, define
+ * VITE_WK_STORAGE_PREFIX no .env e as chaves ganham esse prefixo.
+ */
+export function storageKey(key: string): string {
+  return (import.meta.env.VITE_WK_STORAGE_PREFIX ?? '') + key
+}
+
 function read<T extends string>(key: string, allowed: readonly T[], fallback: T): T {
   try {
-    const v = localStorage.getItem(key)
+    const v = localStorage.getItem(storageKey(key))
     return allowed.includes(v as T) ? (v as T) : fallback
   } catch {
     return fallback
@@ -46,7 +56,7 @@ export function usePref<T extends string>(key: string, allowed: readonly T[], fa
     (next: T) => {
       setValue(next)
       try {
-        localStorage.setItem(key, next)
+        localStorage.setItem(storageKey(key), next)
       } catch {
         // sem armazenamento, a escolha vale só nesta visita
       }

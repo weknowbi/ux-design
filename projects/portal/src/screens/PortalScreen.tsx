@@ -5,13 +5,12 @@ import { type Crumb, type MenuItem } from '@/components/Header'
 import { AppShell } from '@/components/AppShell'
 import { Icon } from '@/components/icons'
 import { FolderHeader } from '@/components/FolderHeader'
-import { CONTENT_TYPES, DynamicHero, FADE, FolderBar, Hero, MobileHero, SearchField, type SectionId } from '@/components/Hero'
+import { DynamicHero, FADE, FolderBar, Hero, MobileHero, type SectionId } from '@/components/Hero'
 import { ContentBrowser } from '@/components/browser/ContentBrowser'
 import { useBrowserPrefs, usePref } from '@/components/browser/prefs'
 import { BrowserControls } from '@/components/browser/BrowserControls'
 import {
   CardStyleContext,
-  DASH_THUMBS,
   DashThumbContext,
   ICON_MODES,
   IconModeContext,
@@ -42,10 +41,16 @@ const WIDE_MAX_WIDTH = 1760
 type Layout = 'dinamico' | 'padrao' | 'compacto'
 const LAYOUTS: Layout[] = ['dinamico', 'padrao', 'compacto']
 
-/* Um texto só para a busca do portal, em qualquer tela e com qualquer aba
-   aberta — ela procura sempre a mesma coisa. Antes ele seguia a aba
-   ("Pesquise em Pastas") e anunciava um recorte que a busca não faz. */
+/* A busca da barra de topo procura no acervo, de qualquer tela. */
 const SEARCH_PLACEHOLDER = 'Pesquise por nome ou tag'
+
+/* A da folha procura só na aba aberta, e o texto diz qual: é ele que
+   explica por que, em Tarefas, um painel não aparece no resultado. */
+const SECTION_PLACEHOLDER: Record<SectionId, string> = {
+  pastas: SEARCH_PLACEHOLDER,
+  tarefas: 'Pesquise por tarefas',
+  apresentacoes: 'Pesquise por apresentações',
+}
 
 /**
  * O menu "…" alterna o estágio do cadastro do cliente, não o desenho do card:
@@ -68,18 +73,9 @@ function iconModeMenuItems(mode: IconMode, onChange: (m: IconMode) => void): Men
   }))
 }
 
-/** Dashboard sem imagem: croqui do layout ou ícone. Mostra o modo em que você NÃO está. */
-const DASH_THUMB_MENU: Record<DashThumb, { icon: string; label: string }> = {
-  croqui: { icon: 'dashboard', label: 'Dashboard sem imagem: croqui' },
-  icone: { icon: 'bar_chart', label: 'Dashboard sem imagem: ícone' },
-}
-
-function dashThumbMenuItems(mode: DashThumb, onChange: (m: DashThumb) => void): MenuItem[] {
-  return DASH_THUMBS.filter((m) => m !== mode).map((m) => ({
-    ...DASH_THUMB_MENU[m],
-    onClick: () => onChange(m),
-  }))
-}
+/* Dashboard sem imagem mostra o croqui do layout. A alternativa com o ícone
+   saiu do menu "…": o croqui ficou. */
+const DASH_THUMB: DashThumb = 'croqui'
 
 /**
  * A pasta aberta vive na URL (`#/pasta/<id>`): o voltar do navegador sobe um
@@ -94,7 +90,7 @@ export function PortalScreen({ onRoute }: { onRoute: (route: PortalRoute) => voi
   const isMobile = useIsMobile()
   const [folderId, setFolderId] = useState(readHash)
   const [query, setQuery] = useState('')
-  /** A busca que está valendo é a geral, da barra de topo (ver `topbarSearch`). */
+  /** A busca que está valendo é a da barra de topo (ver `topbarSearch`). */
   const [globalSearch, setGlobalSearch] = useState(false)
   const [favorites, setFavorites] = useState(() => initialFavorites(PORTAL_ROOT))
   const [layout] = usePref<Layout>('wk-portal-layout', LAYOUTS, 'dinamico')
@@ -103,10 +99,9 @@ export function PortalScreen({ onRoute }: { onRoute: (route: PortalRoute) => voi
      o card "atual" de testes antigos mostrava a caixa azulada e o fio sob a
      imagem, e a mesma tela parecia outra conforme quem abria. */
   const cardStyle: CardStyle = 'padrao'
-  const [iconMode, setIconMode] = usePref<IconMode>('wk-portal-icones', ICON_MODES, 'definidos')
-  const [dashThumb, setDashThumb] = usePref<DashThumb>('wk-portal-dash-thumb', DASH_THUMBS, 'croqui')
   const [heroCollapsed, setHeroCollapsed] = useState(false)
-  const [section, setSection] = useState<SectionId>('pastas')
+  const [openTab, setSection] = useState<SectionId>('pastas')
+  const [iconMode, setIconMode] = usePref<IconMode>('wk-portal-icones', ICON_MODES, 'definidos')
   const prefs = useBrowserPrefs()
   const [toast, setToast] = useState<{ text: string; at: number } | null>(null)
   const mainRef = useRef<HTMLElement>(null)
@@ -128,6 +123,11 @@ export function PortalScreen({ onRoute }: { onRoute: (route: PortalRoute) => voi
   const path = (folderId && findFolderPath(PORTAL_ROOT, folderId)) || []
   const atRoot = path.length === 0
   const current = atRoot ? null : path[path.length - 1]
+  /* Tarefas e Apresentações não têm pasta: dentro de uma, a aba é Pastas.
+     A escolhida fica guardada para a volta à home — sem isto, abrir uma
+     pasta pelo voltar do navegador, com Tarefas acesa, listava as tarefas
+     sob o nome da pasta. */
+  const section: SectionId = atRoot ? openTab : 'pastas'
   const dynamicHero = layout === 'dinamico' && atRoot
   /** No dinâmico, a pasta abre com a barra da home já recolhida. */
   const folderBar = layout === 'dinamico' && !atRoot
@@ -186,7 +186,7 @@ export function PortalScreen({ onRoute }: { onRoute: (route: PortalRoute) => voi
      usuário entra em alguma pasta. */
   const toCrumb = (f: Folder): Crumb => ({ label: folderName(f), onClick: () => navigate(f.id) })
   const hidden = path.length > 1 ? path.slice(0, -1) : []
-  const trail: Crumb[] = path.length === 0 ? [] : [
+  const pathTrail: Crumb[] = path.length === 0 ? [] : [
     { label: 'Portal', icon: <Icon name="home" size={24} />, iconOnly: true, onClick: () => navigate(null) },
     ...(hidden.length
       ? [{ label: '…', collapsed: hidden.map((f) => ({ label: folderName(f), onClick: () => navigate(f.id) })) }]
@@ -194,62 +194,58 @@ export function PortalScreen({ onRoute }: { onRoute: (route: PortalRoute) => voi
     ...path.slice(hidden.length).map(toCrumb),
   ]
 
-  /* Uma busca por tela. Na home é a do meio, e ela é a busca geral do
-     Weknow: varre o portal inteiro — pastas, subpastas e dashboards — e os
-     cards dizem de onde cada resultado veio. Enquanto a home está aberta, a
-     barra de topo recolhe a sua: duas caixas lado a lado, parecidas e com
-     escopos diferentes, deixavam o usuário sem saber qual usar.
+  /* Uma busca por tela, e cada uma com o seu alcance:
 
-     Dentro de pasta a divisão continua: a busca do cabeçalho filtra a pasta
-     aberta e a barra de topo guarda a geral. Ali o título e o caminho de
-     volta estão na tela, e são eles que explicam o escopo. */
-  const localQuery = globalSearch ? '' : query
-  const onLocalQuery = useCallback((v: string) => {
+     - a da folha só existe na home. Procura na aba aberta — o texto do campo
+       muda com ela — e o resultado entra no lugar das seções, com a busca e
+       os chips ainda em cima;
+     - a da barra de topo é a de dentro da pasta (e a do compacto, que não
+       tem herói). Varre o acervo e troca a folha inteira pelo resultado;
+       apagar o texto devolve a pasta onde o usuário estava.
+
+     Enquanto a home está aberta a barra recolhe a sua: duas caixas na mesma
+     tela, parecidas e com escopos diferentes, deixavam o usuário sem saber
+     qual usar. */
+  const sheetQuery = globalSearch ? '' : query
+  const topQuery = globalSearch ? query : ''
+  const onSheetQuery = useCallback((v: string) => {
     setGlobalSearch(false)
     setQuery(v)
   }, [])
-  const onGlobalQuery = useCallback((v: string) => {
+  const onTopQuery = useCallback((v: string) => {
     setGlobalSearch(true)
     setQuery(v)
   }, [])
+  /** A folha mostra o resultado da barra de topo no lugar do que estava aberto. */
+  const results = globalSearch && query.trim() !== ''
+
+  /* O resultado tem página própria, e o caminho diz isso: casa › Resultado
+     da pesquisa. A casa sai da busca e volta à home, como em qualquer pasta. */
+  const trail: Crumb[] = results
+    ? [
+        { label: 'Portal', icon: <Icon name="home" size={24} />, iconOnly: true, onClick: () => navigate(null) },
+        { label: 'Resultado da pesquisa' },
+      ]
+    : pathTrail
+
+  // O resultado começa do alto, e não da rolagem da pasta de onde ele veio.
+  useEffect(() => {
+    mainRef.current?.scrollTo({ top: 0 })
+  }, [results])
 
   /* A home tem busca no meio da tela no dinâmico, no padrão e no celular — e
-     é lá que ela fica. O compacto não tem herói nenhum, então ele é o único
-     que ainda empresta a barra de topo para filtrar a lista. */
-  const heroAtRoot = atRoot && (isMobile || dynamicHero || layout === 'padrao')
+     é lá que ela fica. O compacto não tem herói nenhum. */
+  const heroAtRoot = atRoot && !results && (isMobile || dynamicHero || layout === 'padrao')
 
   /* Escondida, e não ausente: o campo sai de vista mas guarda o lugar dele na
      barra, senão o caminho e o menu da conta dançariam ao entrar e sair de uma
-     pasta.
-
-     Dentro da pasta ela também fica escondida: lá a busca é a do cabeçalho,
-     que filtra a pasta aberta. Duas caixas na mesma tela, parecidas e com
-     escopos diferentes, era o que fazia o usuário não saber qual usar.
-
-     A exceção é o compacto, o único layout sem busca própria em tela alguma:
-     tirar a da barra deixaria a home sem nenhuma. */
-  const topbarSearch = heroAtRoot || !atRoot
-    ? { value: '', onChange: onGlobalQuery, placeholder: SEARCH_PLACEHOLDER, global: true, hidden: true }
-    : { value: localQuery, onChange: onLocalQuery, placeholder: SEARCH_PLACEHOLDER }
+     pasta. */
+  const topbarSearch = { value: topQuery, onChange: onTopQuery, placeholder: SEARCH_PLACEHOLDER, hidden: heroAtRoot }
 
   const controls = <BrowserControls prefs={prefs} mobile={isMobile} />
-
-  /* Busca da pasta: o mesmo campo da home, na medida compacta, mas procura só
-     na pasta aberta e nas subpastas — o título e o voltar continuam na tela, e
-     os resultados são dela. O texto não leva o nome da pasta: nome de cliente
-     é longo e o campo cortaria no meio dele.
-
-     Em tela larga ela fica na linha do título, antes da ordem e da
-     visualização. Abaixo de `lg` não cabe ali sem espremer o nome da pasta
-     até sumir, então desce para uma linha própria logo abaixo do título. */
-  const folderSearchField = (
-    <SearchField query={localQuery} onQuery={onLocalQuery} placeholder="Pesquise nesta pasta" compact />
-  )
-  const folderAside = (
-    <div className="flex items-center gap-3 shrink-0">
-      <div className="hidden lg:block w-[240px] xl:w-[280px]">{folderSearchField}</div>
-      {controls}
-    </div>
+  const sheetPlaceholder = SECTION_PLACEHOLDER[section]
+  const resultsHeader = (compact?: boolean) => (
+    <FolderHeader name="Resultado da pesquisa" icon="search" aside={controls} compact={compact} />
   )
 
   const showToast = useCallback((text: string) => setToast({ text, at: Date.now() }), [])
@@ -258,7 +254,7 @@ export function PortalScreen({ onRoute }: { onRoute: (route: PortalRoute) => voi
     <ToastContext.Provider value={showToast}>
     <CardStyleContext.Provider value={cardStyle}>
       <IconModeContext.Provider value={iconMode}>
-      <DashThumbContext.Provider value={dashThumb}>
+      <DashThumbContext.Provider value={DASH_THUMB}>
         <ContentBrowser
           root={PORTAL_ROOT}
           path={path}
@@ -266,8 +262,8 @@ export function PortalScreen({ onRoute }: { onRoute: (route: PortalRoute) => voi
           favorites={favorites}
           prefs={prefs}
           section={section}
-          globalSearch={globalSearch}
-          controls={atRoot ? controls : undefined}
+          globalSearch={results}
+          controls={atRoot && !results ? controls : undefined}
           controlsHidden={dynamicHero && heroCollapsed}
           mobile={isMobile}
           onNavigate={navigate}
@@ -299,21 +295,27 @@ export function PortalScreen({ onRoute }: { onRoute: (route: PortalRoute) => voi
    */
   const mobileContent = (
     <div className="flex flex-col px-4 pb-16">
-      {atRoot ? (
+      {atRoot && !results ? (
         <MobileHero
-          query={query}
-          onQuery={onGlobalQuery}
-          placeholder={SEARCH_PLACEHOLDER}
-          section={query ? null : section}
+          query={sheetQuery}
+          onQuery={onSheetQuery}
+          placeholder={sheetPlaceholder}
+          section={section}
           onSection={openSection}
         />
       ) : (
-        current && (
-          <>
-            {/* O nome da pasta rola junto com o conteúdo e a busca gruda
-                em cima dele: ao descer numa pasta longa, o que precisa
-                ficar à mão é o campo, não o título — para voltar basta
-                subir, e o gesto do sistema continua valendo. */}
+        <>
+          {/* O nome da pasta rola junto com o conteúdo e a busca gruda
+              em cima dele: ao descer numa pasta longa, o que precisa
+              ficar à mão é o campo, não o título — para voltar basta
+              subir, e o gesto do sistema continua valendo.
+
+              A barra de topo do celular não tem lugar para a busca, então
+              ela mora aqui — mas é a da barra: varre o acervo e troca a
+              pasta pelo resultado. As três peças ficam sempre na mesma
+              ordem para o campo não ser recriado, e perder o foco, quando
+              o resultado entra. */}
+          {!results && current && (
             <div className="pt-4">
               <FolderHeader
                 name={folderName(current)}
@@ -322,9 +324,10 @@ export function PortalScreen({ onRoute }: { onRoute: (route: PortalRoute) => voi
                 compact
               />
             </div>
-            <MobileHero query={localQuery} onQuery={onLocalQuery} placeholder="Pesquise nesta pasta" />
-          </>
-        )
+          )}
+          <MobileHero query={topQuery} onQuery={onTopQuery} placeholder={SEARCH_PLACEHOLDER} />
+          {results && resultsHeader(true)}
+        </>
       )}
       <div ref={browserRef} className="scroll-mt-4">
         {browser}
@@ -332,13 +335,20 @@ export function PortalScreen({ onRoute }: { onRoute: (route: PortalRoute) => voi
     </div>
   )
 
-  const desktopContent = dynamicHero ? (
+  const desktopContent = results ? (
+    <div className="mx-auto w-full flex flex-col px-8 pt-8 pb-24" style={{ maxWidth: WIDE_MAX_WIDTH }}>
+      {resultsHeader()}
+      <div ref={browserRef} className="mt-4">
+        {browser}
+      </div>
+    </div>
+  ) : dynamicHero ? (
     <div className="@container mx-auto flex flex-col px-8 pb-24" style={{ maxWidth: WIDE_MAX_WIDTH }}>
       <DynamicHero
-        query={query}
-        onQuery={onGlobalQuery}
-        placeholder={SEARCH_PLACEHOLDER}
-        section={query ? null : section}
+        query={sheetQuery}
+        onQuery={onSheetQuery}
+        placeholder={sheetPlaceholder}
+        section={section}
         onSection={openSection}
         scrollRef={mainRef}
         onCollapsedChange={setHeroCollapsed}
@@ -356,17 +366,9 @@ export function PortalScreen({ onRoute }: { onRoute: (route: PortalRoute) => voi
     </div>
   ) : folderBar && current ? (
     /* Dentro da pasta, a barra da home já recolhida em cima e o título da
-       pasta logo abaixo (ver `FolderBar`).
-
-       A busca procura só nesta pasta e nas subpastas, então o título e o
-       voltar ficam na tela durante a busca: os resultados são dela. Se ela
-       varresse o acervo, o título teria de sair, e com ele o caminho de
-       volta. */
+       pasta logo abaixo (ver `FolderBar`). A busca é a da barra de topo. */
     <div className="mx-auto flex flex-col px-8 pb-24" style={{ maxWidth: WIDE_MAX_WIDTH }}>
       <FolderBar
-        query={localQuery}
-        onQuery={onLocalQuery}
-        placeholder="Pesquise nesta pasta"
         section={section}
         onSection={openSection}
         controls={controls}
@@ -388,10 +390,10 @@ export function PortalScreen({ onRoute }: { onRoute: (route: PortalRoute) => voi
     >
       {layout === 'padrao' && atRoot && (
         <Hero
-          query={query}
-          onQuery={onGlobalQuery}
-          placeholder={SEARCH_PLACEHOLDER}
-          section={query ? null : section}
+          query={sheetQuery}
+          onQuery={onSheetQuery}
+          placeholder={sheetPlaceholder}
+          section={section}
           onSection={openSection}
         />
       )}
@@ -400,9 +402,8 @@ export function PortalScreen({ onRoute }: { onRoute: (route: PortalRoute) => voi
           <FolderHeader
             name={folderName(current)}
             onBack={() => navigate(path.length > 1 ? path[path.length - 2].id : null)}
-            aside={folderAside}
+            aside={controls}
           />
-          <div className="lg:hidden">{folderSearchField}</div>
         </div>
       )}
       <div ref={browserRef} className="scroll-mt-8">
@@ -419,10 +420,7 @@ export function PortalScreen({ onRoute }: { onRoute: (route: PortalRoute) => voi
         else onRoute(route)
       }}
       trail={trail}
-      menuItems={[
-        ...iconModeMenuItems(iconMode, setIconMode),
-        ...dashThumbMenuItems(dashThumb, setDashThumb),
-      ]}
+      menuItems={iconModeMenuItems(iconMode, setIconMode)}
       search={topbarSearch}
       mainRef={mainRef}
       overlay={toastBox}

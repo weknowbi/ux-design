@@ -1,4 +1,5 @@
 import { useSyncExternalStore } from 'react'
+import { storageKey } from './prefs'
 
 /**
  * A cara que o usuário deu a cada item: nome, imagem, ícone e cor. É a parte
@@ -53,7 +54,7 @@ export const APPEARANCE_COLORS = [
   '#22a55b',
 ]
 
-const KEY = 'wk-portal-appearance'
+const KEY = storageKey('wk-portal-appearance')
 let state: Record<string, Appearance> = read()
 const listeners = new Set<() => void>()
 

@@ -6,6 +6,12 @@
       "runtimeExecutable": "npm",
       "runtimeArgs": ["run", "dev"],
       "port": 5177
+    },
+    {
+      "name": "portal-teste",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["--prefix", "../portal_teste", "run", "dev"],
+      "port": 5179
     }
   ]
 }
