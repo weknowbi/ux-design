@@ -25,6 +25,9 @@
        outros projetos, 404) mostra "Pagina nao encontrada" no lugar da
        cortina. Quem e do time e esta num navegador assim entra pela raiz
        com ?entrar no fim do endereco.
+   O acesso de teste guardado no navegador leva um pedaco do hash da senha
+   ("teste:<hash>"): trocar a senha de teste no build-pages.mjs derruba
+   quem entrou com a antiga, que volta a ver a cortina.
    O build tira os comentarios deste arquivo ao publicar.
    O papel fica em localStorage (STORAGE_KEY) e em <html data-ws-role>,
    que e onde o app.js da pagina inicial le. Forjar o papel e trivial
@@ -45,6 +48,7 @@
   // Vazio fora dos projetos de teste (ver applyGate no build-pages.mjs).
   var TEST_HASH = "__TEST_HASH__";
   var TEST_PAGE = TEST_HASH !== "";
+  var TESTER_MARK = "teste:" + TEST_HASH.slice(0, 12);
 
   function roleForHash(hash) {
     if (hash === EDIT_HASH) return "edit";
@@ -61,7 +65,7 @@
   function storedRole() {
     var value = rawStored();
     if (value === "1") value = "edit";
-    if (value === "teste") return TEST_PAGE ? value : null;
+    if (value && value.indexOf("teste") === 0) return TEST_PAGE && value === TESTER_MARK ? "teste" : null;
     return value === "edit" || value === "view" ? value : null;
   }
 
@@ -358,7 +362,7 @@
 
       var role = roleForHash(await sha256(input.value));
       if (role) {
-        try { if (!(role === "teste" && storedRole())) localStorage.setItem(STORAGE_KEY, role); } catch (e) { /* modo privado sem storage: sem persistencia, tudo bem */ }
+        try { if (!(role === "teste" && storedRole())) localStorage.setItem(STORAGE_KEY, role === "teste" ? TESTER_MARK : role); } catch (e) { /* modo privado sem storage: sem persistencia, tudo bem */ }
         submit.classList.add("done");
         submit.innerHTML = ICON_CHECK + "<span>Liberado</span>";
         // Reativa a pagina por baixo ja, e so depois some com a cortina.
@@ -400,6 +404,6 @@
 
   var role = storedRole();
   if (role) reveal(role);
-  else if (!TEST_PAGE && rawStored() === "teste" && !/[?&]entrar(?:[=&]|$)/.test(location.search)) showNotFound();
+  else if (!TEST_PAGE && (rawStored() || "").indexOf("teste") === 0 && !/[?&]entrar(?:[=&]|$)/.test(location.search)) showNotFound();
   else showPrompt();
 })();

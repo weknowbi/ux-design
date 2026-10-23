@@ -34,7 +34,7 @@ const GATE_VIEW_HASH = "015f027c6b45c15d936d8bc321ae08b7bedc9e81dcd349dfe05a3858
 // "access": "teste" no workspace.config.json (ver pages-gate.template.js).
 // Para trocar, gere o hash da senha nova e cole aqui:
 //   node -e "console.log(require('crypto').createHash('sha256').update('SENHA').digest('hex'))"
-const GATE_TEST_HASH = "50e936c050c7ed9af475e3502bb45c13a1c5010b175b7a553101254868cacd79";
+const GATE_TEST_HASH = "bc2c8f3ef628d9990392b441d04f5a1d0569f881e609a92e9c3cc3fde2cde78c";
 
 // Desativa (sem remover) os <script> de uma pagina, pra nenhum deles rodar
 // antes da senha ser confirmada -- ver reactivateScripts() no gate.
