@@ -1,0 +1,7 @@
+@import 'tailwindcss';
+/* As classes do Btn e do Modal moram na biblioteca, fora desta raiz:
+   sem esta linha o Tailwind não as vê e o botão perde a altura. */
+@source '../../design_system/src/lib';
+@import './tokens.css';
+@import './ds-base.css';
+@import './styles.css';

@@ -1,0 +1,395 @@
+/*
+ * Medidas e cores lidas do explorador de dados em produção
+ * (wk-data-explorer, dashboard 156):
+ *   véu            rgba(12, 25, 43, .76) sobre o dashboard
+ *   quadros        brancos, raio 5px, 14px de espaço entre eles
+ *   título         14px #363e49, cabeçalho de 40px
+ *   texto          #475569; ícones #8c98a8; barra superior #c4c7c5
+ *   tipo ativo     anel de 2px #607d8b
+ *   destaque       #3366cc (badge e botão primário)
+ */
+
+/* Paleta da tela ANTIGA (réplica). A parte nova usa só --wk-* (tokens.css). */
+:root {
+  --veil: rgba(12, 25, 43, 0.76);
+  --panel: #ffffff;
+  --title: #363e49;
+  --text: #475569;
+  --text-soft: #5b6878;
+  --icon: #8c98a8;
+  --tb-icon: #c4c7c5;
+  --tb-off: rgba(102, 117, 138, 0.4);
+  --ring: #607d8b;
+  --primary: #3366cc;
+  --line: #e8ecf1;
+  --hover: #f1f4f8;
+  --page: #f3f6fc;
+}
+
+* { box-sizing: border-box; }
+
+html, body, #root { height: 100%; margin: 0; }
+
+body {
+  font-family: Inter, 'Helvetica Neue', sans-serif;
+  font-size: 14px;
+  color: var(--text);
+  background: var(--page);
+  -webkit-font-smoothing: antialiased;
+}
+
+button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+input { font: inherit; color: inherit; }
+button:focus-visible, input:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+
+.stage { position: relative; height: 100%; overflow: hidden; }
+
+/* ---------- explorador ---------- */
+
+.explorer {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--veil);
+  color: #fff;
+}
+
+.toolbar {
+  height: 48px;
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 8px 0 16px;
+}
+
+.tb-title {
+  margin: 0 0 0 4px;
+  font-size: 20px;
+  font-weight: 500;
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tb-actions { display: flex; align-items: center; flex: none; }
+
+.tb-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  color: var(--tb-icon);
+  flex: none;
+}
+.tb-btn:hover:not(:disabled) { background: rgba(255, 255, 255, 0.08); }
+.tb-btn:disabled { color: var(--tb-off); cursor: default; }
+.tb-back { color: #fff; }
+
+.tb-sep { width: 1px; height: 24px; background: rgba(196, 199, 197, 0.45); margin: 0 4px; }
+
+.explorer-body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  gap: 14px;
+  padding: 0 14px 14px;
+}
+
+.panel {
+  background: var(--panel);
+  border-radius: 5px;
+  color: var(--text);
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.panel-title {
+  height: 40px;
+  flex: none;
+  display: flex;
+  align-items: center;
+  padding: 0 8px 0 12px;
+  border-radius: 5px 5px 0 0;
+}
+.panel-title .title { flex: 1; color: var(--title); font-size: 14px; }
+
+.badge {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--primary);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 300;
+  display: grid;
+  place-items: center;
+  margin-right: 5px;
+}
+
+.chev { color: var(--title); display: grid; place-items: center; }
+
+.icon-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  color: var(--text-soft);
+}
+.icon-btn:hover { background: var(--hover); }
+.icon-btn.dark { color: var(--title); }
+
+/* campos */
+.fields { width: 300px; flex: none; }
+
+.fields-search {
+  margin: 4px 12px 10px;
+  height: 44px;
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 10px;
+  background: #f3f4f6;
+  border-bottom: 1px solid #c9ced6;
+  color: var(--icon);
+}
+.fields-search input { flex: 1; min-width: 0; border: 0; background: none; outline: none; font-size: 14px; color: var(--text); }
+.fields-search input::placeholder { color: #5f6b7b; }
+
+.tree { flex: 1; overflow: auto; padding: 6px 4px 10px; }
+.tree-row { height: 28px; display: flex; align-items: center; gap: 4px; font-size: 13px; white-space: nowrap; }
+.tree-toggle { width: 24px; height: 24px; display: grid; place-items: center; color: #364152; flex: none; }
+.tree-toggle svg { transition: transform 0.15s; }
+.tree-icon { color: var(--text); flex: none; }
+.tree-label { overflow: hidden; text-overflow: ellipsis; }
+
+/* medidas, linhas, colunas, filtros */
+.config { width: 300px; flex: none; display: flex; flex-direction: column; gap: 14px; overflow: auto; }
+.config .box { height: 190px; flex: none; }
+.config .collapsed { height: 40px; flex: none; }
+
+.field-item { height: 28px; display: flex; align-items: center; gap: 2px; padding: 0 8px 0 12px; font-size: 12px; }
+.field-name { flex: 1; margin-left: 4px; }
+.field-act { width: 18px; height: 15px; display: grid; place-items: center; color: var(--icon); }
+.field-act:hover { color: var(--text); }
+
+/* resultado */
+.result { flex: 1; min-width: 0; }
+.result-title { position: relative; gap: 8px; }
+
+.chart-types { display: flex; flex-wrap: wrap; gap: 3px; padding: 0 12px 4px; flex: none; }
+
+.type-btn {
+  width: 40px;
+  height: 40px;
+  padding: 8px;
+  border-radius: 50%;
+  color: var(--icon);
+  display: grid;
+  place-items: center;
+}
+.type-btn:hover { background: var(--hover); color: var(--text); }
+.type-btn.is-on { box-shadow: 0 0 0 2px var(--ring); color: var(--icon); }
+
+.chart { flex: 1; min-height: 0; margin: 0 8px 8px; }
+.chart svg { display: block; font-family: Inter, 'Segoe UI', Arial, sans-serif; }
+.chart .mark { transition: fill 0.22s ease, fill-opacity 0.22s ease; }
+.chart .mark-stroke { transition: stroke 0.22s ease; }
+.chart g { transition: opacity 0.15s ease; }
+
+/* ---------- parte nova: escala de cores (design system) ----------
+ * Daqui até o fundo do dashboard, só tokens --wk-* e as medidas das páginas
+ * do design system. Nada da paleta da tela antiga acima.
+ */
+
+/* Gatilho: Btn fantasma pequeno (32 de altura, raio 6, intervalo 6); folga
+   de 8 à esquerda porque o ícone de 24 já traz ~2px de recuo próprio */
+.scale-btn {
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 12px 0 8px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  color: var(--wk-nav-label);
+  background: transparent;
+  transition: background .15s ease, color .15s ease;
+}
+.scale-btn:hover { background: var(--wk-btn-ghost-hover); }
+.scale-btn.is-open { color: var(--wk-primary); background: var(--wk-btn-ghost-hover); }
+.scale-btn:focus-visible { outline: none; box-shadow: var(--wk-btn-focus-ring); }
+
+.strip {
+  position: relative;
+  display: inline-flex;
+  border-radius: 2px;
+  overflow: hidden;
+  flex: none;
+}
+.strip > span { flex: 1; min-width: 0; }
+/* fio por dentro, para cor clara (branco, pastel) não sumir no fundo */
+.strip::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.12);
+  pointer-events: none;
+}
+
+.result-body { flex: 1; min-height: 0; display: flex; position: relative; }
+.result-main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+
+/* Painel de página: fio --wk-border e raio 8, sem sombra (como menu e cartão,
+   que moram na página e não flutuam sobre um véu) */
+.scale-pop {
+  width: 352px;
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  margin: 0 8px 8px 0;
+  background: var(--wk-surface);
+  border: 1px solid var(--wk-border);
+  border-radius: 8px;
+  color: var(--wk-text);
+  font-family: Inter, sans-serif;
+  overflow: hidden;
+}
+
+/* Quadro estreito: o painel flutua sobre o gráfico e ganha a sombra de menu */
+@media (max-width: 1180px) {
+  .scale-pop {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 20;
+    box-shadow: var(--wk-shadow-menu);
+  }
+}
+
+.sp-head {
+  height: 48px;
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 8px 0 16px;
+}
+.sp-title { margin: 0; font-size: 14px; line-height: 1.5; font-weight: 600; color: var(--wk-text); }
+
+/* Linha de preferência com o Switch na ponta; o fio separa a opção da lista */
+.sp-option {
+  height: 48px;
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0 16px 12px;
+  border-bottom: 1px solid var(--wk-border);
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--wk-text);
+}
+
+/* Busca de lista: 38, raio 8, borda de controle, lupa de 24 à direita */
+.sp-search-wrap { padding: 0 16px 8px; flex: none; }
+.sp-search {
+  height: 38px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 8px 0 12px;
+  border: 1px solid var(--wk-field-border);
+  border-radius: 8px;
+  background: var(--wk-surface);
+  transition: border-color .12s ease;
+}
+.sp-search:focus-within { border-color: var(--wk-primary); }
+.sp-search input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: none;
+  background: transparent;
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--wk-text);
+}
+
+/* Lista: opções do Select (36, raio 6, Inter 14), com 8 de margem lateral */
+.sp-list { flex: 1; min-height: 0; overflow: auto; padding: 0 8px 8px; overscroll-behavior: contain; }
+
+.sp-default { padding-bottom: 4px; margin-bottom: 4px; border-bottom: 1px solid var(--wk-border); }
+
+/* Rótulo de grupo: caixa alta 12/600, como o seletor agrupado do ASK */
+.sp-group {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  padding: 12px 12px 4px;
+  background: var(--wk-surface);
+  font-size: 12px;
+  line-height: 1.5;
+  font-weight: 600;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  color: var(--wk-text-muted);
+}
+
+.sp-row {
+  height: 36px;
+  display: grid;
+  grid-template-columns: 1fr 64px 18px;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px;
+  border-radius: 6px;
+  font-size: 14px;
+  color: var(--wk-text);
+  cursor: pointer;
+  transition: background-color .12s ease;
+  /* subir com as setas não esconde a linha atrás do rótulo fixo */
+  scroll-margin-top: 36px;
+}
+.sp-row.is-active { background: var(--wk-menu-hover); }
+.sp-row.is-selected { color: var(--wk-primary); }
+.sp-check { display: grid; place-items: center; }
+.sp-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.sp-empty { margin: 0; padding: 16px 12px; font-size: 14px; color: var(--wk-text-muted); }
+
+/* ---------- dashboard ao fundo ---------- */
+
+.backdrop { position: absolute; inset: 0; background: var(--page); display: flex; flex-direction: column; }
+.bd-top { height: 48px; background: #fff; display: flex; align-items: center; gap: 28px; padding: 0 20px; color: #364152; flex: none; }
+.bd-logo { width: 84px; height: 14px; border-radius: 3px; background: #c9d3e3; }
+.bd-crumb { flex: 1; }
+.bd-search { width: 220px; height: 32px; border-radius: 16px; background: #eef1f6; }
+.bd-grid { flex: 1; display: grid; grid-template-columns: repeat(4, 1fr); grid-template-rows: 1fr 1.4fr 1.4fr; gap: 12px; padding: 12px; }
+.bd-card { background: #fff; border-radius: 6px; padding: 14px; display: flex; }
+.bd-wide { grid-column: span 4; }
+.bd-wide2 { grid-column: span 2; }
+.bd-bars { flex: 1; display: flex; align-items: flex-end; gap: 8px; }
+.bd-bars span { flex: 1; background: #3e83b7; }
+.bd-map { margin: auto; width: 60%; height: 80%; background: #1d2530; border-radius: 40% 50% 45% 55%; }
+.bd-pie { margin: auto; width: 120px; height: 120px; border-radius: 50%; background: conic-gradient(#7a9fd8 0 20%, #f4c76b 0 34%, #ef8a5a 0 47%, #6fcf97 0 60%, #c8c8c8 0 74%, #5b8ed6 0 100%); }
+.bd-kpis { flex-direction: column; gap: 12px; }
+.bd-kpis span { flex: 1; background: #7a9fd8; border-radius: 2px; }
+.bd-kpis span + span { background: #f8cf6a; }
+.bd-table { flex-direction: column; gap: 10px; }
+.bd-table span { height: 10px; background: #e3e8ef; border-radius: 2px; }
+
+@media (max-width: 1280px) {
+  .fields, .config { width: 250px; }
+}
+
