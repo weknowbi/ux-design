@@ -1,27 +1,28 @@
 /**
- * O dashboard de exemplo. Todo dashboard do portal abre este mesmo painel:
- * o protótipo existe para testar a barra inferior (a navegação entre abas),
- * não o conteúdo. Muda só o nome, que vem do card clicado.
+ * O dashboard de exemplo, no visual do painel "Cenário Atendimentos (Foco
+ * Hoje/Semana)" do Weknow (dashboard 19). Todo dashboard do portal abre este
+ * mesmo painel: o protótipo existe para testar a barra inferior, e um
+ * conteúdo só economiza desenvolvimento sem mudar nada no que se testa.
  *
- * As abas contam uma história em sequência, como os consultores montam os
- * painéis de verdade: do panorama ao plano de ação. É esse uso que a lista
- * suspensa da 5.2 quebrou (item do Jira de navegação das abas): com as abas
- * escondidas, o usuário perde o roteiro.
+ * O original tem uma página só. As abas foram acrescentadas para a barra ter
+ * o que navegar, e seguem a história de um painel de pronto-socorro: do dia
+ * de hoje aos recortes. Cada aba reaproveita os mesmos componentes com
+ * outros números, como os consultores costumam montar.
  */
 
-export type Kpi = { label: string; value: string; delta: number; unit?: string }
-
-export type Chart =
-  | { kind: 'line'; title: string; categories: string[]; series: { name: string; values: number[] }[] }
-  | { kind: 'bar'; title: string; categories: string[]; values: number[] }
-  | { kind: 'hbar'; title: string; categories: string[]; values: number[] }
-  | { kind: 'donut'; title: string; categories: string[]; values: number[] }
-
-export type DashTab = { id: string; name: string; kpis: Kpi[]; charts: Chart[] }
-
-const MONTHS = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez']
-const UNITS = ['Ala A', 'Ala B', 'Ala C', 'UTI adulto', 'UTI neonatal', 'Pediatria', 'Maternidade']
-const PAYERS = ['Unimed', 'SUS', 'Bradesco Saúde', 'Amil', 'SulAmérica', 'Particular']
+export type DashTab = {
+  id: string
+  name: string
+  /** Hora de corte da comparação com ontem ("até 15:00"). */
+  cutoff: string
+  todayDate: string
+  yesterdayDate: string
+  today: { adult: number; child: number }
+  yesterday: { adult: number; child: number }
+  convenios: [nome: string, atendimentos: number][]
+  /** Atendimentos por hora, de 00 a 23. Hora que ainda não chegou é 0. */
+  hourly: number[]
+}
 
 /** Números estáveis por aba: a mesma aba mostra os mesmos valores a cada visita. */
 function seeded(seed: number) {
@@ -32,114 +33,53 @@ function seeded(seed: number) {
   }
 }
 
-function series(seed: number, n: number, base: number, spread: number) {
-  const r = seeded(seed)
-  let v = base
-  return Array.from({ length: n }, () => {
-    v = Math.max(base * 0.4, v + (r() - 0.45) * spread)
-    return Math.round(v)
-  })
+/* O desenho de um dia de pronto-socorro: madrugada baixa, pico no fim da
+   manhã e no começo da tarde. */
+const DAY_SHAPE = [18, 13, 10, 8, 8, 12, 20, 34, 55, 63, 69, 66, 63, 66, 74, 72, 70, 66, 60, 52, 44, 36, 28, 22]
+
+function tab(i: number, name: string, scale: number): DashTab {
+  const r = seeded(i * 17 + 3)
+  const vary = (n: number, spread = 0.3) => Math.max(1, Math.round(n * scale * (1 - spread / 2 + r() * spread)))
+  const today = { adult: vary(103), child: vary(16, 0.6) }
+  const yesterday = { adult: vary(110), child: vary(32, 0.5) }
+  // Do maior para o menor, e "Outros" sempre por último, como no original.
+  const convenios: [string, number][] = [
+    ...(
+      [
+        ['SUS', vary(134)],
+        ['Unimed', vary(35, 0.5)],
+        ['Bradesco', vary(3, 1)],
+        ['Gratuidade', vary(3, 1)],
+      ] as [string, number][]
+    ).sort((a, b) => b[1] - a[1]),
+    ['Outros', vary(6, 1)],
+  ]
+  // Até as 15h há números; dali em diante a hora ainda não chegou.
+  const hourly = DAY_SHAPE.map((v, h) => (h < 16 ? Math.max(1, Math.round(v * (0.85 + r() * 0.3) * Math.min(1.2, scale + 0.2))) : 0))
+  return { id: `aba-${i + 1}`, name, cutoff: '15:00', todayDate: '23/09', yesterdayDate: '22/09', today, yesterday, convenios, hourly }
 }
 
-const ranked = (seed: number, cats: string[], base: number) => {
-  const r = seeded(seed)
-  return cats
-    .map((c) => ({ c, v: Math.round(base * (0.25 + r())) }))
-    .sort((a, b) => b.v - a.v)
-}
-
-function tab(
-  i: number,
-  name: string,
-  kpis: Kpi[],
-  titles: { line: string; bar: string; hbar: string; donut: string },
-  donutCats: string[],
-): DashTab {
-  const h = ranked(i * 7 + 3, titles.hbar.includes('convênio') ? PAYERS : UNITS, 1200)
-  const d = ranked(i * 5 + 1, donutCats, 100)
-  return {
-    id: `aba-${i + 1}`,
-    name,
-    kpis,
-    charts: [
-      {
-        kind: 'line',
-        title: titles.line,
-        categories: MONTHS,
-        series: [
-          { name: '2026', values: series(i * 3 + 1, 12, 900, 140) },
-          { name: '2025', values: series(i * 3 + 2, 12, 820, 120) },
-        ],
-      },
-      { kind: 'donut', title: titles.donut, categories: d.map((x) => x.c), values: d.map((x) => x.v) },
-      { kind: 'hbar', title: titles.hbar, categories: h.map((x) => x.c), values: h.map((x) => x.v) },
-      { kind: 'bar', title: titles.bar, categories: MONTHS.slice(0, 9), values: series(i * 3 + 7, 9, 400, 90) },
-    ],
-  }
+/** A primeira aba repete os números do painel original, para comparar lado a lado. */
+const ORIGINAL: DashTab = {
+  id: 'aba-1',
+  name: 'Visão geral',
+  cutoff: '15:00',
+  todayDate: '23/09',
+  yesterdayDate: '22/09',
+  today: { adult: 103, child: 16 },
+  yesterday: { adult: 110, child: 32 },
+  convenios: [['SUS', 134], ['Unimed', 35], ['Bradesco', 3], ['Gratuidade', 3], ['Outros', 6]],
+  hourly: [...DAY_SHAPE.slice(0, 16), ...Array(8).fill(0)],
 }
 
 export const DASH_TABS: DashTab[] = [
-  tab(0, 'Visão geral', [
-    { label: 'Taxa de ocupação', value: '87', unit: '%', delta: 3.2 },
-    { label: 'Pacientes internados', value: '412', delta: 1.8 },
-    { label: 'Permanência média', value: '4,6', unit: 'dias', delta: -0.4 },
-    { label: 'Faturamento do mês', value: '18,2', unit: 'mi', delta: 5.1 },
-  ], { line: 'Internações por mês', donut: 'Internações por tipo', hbar: 'Pacientes por unidade', bar: 'Altas por mês' },
-  ['Clínica', 'Cirúrgica', 'Obstétrica']),
-  tab(1, 'Ocupação por unidade', [
-    { label: 'Leitos ativos', value: '474', delta: 0 },
-    { label: 'Ocupados agora', value: '412', delta: 2.4 },
-    { label: 'Bloqueados', value: '11', delta: -1.1 },
-    { label: 'Giro de leitos', value: '5,8', delta: 0.6 },
-  ], { line: 'Ocupação média por mês', donut: 'Leitos por situação', hbar: 'Ocupação por unidade', bar: 'Bloqueios por mês' },
-  ['Ocupados', 'Livres', 'Bloqueados']),
-  tab(2, 'Internações', [
-    { label: 'Internações no mês', value: '1.238', delta: 4.3 },
-    { label: 'Eletivas', value: '61', unit: '%', delta: -2.0 },
-    { label: 'Pelo pronto-socorro', value: '39', unit: '%', delta: 2.0 },
-    { label: 'Reinternação em 30 dias', value: '6,1', unit: '%', delta: -0.8 },
-  ], { line: 'Internações por mês', donut: 'Origem da internação', hbar: 'Internações por convênio', bar: 'Reinternações por mês' },
-  ['Eletiva', 'Pronto-socorro', 'Transferência']),
-  tab(3, 'Tempo de permanência', [
-    { label: 'Permanência média', value: '4,6', unit: 'dias', delta: -0.4 },
-    { label: 'Acima de 10 dias', value: '38', delta: -5.0 },
-    { label: 'UTI adulto', value: '7,2', unit: 'dias', delta: 0.3 },
-    { label: 'Meta', value: '4,5', unit: 'dias', delta: 0 },
-  ], { line: 'Permanência média por mês', donut: 'Faixa de permanência', hbar: 'Permanência por unidade', bar: 'Casos acima da meta' },
-  ['Até 3 dias', '4 a 10 dias', 'Acima de 10']),
-  tab(4, 'Altas e transferências', [
-    { label: 'Altas no mês', value: '1.196', delta: 3.7 },
-    { label: 'Altas até 11h', value: '42', unit: '%', delta: 6.0 },
-    { label: 'Transferências', value: '57', delta: -2.2 },
-    { label: 'Óbitos', value: '1,9', unit: '%', delta: -0.1 },
-  ], { line: 'Altas por mês', donut: 'Tipo de saída', hbar: 'Altas por convênio', bar: 'Transferências por mês' },
-  ['Alta médica', 'Transferência', 'Óbito']),
-  tab(5, 'Faturamento', [
-    { label: 'Faturado', value: '18,2', unit: 'mi', delta: 5.1 },
-    { label: 'Ticket médio', value: '14,7', unit: 'mil', delta: 1.2 },
-    { label: 'Contas abertas', value: '326', delta: -4.5 },
-    { label: 'Prazo de envio', value: '9', unit: 'dias', delta: -1.0 },
-  ], { line: 'Faturamento por mês (R$ mil)', donut: 'Faturamento por tipo', hbar: 'Faturamento por unidade', bar: 'Contas enviadas por mês' },
-  ['Diárias', 'Materiais', 'Procedimentos']),
-  tab(6, 'Glosas por convênio', [
-    { label: 'Glosado', value: '612', unit: 'mil', delta: -3.4 },
-    { label: 'Índice de glosa', value: '3,4', unit: '%', delta: -0.2 },
-    { label: 'Recursos enviados', value: '184', delta: 8.0 },
-    { label: 'Recuperado', value: '58', unit: '%', delta: 4.1 },
-  ], { line: 'Glosas por mês (R$ mil)', donut: 'Motivo da glosa', hbar: 'Glosas por convênio', bar: 'Recursos por mês' },
-  ['Administrativa', 'Técnica', 'Linear']),
-  tab(7, 'Qualidade assistencial', [
-    { label: 'Eventos adversos', value: '23', delta: -12.0 },
-    { label: 'Quedas', value: '0,9', unit: '‰', delta: -0.2 },
-    { label: 'Infecção hospitalar', value: '2,1', unit: '%', delta: -0.3 },
-    { label: 'NPS', value: '74', delta: 3.0 },
-  ], { line: 'Eventos notificados por mês', donut: 'Gravidade dos eventos', hbar: 'Eventos por unidade', bar: 'Quedas por mês' },
-  ['Leve', 'Moderado', 'Grave']),
-  tab(8, 'Plano de ação', [
-    { label: 'Ações abertas', value: '17', delta: -3.0 },
-    { label: 'Concluídas no prazo', value: '82', unit: '%', delta: 5.0 },
-    { label: 'Atrasadas', value: '4', delta: -2.0 },
-    { label: 'Responsáveis', value: '9', delta: 0 },
-  ], { line: 'Ações concluídas por mês', donut: 'Situação das ações', hbar: 'Ações por unidade', bar: 'Ações abertas por mês' },
-  ['No prazo', 'Em risco', 'Atrasada']),
+  ORIGINAL,
+  tab(1, 'Semana', 1.08),
+  tab(2, 'Adulto', 0.92),
+  tab(3, 'Infantil', 0.4),
+  tab(4, 'Por convênio', 1),
+  tab(5, 'Faixa horária', 0.96),
+  tab(6, 'Classificação de risco', 0.88),
+  tab(7, 'Tempo de espera', 0.8),
+  tab(8, 'Comparativo mensal', 1.12),
 ]

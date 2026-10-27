@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { COLOR, FONT } from '@/design/tokens'
 import { useIsMobile } from '@/design/viewport'
 import { Icon } from '@/components/icons'
@@ -8,7 +8,7 @@ import { IconBtn } from '@ds/Btn'
 import { Dropdown, MenuAction } from '@/components/browser/Menu'
 import { useAppearances } from '@/components/browser/appearance'
 import type { PortalRoute } from '@/components/PortalSidebar'
-import { ChartView, KpiTile, Widget } from '@/components/dashboard/Charts'
+import { AtendimentosCanvas, CANVAS_H, CANVAS_W } from '@/components/dashboard/AtendimentosCanvas'
 import { DashboardBar } from '@/components/dashboard/DashboardBar'
 import { DASH_TABS } from '@/data/dashboard'
 import { CURRENT_USER } from '@/data/account'
@@ -48,6 +48,16 @@ export function DashboardScreen({ dashboardId }: { dashboardId: string; onRoute:
   const entry = flatten(PORTAL_ROOT).find((e) => e.item.id === dashboardId && e.item.kind === 'dashboard')
   const [active, setActive] = useState(0)
   const scrollRef = useRef<HTMLDivElement>(null)
+  /* O quadro de 1920 × 1080 entra na largura da tela, como o web abre o
+     painel ("ajustar à largura"); o que sobra para baixo rola. */
+  const [scale, setScale] = useState(0)
+  useLayoutEffect(() => {
+    const el = scrollRef.current
+    if (!el) return
+    const ro = new ResizeObserver(([e]) => setScale(e.contentRect.width / CANVAS_W))
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [])
 
   // Outro dashboard começa na primeira aba.
   useEffect(() => {
@@ -67,7 +77,6 @@ export function DashboardScreen({ dashboardId }: { dashboardId: string; onRoute:
   const openFolder = (id: string) => go(`/pasta/${encodeURIComponent(id)}`)
 
   const tab = DASH_TABS[active]
-  const [line, donut, hbar, bar] = tab.charts
 
   const chevron = <Icon name="chevron_right" size={24} color={COLOR.navLabel} className="shrink-0" />
 
@@ -183,35 +192,17 @@ export function DashboardScreen({ dashboardId }: { dashboardId: string; onRoute:
   )
 
   const body = entry ? (
-    <div className={`grid gap-3 ${isMobile ? 'grid-cols-2' : 'grid-cols-12'}`} style={{ gridAutoRows: 'min-content' }}>
-      {tab.kpis.map((k) => (
-        <div key={k.label} className={isMobile ? '' : 'col-span-3'} style={{ height: 112 }}>
-          <KpiTile kpi={k} />
+    <div style={{ width: CANVAS_W * scale, height: CANVAS_H * scale }}>
+      {scale > 0 && (
+        <div style={{ transform: `scale(${scale})`, transformOrigin: '0 0' }}>
+          <AtendimentosCanvas tab={tab} />
         </div>
-      ))}
-      <div className={isMobile ? 'col-span-2' : 'col-span-8'} style={{ height: 300 }}>
-        <Widget title={line.title}>
-          <ChartView chart={line} />
-        </Widget>
-      </div>
-      <div className={isMobile ? 'col-span-2' : 'col-span-4'} style={{ minHeight: 300 }}>
-        <Widget title={donut.title}>
-          <ChartView chart={donut} />
-        </Widget>
-      </div>
-      <div className={isMobile ? 'col-span-2' : 'col-span-5'} style={{ minHeight: 300 }}>
-        <Widget title={hbar.title}>
-          <ChartView chart={hbar} />
-        </Widget>
-      </div>
-      <div className={isMobile ? 'col-span-2' : 'col-span-7'} style={{ height: 300 }}>
-        <Widget title={bar.title}>
-          <ChartView chart={bar} />
-        </Widget>
-      </div>
+      )}
     </div>
   ) : (
-    <p style={{ fontFamily: FONT, fontSize: 14, color: COLOR.textMuted }}>Dashboard não encontrado.</p>
+    <p className="p-4" style={{ fontFamily: FONT, fontSize: 14, color: COLOR.textMuted }}>
+      Dashboard não encontrado.
+    </p>
   )
 
   return (
@@ -222,13 +213,8 @@ export function DashboardScreen({ dashboardId }: { dashboardId: string; onRoute:
         ref={scrollRef}
         role="tabpanel"
         aria-label={tab.name}
-        className="flex-1 min-h-0 overflow-auto"
-        style={{
-          marginTop: 1,
-          background: 'var(--wk-surface-subtle)',
-          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.12)',
-          padding: isMobile ? 12 : 16,
-        }}
+        className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden [scrollbar-gutter:stable]"
+        style={{ marginTop: 1, background: '#FFFFFF', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.12)' }}
       >
         {body}
       </div>
