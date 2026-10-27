@@ -23,8 +23,9 @@ const PROJECTS_ROOT = path.join(ROOT, "projects");
 const SITE_ROOT = path.join(ROOT, "_site");
 
 // Hashes SHA-256 das senhas de acesso do site publicado -- nunca as senhas
-// em texto puro (nem aqui, nem em nenhum outro arquivo). "edit" pode
-// renomear projetos na pagina inicial; "view" so visualiza. Ver
+// em texto puro (nem aqui, nem em nenhum outro arquivo). "edit" abre a
+// pagina inicial (a lista de projetos) e pode renomear projetos nela;
+// "view" so abre os projetos, um a um, e nao a pagina inicial. Ver
 // pages-gate.template.js pra entender o mecanismo e as limitacoes (site
 // estatico, sem servidor: isso e uma cortina contra acesso casual, nao
 // seguranca de verdade).
@@ -54,7 +55,7 @@ function disableScripts(html) {
 // abertas), desativa os scripts, injeta o CSS que esconde a pagina ate a
 // liberacao, e copia o gate.js que faz a verificacao da senha e reativa os
 // scripts quando ela bate.
-function applyGate(dir, { test = false } = {}) {
+function applyGate(dir, { test = false, home = false } = {}) {
   const pages = fs.readdirSync(dir).filter((name) => name.toLowerCase().endsWith(".html"));
   if (pages.length === 0) return;
 
@@ -73,13 +74,15 @@ function applyGate(dir, { test = false } = {}) {
 
   // Cada pagina leva so os hashes das senhas que ela aceita: a de teste so
   // vai para os projetos de teste, e eles nao levam os de view/edit (quem e
-  // do time e ja entrou neste navegador passa pelo papel guardado).
+  // do time e ja entrou neste navegador passa pelo papel guardado). A
+  // pagina inicial nao leva o de view: so a senha de edicao abre a lista.
   const gateJs = stripComments(
     fs
       .readFileSync(path.join(ROOT, "scripts", "pages-gate.template.js"), "utf-8")
       .replace("__EDIT_HASH__", test ? "" : GATE_EDIT_HASH)
-      .replace("__VIEW_HASH__", test ? "" : GATE_VIEW_HASH)
+      .replace("__VIEW_HASH__", test || home ? "" : GATE_VIEW_HASH)
       .replace("__TEST_HASH__", test ? GATE_TEST_HASH : "")
+      .replace("__HOME_PAGE__", home ? "1" : "")
       .replace(
         "__PROMPT_TEXT__",
         test
@@ -260,7 +263,7 @@ function buildStaticIndex(projects) {
   fs.copyFileSync(path.join(ROOT, "scripts", "pages-index.js"), path.join(SITE_ROOT, "app.js"));
   fs.copyFileSync(path.join(ROOT, "app", "public", "logo.svg"), path.join(SITE_ROOT, "logo.svg"));
 
-  applyGate(SITE_ROOT);
+  applyGate(SITE_ROOT, { home: true });
 
   // GitHub Pages: garante que rotas desconhecidas caiam de volta no index
   // (nenhum destes projetos usa roteamento por historico, mas e barato ter).

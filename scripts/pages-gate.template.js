@@ -11,8 +11,12 @@
        uma div no inspetor pra "ver por baixo", o app realmente nao rodou.
 
    Sao tres senhas, cada uma com um papel:
-     - "edit": pode ver tudo e renomear projetos na pagina inicial;
-     - "view": so visualizacao;
+     - "edit": a unica que abre a pagina inicial (a lista de projetos), e
+       pode renomear projetos nela;
+     - "view": abre cada projeto pelo link dele, so pra visualizar, mas nao
+       a pagina inicial (nem a 404, que e copia dela): la o hash dela nem
+       vai junto e um papel "view" guardado no navegador e ignorado, entao
+       quem tem so essa senha nao consegue voltar e ver todos os projetos;
      - "teste": a que vai para os participantes de teste de usabilidade.
        So abre os projetos marcados com "access": "teste" no
        workspace.config.json. Na pagina inicial e nos outros projetos ela
@@ -49,6 +53,8 @@
   var TEST_HASH = "__TEST_HASH__";
   var TEST_PAGE = TEST_HASH !== "";
   var TESTER_MARK = "teste:" + TEST_HASH.slice(0, 12);
+  // "1" so na pagina inicial (e na 404): la o papel "view" nao vale.
+  var HOME_PAGE = "__HOME_PAGE__" === "1";
 
   function roleForHash(hash) {
     if (hash === EDIT_HASH) return "edit";
@@ -66,7 +72,8 @@
     var value = rawStored();
     if (value === "1") value = "edit";
     if (value && value.indexOf("teste") === 0) return TEST_PAGE && value === TESTER_MARK ? "teste" : null;
-    return value === "edit" || value === "view" ? value : null;
+    if (value === "view") return HOME_PAGE ? null : "view";
+    return value === "edit" ? value : null;
   }
 
   // Usado pelo botao "Sair" da pagina inicial -- limpa tambem o token do GitHub.
