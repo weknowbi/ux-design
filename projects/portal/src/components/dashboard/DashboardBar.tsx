@@ -1,12 +1,10 @@
-import { useLayoutEffect, useRef, useState, type ReactNode } from 'react'
+import { useLayoutEffect, useRef, useState } from 'react'
 import { COLOR, FONT, LAYOUT } from '@/design/tokens'
 import { Icon } from '@/components/icons'
 import { AnaliseInteligenteIcon } from '@/components/dashboard/AnaliseInteligenteIcon'
-import { Btn, IconBtn } from '@ds/Btn'
-import { fieldBoxStyle, fieldTextStyle } from '@ds/Field'
-import { Dropdown, MenuOption } from '@/components/browser/Menu'
+import { Btn } from '@ds/Btn'
+import { Dropdown } from '@/components/browser/Menu'
 import { useEllipsisTooltip } from '@/components/Tooltip'
-import type { TabNav } from '@/data/dashboard'
 
 /**
  * Barra inferior do dashboard — nó 4921:5646 (WP-832), com as abas de volta.
@@ -20,7 +18,7 @@ import type { TabNav } from '@/data/dashboard'
  *
  * Os controles são os do design system, e não desenhos próprios da barra:
  * `Btn` pequeno (32) para as ações com rótulo, `IconBtn` (32 × 32) para as de
- * ícone, o campo do sistema no seletor da lista. A exceção é o ícone da
+ * ícone. A exceção é o ícone da
  * Análise inteligente, em 24 e não nos 20 do botão: em 20 ele ficava
  * ilegível. O Figma tinha 28 de altura e
  * fundos cinza próprios, que não existem no sistema; 32 é a altura do botão
@@ -36,12 +34,12 @@ import type { TabNav } from '@/data/dashboard'
  * Escondidas atrás de uma lista, cada troca custa dois cliques e o usuário
  * não sabe mais o que vem depois.
  *
- * Por isso a navegação passou a ser propriedade do dashboard (`TabNav`):
+ * Por isso as abas voltam a ficar à vista, na ordem. As que não cabem na
+ * largura vão para o "+N", que lista o painel inteiro. A aba aberta nunca
+ * fica escondida: a fileira anda para mostrá-la, sem tirar as outras de ordem.
  *
- *   abas   todas à vista, na ordem. As que não cabem na largura vão para o
- *          "+N", que lista o painel inteiro. A aba aberta nunca fica escondida:
- *          a fileira anda para mostrá-la, sem tirar as outras de ordem
- *   lista  o seletor da 5.2, idêntico ao Figma
+ * A escolha entre abas visíveis e a lista suspensa da 5.2, por dashboard,
+ * chegou a existir no protótipo e saiu: fica só o modo de abas visíveis.
  *
  * O limite de abas visíveis é a largura, e não um número fixo: "5 abas" sobra
  * num monitor grande, quebra num notebook e depende do tamanho dos nomes.
@@ -103,7 +101,7 @@ function TabButton({
   )
 }
 
-/** Lista do painel inteiro: o "+N" das abas e o seletor da lista abrem a mesma. */
+/** Lista do painel inteiro, aberta pelo "+N". */
 function TabList({ tabs, active, onSelect }: { tabs: Tab[]; active: number; onSelect: (i: number) => void }) {
   return (
     <div role="listbox" aria-label="Abas do dashboard">
@@ -276,45 +274,6 @@ function TabStrip({ tabs, active, onSelect }: { tabs: Tab[]; active: number; onS
   )
 }
 
-/* ------------------------------------------------------ seletor (lista) */
-
-function TabSelect({ tabs, active, onSelect }: { tabs: Tab[]; active: number; onSelect: (i: number) => void }) {
-  return (
-    <Dropdown
-      align="left"
-      minWidth={244}
-      trigger={({ open, toggle }) => (
-        <button
-          type="button"
-          onClick={toggle}
-          aria-haspopup="listbox"
-          aria-expanded={open}
-          aria-label="Aba aberta"
-          className="flex items-center gap-2"
-          /* O campo do sistema, na altura da barra (32 em vez de 38). */
-          style={{ ...fieldBoxStyle({ focused: open }), width: 244, height: CONTROL_HEIGHT, paddingBlock: 0, paddingRight: 8 }}
-        >
-          <span className="flex-1 min-w-0 truncate text-left" style={{ ...fieldTextStyle, fontSize: 14 }}>
-            {tabs[active].name}
-          </span>
-          <Icon name="keyboard_arrow_down" size={24} color={COLOR.navLabel} className={open ? 'wk-flip' : undefined} />
-        </button>
-      )}
-    >
-      {(close) => (
-        <TabList
-          tabs={tabs}
-          active={active}
-          onSelect={(i) => {
-            onSelect(i)
-            close()
-          }}
-        />
-      )}
-    </Dropdown>
-  )
-}
-
 /* ------------------------------------------------------------ controles */
 
 /**
@@ -336,29 +295,17 @@ function Arrow({ dir, disabled, onClick }: { dir: 'prev' | 'next'; disabled: boo
   )
 }
 
-function MenuLabel({ children }: { children: ReactNode }) {
-  return (
-    <div className="px-2 pt-2 pb-1" style={{ fontFamily: FONT, fontSize: 12, fontWeight: 600, color: COLOR.textSecondary }}>
-      {children}
-    </div>
-  )
-}
-
 /* ---------------------------------------------------------------- barra */
 
 export function DashboardBar({
   tabs,
   active,
   onSelect,
-  nav,
-  onNav,
   mobile,
 }: {
   tabs: Tab[]
   active: number
   onSelect: (i: number) => void
-  nav: TabNav
-  onNav: (v: TabNav) => void
   mobile?: boolean
 }) {
   const prev = <Arrow dir="prev" disabled={active === 0} onClick={() => onSelect(active - 1)} />
@@ -375,30 +322,15 @@ export function DashboardBar({
         background: COLOR.surface,
       }}
     >
-      {nav === 'abas' ? (
-        <>
-          {/* As setas ficam juntas na frente: com as abas no meio, a da
-              direita andaria a cada troca de aba. */}
-          {!mobile && (
-            <div className="flex items-center shrink-0">
-              {prev}
-              {next}
-            </div>
-          )}
-          <TabStrip tabs={tabs} active={active} onSelect={onSelect} />
-        </>
-      ) : (
-        <div className="flex-1 min-w-0 flex items-center gap-2">
+      {/* As setas ficam juntas na frente: com as abas no meio, a da
+          direita andaria a cada troca de aba. */}
+      {!mobile && (
+        <div className="flex items-center shrink-0">
           {prev}
-          <TabSelect tabs={tabs} active={active} onSelect={onSelect} />
           {next}
-          {!mobile && (
-            <span className="whitespace-nowrap" style={{ fontFamily: FONT, fontSize: 14, color: COLOR.textSecondary }}>
-              {active + 1} de {tabs.length}
-            </span>
-          )}
         </div>
       )}
+      <TabStrip tabs={tabs} active={active} onSelect={onSelect} />
 
       <div className="shrink-0 flex items-center gap-2 pl-4">
         {/* Editar layout, zoom e tela cheia ficam de fora por enquanto: o
@@ -414,43 +346,11 @@ export function DashboardBar({
             {!mobile && 'Análise inteligente'}
           </span>
         </Btn>
-        <Dropdown
-          align="right"
-          minWidth={280}
-          trigger={({ open, toggle }) => (
-            <IconBtn title="Mais opções" onClick={toggle} active={open}>
-              <Icon name="more_horiz" size={24} />
-            </IconBtn>
-          )}
-        >
-          {(close) => (
-            <div style={{ maxWidth: 300 }}>
-              {/* No produto isto mora nas propriedades do dashboard, no modo
-                  de edição. Está no "…" só para dar para comparar os dois
-                  modos no protótipo sem entrar em outra tela. */}
-              <MenuLabel>Navegação das abas · deste dashboard</MenuLabel>
-              <MenuOption
-                checked={nav === 'abas'}
-                label="Abas visíveis"
-                onSelect={() => {
-                  onNav('abas')
-                  close()
-                }}
-              />
-              <MenuOption
-                checked={nav === 'lista'}
-                label="Lista suspensa"
-                onSelect={() => {
-                  onNav('lista')
-                  close()
-                }}
-              />
-              <p className="px-2 pt-1 pb-2" style={{ fontFamily: FONT, fontSize: 12, lineHeight: '16px', color: COLOR.textSecondary }}>
-                Com abas visíveis, as que não couberem na largura da tela vão para o botão "+N".
-              </p>
-            </div>
-          )}
-        </Dropdown>
+        {/* O "…" do web fica à vista, mas sem ação por enquanto: o menu
+            dele não faz parte do que o protótipo testa. */}
+        <span className="shrink-0 w-8 h-8 flex items-center justify-center" aria-hidden>
+          <Icon name="more_horiz" size={24} color={COLOR.navLabel} />
+        </span>
       </div>
     </div>
   )

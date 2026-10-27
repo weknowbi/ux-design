@@ -1,5 +1,3 @@
-import { useCallback, useSyncExternalStore } from 'react'
-
 /**
  * O dashboard de exemplo. Todo dashboard do portal abre este mesmo painel:
  * o protótipo existe para testar a barra inferior (a navegação entre abas),
@@ -145,58 +143,3 @@ export const DASH_TABS: DashTab[] = [
   ], { line: 'Ações concluídas por mês', donut: 'Situação das ações', hbar: 'Ações por unidade', bar: 'Ações abertas por mês' },
   ['No prazo', 'Em risco', 'Atrasada']),
 ]
-
-/**
- * Como as abas aparecem na barra inferior. É propriedade do dashboard, e
- * quem decide é quem desenvolve o painel, não quem o consome:
- *
- *   abas    todas à vista, como até a 5.1. As que não cabem na largura vão
- *           para o botão "+N". É o padrão, para os painéis antigos voltarem
- *           ao que eram sem ninguém precisar abrir um por um
- *   lista   o seletor com "1 de N" da 5.2, para painel com muitas abas
- *           que não seguem uma ordem
- */
-export type TabNav = 'abas' | 'lista'
-export const TAB_NAVS: TabNav[] = ['abas', 'lista']
-export const DEFAULT_TAB_NAV: TabNav = 'abas'
-
-/* Guardado por dashboard no navegador: no produto isto mora no cadastro do
-   painel. A escolha feita num dashboard não vaza para os outros. */
-const KEY = 'wk-portal-dash-nav'
-const listeners = new Set<() => void>()
-
-function readAll(): Record<string, TabNav> {
-  try {
-    const raw = JSON.parse(localStorage.getItem(KEY) || '{}')
-    return raw && typeof raw === 'object' ? raw : {}
-  } catch {
-    return {}
-  }
-}
-
-let cache = readAll()
-
-export function useTabNav(dashboardId: string): [TabNav, (v: TabNav) => void] {
-  const value = useSyncExternalStore(
-    (fn) => {
-      listeners.add(fn)
-      return () => {
-        listeners.delete(fn)
-      }
-    },
-    () => cache[dashboardId],
-  )
-  const set = useCallback(
-    (v: TabNav) => {
-      cache = { ...cache, [dashboardId]: v }
-      try {
-        localStorage.setItem(KEY, JSON.stringify(cache))
-      } catch {
-        /* sem armazenamento a escolha vale até recarregar */
-      }
-      listeners.forEach((fn) => fn())
-    },
-    [dashboardId],
-  )
-  return [TAB_NAVS.includes(value) ? value : DEFAULT_TAB_NAV, set]
-}

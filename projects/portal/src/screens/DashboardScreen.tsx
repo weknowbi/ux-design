@@ -10,7 +10,7 @@ import { useAppearances } from '@/components/browser/appearance'
 import type { PortalRoute } from '@/components/PortalSidebar'
 import { ChartView, KpiTile, Widget } from '@/components/dashboard/Charts'
 import { DashboardBar } from '@/components/dashboard/DashboardBar'
-import { DASH_TABS, useTabNav } from '@/data/dashboard'
+import { DASH_TABS } from '@/data/dashboard'
 import { CURRENT_USER } from '@/data/account'
 import { PORTAL_ROOT, flatten } from '@/data/portal'
 import { go } from '@/lib/router'
@@ -28,8 +28,7 @@ import { go } from '@/lib/router'
  *
  * Só a barra inferior é proposta; o resto copia o web para a barra ser
  * julgada no lugar onde vai morar. Todo dashboard abre o mesmo painel de
- * exemplo (`DASH_TABS`): muda o nome, e a navegação das abas, guardada por
- * dashboard.
+ * exemplo (`DASH_TABS`): só o nome muda.
  */
 const HEADER_H = 56
 const FILTER_H = 52
@@ -48,7 +47,6 @@ export function DashboardScreen({ dashboardId }: { dashboardId: string; onRoute:
   const customized = useAppearances()
   const entry = flatten(PORTAL_ROOT).find((e) => e.item.id === dashboardId && e.item.kind === 'dashboard')
   const [active, setActive] = useState(0)
-  const [nav, setNav] = useTabNav(dashboardId)
   const scrollRef = useRef<HTMLDivElement>(null)
 
   // Outro dashboard começa na primeira aba.
@@ -234,7 +232,7 @@ export function DashboardScreen({ dashboardId }: { dashboardId: string; onRoute:
       >
         {body}
       </div>
-      {entry && <DashboardBar tabs={DASH_TABS} active={active} onSelect={setActive} nav={nav} onNav={setNav} mobile={isMobile} />}
+      {entry && <DashboardBar tabs={DASH_TABS} active={active} onSelect={setActive} mobile={isMobile} />}
     </div>
   )
 }
