@@ -2,6 +2,7 @@ import { Fragment, useContext, useMemo, type ReactNode } from 'react'
 import { COLOR, FONT } from '@/design/tokens'
 import { PRESENTATIONS, TASKS, flatten, stats, type Entry, type Folder, type Item } from '@/data/portal'
 import { describeCounts, normalize } from '@/lib/format'
+import { go } from '@/lib/router'
 import { sortItems, type BrowserPrefs, type ViewMode } from '@/components/browser/prefs'
 import { FADE, HIDDEN } from '@/components/Hero'
 import { Icon } from '@/components/icons'
@@ -148,6 +149,8 @@ export function ContentBrowser({
 
   const open = (item: Item) => {
     if (item.kind === 'folder') onNavigate(item.id)
+    // Todo dashboard abre o mesmo painel de exemplo (ver `data/dashboard.ts`).
+    else if (item.kind === 'dashboard') go(`/dashboard/${encodeURIComponent(item.id)}`)
   }
 
   const asideControls = controls ? (

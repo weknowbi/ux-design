@@ -489,3 +489,23 @@ body {
 @media (hover: none) {
   * { -webkit-tap-highlight-color: transparent; }
 }
+
+/* ---------------------------------------------------------------------------
+   Gráficos do dashboard de exemplo: as três primeiras cores da paleta
+   categórica de referência. Validadas como conjunto nos dois temas, com o
+   passo escuro escolhido para a folha escura, e não um claro invertido.
+--------------------------------------------------------------------------- */
+:root {
+  --wk-viz-1: #2a78d6;
+  --wk-viz-2: #eb6834;
+  --wk-viz-3: #1baf7a;
+  --wk-viz-grid: #edf0f3;
+  --wk-viz-axis: #6b7280;
+}
+:root[data-theme='dark'] {
+  --wk-viz-1: #3987e5;
+  --wk-viz-2: #d95926;
+  --wk-viz-3: #199e70;
+  --wk-viz-grid: #26292e;
+  --wk-viz-axis: #9aa0a6;
+}

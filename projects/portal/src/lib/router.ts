@@ -12,15 +12,19 @@ import { useEffect, useState } from 'react'
  *   #/pasta/<id>             portal, dentro de uma pasta
  *   #/configuracoes          índice de configurações
  *   #/configuracoes/<id>     uma tela de configuração
+ *   #/dashboard/<id>         um dashboard aberto
  */
 
 export type Route =
   | { name: 'portal' }
   | { name: 'settings' }
   | { name: 'settings-page'; page: string }
+  | { name: 'dashboard'; id: string }
 
 export function parseRoute(hash: string): Route {
   const path = hash.replace(/^#/, '')
+  const dash = path.match(/^\/dashboard\/([^/]+)\/?$/)
+  if (dash) return { name: 'dashboard', id: decodeURIComponent(dash[1]) }
   const m = path.match(/^\/configuracoes(?:\/([^/]+))?\/?$/)
   if (!m) return { name: 'portal' }
   return m[1] ? { name: 'settings-page', page: decodeURIComponent(m[1]) } : { name: 'settings' }

@@ -1,6 +1,7 @@
 import { PortalScreen } from '@/screens/PortalScreen'
 import { SettingsScreen } from '@/screens/SettingsScreen'
 import { SettingsPageScreen } from '@/screens/SettingsPageScreen'
+import { DashboardScreen } from '@/screens/DashboardScreen'
 import { go, useRoute } from '@/lib/router'
 import type { PortalRoute } from '@/components/PortalSidebar'
 
@@ -24,6 +25,7 @@ export default function App() {
   }
 
   if (route.name === 'settings') return <SettingsScreen onRoute={onRoute} />
+  if (route.name === 'dashboard') return <DashboardScreen dashboardId={route.id} onRoute={onRoute} />
   if (route.name === 'settings-page') return <SettingsPageScreen pageId={route.page} onRoute={onRoute} />
   return <PortalScreen onRoute={onRoute} />
 }
