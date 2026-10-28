@@ -115,10 +115,13 @@ export function ContentBrowser({
   controls,
   controlsHidden,
   mobile = false,
+  revision,
   onNavigate,
   onToggleFavorite,
 }: {
   root: Folder
+  /** Muda quando o acervo ganha uma pasta: a raiz é a mesma, o conteúdo não. */
+  revision?: number
   path: Folder[]
   query: string
   favorites: Set<string>
@@ -136,7 +139,8 @@ export function ContentBrowser({
   onNavigate: (id: string | null) => void
   onToggleFavorite: (id: string) => void
 }) {
-  const all = useMemo(() => flatten(root), [root])
+  // `revision` entra na lista porque a pasta nova muda o que há dentro da raiz, não a raiz.
+  const all = useMemo(() => flatten(root), [root, revision])
   const q = normalize(query.trim())
   const current = path.length ? path[path.length - 1] : root
   /* No celular a visualização não é escolha: Expandido põe um card de 260px

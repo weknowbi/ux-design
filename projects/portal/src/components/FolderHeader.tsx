@@ -18,6 +18,11 @@ import { useEllipsisTooltip } from '@/components/Tooltip'
  * duas coisas são o nome da página, e em 24px o nome da pasta pesava mais que
  * a saudação, como se fosse outro nível.
  *
+ * Dentro de pasta, o ícone é o da própria pasta (`mark`, o quadrado do card
+ * com o ícone e a cor que o usuário escolheu) e o lápis de editar vem colado
+ * ao nome (`action`), não na ponta da linha: é a pasta que ele edita, e a
+ * ponta é dos controles da folha.
+ *
  * A seta e o ícone são opcionais porque nem toda tela está DENTRO de alguma
  * coisa. Numa que se abre pelo menu lateral, como o índice de configurações,
  * os dois juntos empurram o título 76px para dentro e ele deixa de se alinhar
@@ -28,6 +33,8 @@ export function FolderHeader({
   onBack,
   aside,
   icon = 'folder',
+  mark,
+  action,
   compact = false,
 }: {
   name: string
@@ -41,6 +48,10 @@ export function FolderHeader({
    * `null` tira o ícone, e com ele o recuo que ele impõe ao título.
    */
   icon?: string | null
+  /** Ícone pronto no lugar do glifo cinza: o da pasta aberta (ver FolderMark). */
+  mark?: ReactNode
+  /** Ação colada ao nome, depois dele: o lápis de editar a pasta. */
+  action?: ReactNode
   /**
    * Celular. Cai para 17px e larga o ícone de pasta: numa coluna de 375px os
    * 22px de título e os 28+12 do ícone deixavam o nome — que é o dado — com
@@ -69,18 +80,23 @@ export function FolderHeader({
           <Icon name="arrow_back" size={24} color={COLOR.navLabel} />
         </button>
       )}
-      {icon && !compact && (
-        <Icon name={icon} size={28} filled color={COLOR.navLabel} className="shrink-0" />
-      )}
-      <h2
-        ref={tip.ref}
-        className={`flex-1 min-w-0 truncate font-medium tracking-[-0.3px] ${
-          compact ? 'text-[17px] leading-[24px]' : 'text-[22px] leading-[30px]'
-        }`}
-        style={{ fontFamily: FONT, color: COLOR.text }}
-      >
-        {name}
-      </h2>
+      {!compact &&
+        (mark ?? (icon && <Icon name={icon} size={28} filled color={COLOR.navLabel} className="shrink-0" />))}
+      {/* O título não estica: é o que deixa o lápis encostado no fim do nome.
+          Quem ocupa a sobra é este bloco, e nome comprido ainda corta em
+          reticências antes de empurrar o lápis para fora. */}
+      <div className="flex-1 min-w-0 flex items-center gap-1">
+        <h2
+          ref={tip.ref}
+          className={`min-w-0 truncate font-medium tracking-[-0.3px] ${
+            compact ? 'text-[17px] leading-[24px]' : 'text-[22px] leading-[30px]'
+          }`}
+          style={{ fontFamily: FONT, color: COLOR.text }}
+        >
+          {name}
+        </h2>
+        {action}
+      </div>
       {aside}
       {tip.tooltip}
     </div>

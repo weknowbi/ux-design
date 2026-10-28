@@ -36,8 +36,18 @@ item, enquanto o quadrado leva a mesma cor diluída a 14% no claro e a 24% no
 escuro (`--wk-icon-tint`).
 
 A cor vem, nesta ordem, do que a pessoa personalizou, do tema cadastrado na
-pasta ou do padrão do tipo. Pasta nasce azul com `folder`, e dashboard nasce
-vermelho com `bar_chart`.
+pasta ou do padrão do tipo. Pasta nasce azul com `folder`.
+
+> **Vermelho é do dashboard, e só dele.**
+
+Dashboard é sempre vermelho (`DASHBOARD_COLOR`) com `bar_chart`, sem escolha
+de ícone nem de cor. A pasta escolhe entre `FOLDER_COLORS`, que é a paleta sem
+o vermelho e com oliva e café no lugar. Assim, tudo o que é vermelho na grade é
+dashboard, e dá para separar um do outro sem ler o nome.
+
+O ícone da pasta sai do catálogo inteiro do Material Symbols, com busca pelo
+nome do símbolo (em inglês). O catálogo mora em `iconNames.ts`, gerado por
+`scripts/build-icon-names.mjs`, e só é baixado quando o painel de ícones abre.
 
 Cor cheia no quadrado **e** no cartão colorido deixava a grade pesada. Com a
 caixa neutra, a cor aparece uma vez só, diluída atrás do glifo.

@@ -60,6 +60,7 @@ aconteceu porque eram dois arquivos e ninguém avisa quando só um muda.
 | `BrowserControls.tsx` | duas cópias idênticas |
 | `prefs.ts` | duas cópias idênticas; o tipo do acervo virou a forma mínima `Sortable` |
 | `appearance.ts` | duas cópias idênticas |
+| `iconNames.ts` | nasceu aqui: o catálogo do Material Symbols, gerado por `scripts/build-icon-names.mjs` |
 
 Nos apps, o caminho antigo de cada um virou uma linha de reexportação, para os
 `import` espalhados continuarem valendo sem um mutirão de busca e substituição.

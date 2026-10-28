@@ -12,6 +12,8 @@ import { BrowserControls } from '@/components/browser/BrowserControls'
 import {
   CardStyleContext,
   DashThumbContext,
+  FolderEditButton,
+  FolderMark,
   ICON_MODES,
   IconModeContext,
   ToastContext,
@@ -22,6 +24,9 @@ import {
 import { useAppearances } from '@/components/browser/appearance'
 import type { PortalRoute } from '@/components/PortalSidebar'
 import { PORTAL_ROOT, findFolderPath, initialFavorites, type Folder } from '@/data/portal'
+import { createFolder, useFolderRevision } from '@/data/newFolders'
+import { NewFolderButton } from '@/components/browser/NewFolderButton'
+import { PromptModal } from '@/components/PromptModal'
 
 /** Espec. do frame `home` (WP-832): conteúdo de 1159px centrado na coluna de 1617. */
 const CONTENT_WIDTH = 1159
@@ -40,6 +45,9 @@ const WIDE_MAX_WIDTH = 1760
  */
 type Layout = 'dinamico' | 'padrao' | 'compacto'
 const LAYOUTS: Layout[] = ['dinamico', 'padrao', 'compacto']
+
+/** O botão "Nova pasta" saiu da tela por enquanto; o resto do fluxo fica pronto. */
+const NEW_FOLDER = false
 
 /* A busca da barra de topo procura no acervo, de qualquer tela. */
 const SEARCH_PLACEHOLDER = 'Pesquise por nome ou tag'
@@ -104,6 +112,9 @@ export function PortalScreen({ onRoute }: { onRoute: (route: PortalRoute) => voi
   const [iconMode, setIconMode] = usePref<IconMode>('wk-portal-icones', ICON_MODES, 'definidos')
   const prefs = useBrowserPrefs()
   const [toast, setToast] = useState<{ text: string; at: number } | null>(null)
+  /** O modal de "Nova pasta" está aberto. */
+  const [creating, setCreating] = useState(false)
+  const folderRevision = useFolderRevision()
   const mainRef = useRef<HTMLElement>(null)
   const browserRef = useRef<HTMLDivElement>(null)
 
@@ -184,6 +195,14 @@ export function PortalScreen({ onRoute }: { onRoute: (route: PortalRoute) => voi
      lista os nomes completos.
      Na home não há caminho a mostrar — o breadcrumb só aparece depois que o
      usuário entra em alguma pasta. */
+  /* Dentro da pasta, o cabeçalho mostra o ícone que ela tem no card e o lápis
+     que abre o mesmo painel de editar do ⋮. A chave é a pasta: ao descer para
+     uma subpasta, o lápis não herda o rascunho da de cima. */
+  const folderHeaderParts = (f: Folder, compact = false) => ({
+    mark: <FolderMark item={f} />,
+    action: <FolderEditButton key={f.id} item={f} compact={compact} />,
+  })
+
   const toCrumb = (f: Folder): Crumb => ({ label: folderName(f), onClick: () => navigate(f.id) })
   const hidden = path.length > 1 ? path.slice(0, -1) : []
   const pathTrail: Crumb[] = path.length === 0 ? [] : [
@@ -242,7 +261,17 @@ export function PortalScreen({ onRoute }: { onRoute: (route: PortalRoute) => voi
      pasta. */
   const topbarSearch = { value: topQuery, onChange: onTopQuery, placeholder: SEARCH_PLACEHOLDER, hidden: heroAtRoot }
 
-  const controls = <BrowserControls prefs={prefs} mobile={isMobile} />
+  /* "Nova pasta" vem antes da ordem e da visualização, na home e dentro de
+     pasta, sempre no mesmo lugar. Fica fora de Tarefas e Apresentações, que
+     não têm pasta, e do resultado da busca, que não é lugar nenhum. Desligado
+     por enquanto (NEW_FOLDER): as pastas já criadas continuam aparecendo. */
+  const canCreate = NEW_FOLDER && section === 'pastas' && !results
+  const controls = (
+    <div className="flex items-center">
+      {canCreate && <NewFolderButton mobile={isMobile} onClick={() => setCreating(true)} />}
+      <BrowserControls prefs={prefs} mobile={isMobile} />
+    </div>
+  )
   const sheetPlaceholder = SECTION_PLACEHOLDER[section]
   const resultsHeader = (compact?: boolean) => (
     <FolderHeader name="Resultado da pesquisa" icon="search" aside={controls} compact={compact} />
@@ -250,10 +279,26 @@ export function PortalScreen({ onRoute }: { onRoute: (route: PortalRoute) => voi
 
   const showToast = useCallback((text: string) => setToast({ text, at: Date.now() }), [])
 
+  /* A pasta nova entra no fim da lista, que na home pode estar duas telas
+     abaixo. Sem levar a pessoa até ela, o "criada" do aviso não teria nada
+     para mostrar: a tela rola até a pasta e a contorna por um instante. */
+  const createIn = (name: string) => {
+    const id = createFolder(current?.id ?? null, name)
+    showToast(`Pasta "${name}" criada`)
+    requestAnimationFrame(() => {
+      const el = document.querySelector<HTMLElement>(`[data-item="${id}"]`)
+      if (!el) return
+      const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+      el.scrollIntoView({ block: 'center', behavior: still ? 'auto' : 'smooth' })
+      el.animate(
+        [{ boxShadow: '0 0 0 2px var(--wk-primary)' }, { boxShadow: '0 0 0 2px transparent' }],
+        { duration: still ? 0 : 2000, easing: 'ease-in', delay: still ? 0 : 300 },
+      )
+    })
+  }
+
   const browser = (
-    <ToastContext.Provider value={showToast}>
     <CardStyleContext.Provider value={cardStyle}>
-      <IconModeContext.Provider value={iconMode}>
       <DashThumbContext.Provider value={DASH_THUMB}>
         <ContentBrowser
           root={PORTAL_ROOT}
@@ -266,13 +311,12 @@ export function PortalScreen({ onRoute }: { onRoute: (route: PortalRoute) => voi
           controls={atRoot && !results ? controls : undefined}
           controlsHidden={dynamicHero && heroCollapsed}
           mobile={isMobile}
+          revision={folderRevision}
           onNavigate={navigate}
           onToggleFavorite={toggleFavorite}
         />
       </DashThumbContext.Provider>
-      </IconModeContext.Provider>
     </CardStyleContext.Provider>
-    </ToastContext.Provider>
   )
 
   const toastBox = (
@@ -322,6 +366,7 @@ export function PortalScreen({ onRoute }: { onRoute: (route: PortalRoute) => voi
                 onBack={() => navigate(path.length > 1 ? path[path.length - 2].id : null)}
                 aside={controls}
                 compact
+                {...folderHeaderParts(current, true)}
               />
             </div>
           )}
@@ -377,6 +422,7 @@ export function PortalScreen({ onRoute }: { onRoute: (route: PortalRoute) => voi
         <FolderHeader
           name={folderName(current)}
           onBack={() => navigate(path.length > 1 ? path[path.length - 2].id : null)}
+          {...folderHeaderParts(current)}
         />
       </div>
       <div ref={browserRef} className="mt-8 scroll-mt-24">
@@ -403,6 +449,7 @@ export function PortalScreen({ onRoute }: { onRoute: (route: PortalRoute) => voi
             name={folderName(current)}
             onBack={() => navigate(path.length > 1 ? path[path.length - 2].id : null)}
             aside={controls}
+            {...folderHeaderParts(current)}
           />
         </div>
       )}
@@ -423,9 +470,30 @@ export function PortalScreen({ onRoute }: { onRoute: (route: PortalRoute) => voi
       menuItems={iconModeMenuItems(iconMode, setIconMode)}
       search={topbarSearch}
       mainRef={mainRef}
-      overlay={toastBox}
+      overlay={
+        <>
+          {toastBox}
+          {creating && (
+            <PromptModal
+              title="Nova pasta"
+              label="Nome"
+              placeholder="Nome da pasta"
+              confirmLabel="Criar pasta"
+              onConfirm={createIn}
+              onClose={() => setCreating(false)}
+            />
+          )}
+        </>
+      }
     >
-      {isMobile ? mobileContent : desktopContent}
+      {/* Aviso e modo dos ícones valem para a tela toda, e não só para o
+          acervo: o cabeçalho da pasta também resolve o ícone dela e salva
+          pelo mesmo painel. */}
+      <ToastContext.Provider value={showToast}>
+        <IconModeContext.Provider value={iconMode}>
+          {isMobile ? mobileContent : desktopContent}
+        </IconModeContext.Provider>
+      </ToastContext.Provider>
     </AppShell>
   )
 }

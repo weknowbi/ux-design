@@ -16,7 +16,11 @@ export type Appearance = {
   image?: string | null
 }
 
-/** Ícones oferecidos: os temas que aparecem nas pastas dos clientes. */
+/**
+ * Ícones sugeridos: os temas que aparecem nas pastas dos clientes. São os que
+ * o painel mostra antes de a pessoa buscar; a busca vai no catálogo inteiro
+ * do Material Symbols (ver iconNames).
+ */
 export const APPEARANCE_ICONS = [
   'folder',
   'dashboard',
@@ -52,6 +56,24 @@ export const APPEARANCE_COLORS = [
   '#2f3542',
   '#0ea5e9',
   '#22a55b',
+]
+
+/**
+ * Vermelho é do dashboard, e só dele: é o que deixa ler o tipo do item pela
+ * cor, de relance, numa grade com pastas e dashboards misturados. Por isso a
+ * pasta não o oferece nem o aceita (ver FOLDER_COLORS).
+ */
+export const DASHBOARD_COLOR = '#d81b4a'
+
+/**
+ * Cores que a pasta pode ter: a paleta do card sem o vermelho, que é do
+ * dashboard, e com duas no lugar dele, oliva e café, de matiz bem longe do
+ * vermelho. As duas passam de 4,5:1 com o ícone branco por cima.
+ */
+export const FOLDER_COLORS = [
+  ...APPEARANCE_COLORS.filter((c) => c !== DASHBOARD_COLOR),
+  '#5d7d1f',
+  '#8d5b3c',
 ]
 
 const KEY = storageKey('wk-portal-appearance')
