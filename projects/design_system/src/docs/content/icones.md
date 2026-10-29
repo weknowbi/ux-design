@@ -18,6 +18,11 @@ O tamanho padrão é 24px e a cor padrão é `--wk-nav-label`.
    então não repita à mão em outro lugar.
 3. Os tamanhos em uso são 20 dentro de botão e de linha densa, 24 no padrão
    (menu, barra de topo, chip e campo) e 44 em miniatura vazia.
+   **A exceção é a coluna "Ações" de uma tabela**, como as de Tarefas e
+   Apresentações no portal: ali os botões são o conteúdo da coluna, e não um
+   atalho ao lado do nome, então o ícone fica nos 24 do padrão, numa caixa de
+   32 com 4 entre os botões. Quando essas ações se juntam num menu, como no ⋮
+   do celular, voltam aos 20 do item de menu.
 4. Ícone sozinho como botão precisa de `title` e de `aria-label`. Um ícone de
    casa não diz para onde ele leva.
 5. Ícone decorativo recebe `aria-hidden`, e o componente `Icon` já cuida disso.

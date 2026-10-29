@@ -266,12 +266,16 @@ export function PortalScreen({ onRoute }: { onRoute: (route: PortalRoute) => voi
      não têm pasta, e do resultado da busca, que não é lugar nenhum. Desligado
      por enquanto (NEW_FOLDER): as pastas já criadas continuam aparecendo. */
   const canCreate = NEW_FOLDER && section === 'pastas' && !results
-  const controls = (
-    <div className="flex items-center">
-      {canCreate && <NewFolderButton mobile={isMobile} onClick={() => setCreating(true)} />}
-      <BrowserControls prefs={prefs} mobile={isMobile} />
-    </div>
-  )
+  /* Ordem e visualização são do acervo de pastas. Tarefas e Apresentações
+     são uma tabela fixa no Weknow — sempre em lista, na ordem do código —,
+     então ali não há o que escolher e os controles saem. */
+  const controls =
+    section === 'pastas' || results ? (
+      <div className="flex items-center">
+        {canCreate && <NewFolderButton mobile={isMobile} onClick={() => setCreating(true)} />}
+        <BrowserControls prefs={prefs} mobile={isMobile} />
+      </div>
+    ) : undefined
   const sheetPlaceholder = SECTION_PLACEHOLDER[section]
   const resultsHeader = (compact?: boolean) => (
     <FolderHeader name="Resultado da pesquisa" icon="search" aside={controls} compact={compact} />

@@ -8,7 +8,7 @@ ficam as ações secundárias de um item: renomear, duplicar, excluir.
 | Painel | fundo `--wk-surface`, borda 1px `--wk-border`, raio 8, `--wk-shadow-menu`, padding 4 |
 | Largura | mínimo de 160; 180 quando o menu é de uma linha de lista |
 | Item | altura 36, raio 8, Inter 14, intervalo 8 |
-| Ícone | em `--wk-nav-label`, à esquerda do rótulo |
+| Ícone | em `--wk-nav-label`, à esquerda do rótulo; o nome de um símbolo, ou um SVG próprio de 20px em `currentColor` quando o símbolo não existe na biblioteca |
 | Hover | fundo `--wk-menu-hover` |
 | Separador | fio de 1px em `--wk-border`, com 4 de folga acima e abaixo |
 | Respiro | 4 entre o gatilho e o painel, 8 entre o painel e a borda |

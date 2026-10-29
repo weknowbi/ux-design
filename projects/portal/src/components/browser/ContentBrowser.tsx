@@ -173,10 +173,13 @@ export function ContentBrowser({
     const matches = q
       ? source.filter((item) => normalize(item.name).includes(q) || ('code' in item && item.code.includes(q)))
       : source
-    const entries: Listed[] = sortItems([...matches], prefs.sort, prefs.dir).map((item) => ({
-      item,
-      meta: 'code' in item ? item.code : undefined,
-    }))
+    // Sem controles de ordem aqui: a lista vem na ordem do código, como no Weknow.
+    const entries: Listed[] = [...matches]
+      .sort((a, b) => ('code' in a && 'code' in b ? a.code.localeCompare(b.code, 'pt-BR', { numeric: true }) : 0))
+      .map((item) => ({
+        item,
+        meta: 'code' in item ? item.code : undefined,
+      }))
     const list = entries.length ? (
       <ItemCollection
         entries={entries}

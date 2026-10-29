@@ -1,4 +1,15 @@
-import { createContext, Fragment, useContext, useEffect, useMemo, useRef, useState, type ReactNode, type RefObject } from 'react'
+import {
+  createContext,
+  Fragment,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type CSSProperties,
+  type ReactNode,
+  type RefObject,
+} from 'react'
 import { COLOR, FONT, RADIUS } from '@/design/tokens'
 import { Btn as Button } from '@ds/Btn'
 import { FormField, fieldBoxStyle, fieldTextStyle } from '@ds/Field'
@@ -229,6 +240,26 @@ const TRAIL_HEIGHT = 12
 const LIST_COLS =
   '[grid-template-columns:20px_minmax(0,1fr)_auto] lg:[grid-template-columns:20px_minmax(0,42fr)_minmax(0,18fr)_minmax(0,29fr)_minmax(92px,11fr)]'
 
+/**
+ * Tarefas e Apresentações: a tabela do Weknow, na mesma ordem de colunas.
+ *
+ *   Código   Descrição                                        Ações
+ *   ──────────────────────────────────────────────────────────────────
+ *   09       E-mail dashboard novidades                      [📄 ▶]
+ *
+ * Sem "Última alteração", que o Weknow não mostra aqui, e sem o ícone de
+ * tipo: ele seria o mesmo em toda linha, e ícone repetido numa lista é
+ * textura, não informação (regra 7 de Ícones no design system).
+ *
+ * O código vem primeiro e em largura fixa, porque é por ele que o cliente cita
+ * o item. A coluna de ações tem a largura dos botões (`--wk-row-actions`,
+ * dita pela coleção): com `auto`, o "Ações" do cabeçalho mediria menos que os
+ * botões das linhas e puxaria a coluna do nome para fora do lugar. Abaixo de
+ * md os botões viram um ⋮ de 40px (ver RowActions).
+ */
+const PLAIN_COLS =
+  '[grid-template-columns:48px_minmax(0,1fr)_40px] md:[grid-template-columns:88px_minmax(0,1fr)_var(--wk-row-actions)]'
+
 /** "13/08/2026 14:49" — os segundos do rodapé dos cadastros não ajudam a varrer a lista. */
 const MODIFIED_FORMAT = new Intl.DateTimeFormat('pt-BR', {
   day: '2-digit',
@@ -252,6 +283,19 @@ const HEAD_STYLE = {
 
 export type Columns = { name: string; meta: string }
 const DEFAULT_COLUMNS: Columns = { name: 'Nome', meta: 'Detalhes' }
+
+/** Cabeçalho da tabela de Tarefas e Apresentações (ver PLAIN_COLS). */
+function PlainHeader({ columns }: { columns: Columns }) {
+  return (
+    <div className={`grid items-center h-7 ${LIST_PAD} ${PLAIN_COLS}`}>
+      <span style={HEAD_STYLE}>{columns.meta}</span>
+      <span style={HEAD_STYLE}>{columns.name}</span>
+      <span className="text-right" style={HEAD_STYLE}>
+        Ações
+      </span>
+    </div>
+  )
+}
 
 function ListHeader({ columns, aside }: { columns: Columns; aside?: ReactNode }) {
   return (
@@ -308,36 +352,142 @@ function RowMenu({ item, favorite, onOpen, onToggleFavorite }: Omit<ItemProps, '
           </button>
         )}
       >
-        {(close) =>
-          item.kind === 'presentation' ? (
-            // As duas ações que a coluna "Ações" do Weknow oferece aqui.
-            <>
-              <MenuAction icon="link" label="Copiar link" onSelect={close} />
-              <MenuAction icon="file_export" label="Exportar" onSelect={close} />
-            </>
-          ) : (
-            <>
-              <MenuAction
-                icon={item.kind === 'folder' ? 'folder_open' : 'dashboard'}
-                label="Abrir"
-                onSelect={() => {
-                  close()
-                  onOpen(item)
-                }}
-              />
-              <MenuAction
-                icon="star"
-                label={favorite ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
-                onSelect={() => {
-                  close()
-                  onToggleFavorite(item.id)
-                }}
-              />
-            </>
-          )
-        }
+        {(close) => (
+          <>
+            <MenuAction
+              icon={item.kind === 'folder' ? 'folder_open' : 'dashboard'}
+              label="Abrir"
+              onSelect={() => {
+                close()
+                onOpen(item)
+              }}
+            />
+            <MenuAction
+              icon="star"
+              label={favorite ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
+              onSelect={() => {
+                close()
+                onToggleFavorite(item.id)
+              }}
+            />
+          </>
+        )}
       </Dropdown>
     </div>
+  )
+}
+
+/**
+ * "Abrir apresentação pública" do Weknow: a tela de play com o selo de pessoa
+ * no canto. Não existe nos Material Symbols, então vem o desenho de lá — já
+ * no traço fino do wght 200 —, herdando a cor de quem o usa.
+ */
+function PublicPresentationIcon({ size = 20 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" className="block">
+      <path d="M18 18C18.4167 18 18.7708 17.8542 19.0625 17.5625C19.3542 17.2708 19.5 16.9167 19.5 16.5C19.5 16.0833 19.3542 15.7292 19.0625 15.4375C18.7708 15.1458 18.4167 15 18 15C17.5833 15 17.2292 15.1458 16.9375 15.4375C16.6458 15.7292 16.5 16.0833 16.5 16.5C16.5 16.9167 16.6458 17.2708 16.9375 17.5625C17.2292 17.8542 17.5833 18 18 18ZM18 21C18.5038 21 18.9715 20.8823 19.403 20.647C19.8343 20.4118 20.1917 20.0859 20.475 19.6693C20.0955 19.4436 19.6974 19.2757 19.2807 19.1655C18.8641 19.0552 18.4372 19 18 19C17.5628 19 17.1359 19.0552 16.7193 19.1655C16.3026 19.2757 15.9045 19.4436 15.525 19.6693C15.8083 20.0859 16.1657 20.4118 16.597 20.647C17.0285 20.8823 17.4962 21 18 21ZM18 22C16.8858 22 15.9407 21.6118 15.1645 20.8355C14.3882 20.0593 14 19.1142 14 18C14 16.8858 14.3882 15.9407 15.1645 15.1645C15.9407 14.3882 16.8858 14 18 14C19.1142 14 20.0593 14.3882 20.8355 15.1645C21.6118 15.9407 22 16.8858 22 18C22 19.1142 21.6118 20.0593 20.8355 20.8355C20.0593 21.6118 19.1142 22 18 22Z" />
+      <path d="M18.3848 4C18.845 4.00006 19.2288 4.15462 19.5371 4.46289C19.8454 4.77116 19.9999 5.15502 20 5.61523V13.416C19.6825 13.2773 19.3478 13.1702 19 13.0996V5.61523C18.9999 5.46134 18.9357 5.32048 18.8076 5.19238C18.6795 5.06429 18.5387 5.00007 18.3848 5H5.61523C5.46134 5.00007 5.32048 5.06429 5.19238 5.19238C5.06429 5.32048 5.00007 5.46134 5 5.61523V18.3848C5.00007 18.5387 5.06429 18.6795 5.19238 18.8076C5.32048 18.9357 5.46134 18.9999 5.61523 19H13.1006C13.1712 19.3479 13.2782 19.6824 13.417 20H5.61523C5.15502 19.9999 4.77116 19.8454 4.46289 19.5371C4.15462 19.2288 4.00006 18.845 4 18.3848V5.61523C4.00006 5.15502 4.15462 4.77116 4.46289 4.46289C4.77116 4.15462 5.15502 4.00006 5.61523 4H18.3848ZM15.4619 12L9.88477 15.5771V8.42285L15.4619 12Z" />
+    </svg>
+  )
+}
+
+/**
+ * A coluna "Ações" do Weknow, botão a botão e na mesma ordem, com os mesmos
+ * desenhos — só que no peso e na cor de ícone do design system. `toast`: o
+ * aviso que o protótipo dá no lugar do que o Weknow faria de verdade; sem ele
+ * o botão só existe para mostrar onde a função mora.
+ */
+type RowAction = { label: string; icon: string | typeof PublicPresentationIcon; toast?: string }
+const ROW_ACTIONS: Partial<Record<Item['kind'], RowAction[]>> = {
+  task: [
+    { label: 'Exibir logs', icon: 'description' },
+    { label: 'Executar tarefa', icon: 'play_circle', toast: 'Tarefa enviada para execução' },
+  ],
+  presentation: [
+    { label: 'Abrir apresentação', icon: 'slideshow' },
+    { label: 'Abrir apresentação pública', icon: PublicPresentationIcon },
+    { label: 'Copiar link da apresentação pública', icon: 'link', toast: 'Link copiado' },
+    { label: 'Exportar', icon: 'file_export' },
+  ],
+}
+
+/**
+ * Ícone da ação. Na linha ele vem em 24, o tamanho padrão, e não nos 20 de
+ * linha densa: aqui os botões são o conteúdo da coluna, não um atalho ao lado
+ * do nome. No menu do celular fica nos 20 do item de menu.
+ */
+const ACTION_ICON = 24
+const actionIcon = (action: RowAction, size: number) =>
+  typeof action.icon === 'string' ? (
+    <Icon name={action.icon} size={size} color={COLOR.navLabel} />
+  ) : (
+    <action.icon size={size} />
+  )
+
+/** Caixa de 32px (o ícone de 24 com 4 de folga), 4px entre elas: a largura que a coluna de ações reserva. */
+const actionsWidth = (count: number) => `${count * 32 + (count - 1) * 4}px`
+
+/**
+ * Ações de tarefa e apresentação. Sempre à vista, como no Weknow: aqui elas
+ * são o que se faz com o item, não um atalho escondido no hover.
+ *
+ * No celular quatro botões de 40px tomariam metade da linha, e é o nome que
+ * se lê — ali eles se juntam num ⋮, com os mesmos ícones e rótulos.
+ */
+function RowActions({ item, actions }: { item: Item; actions: RowAction[] }) {
+  const toast = useContext(ToastContext)
+  const run = (action: RowAction) => action.toast && toast(action.toast)
+  return (
+    <>
+      <div className="hidden md:flex items-center justify-end gap-1">
+        {actions.map((action) => (
+          <button
+            key={action.label}
+            type="button"
+            onClick={() => run(action)}
+            aria-label={`${action.label}: ${item.name}`}
+            title={action.label}
+            className="wk-icon-btn flex items-center justify-center size-8"
+            style={{ color: COLOR.navLabel }}
+          >
+            {actionIcon(action, ACTION_ICON)}
+          </button>
+        ))}
+      </div>
+      <div className="md:hidden relative z-10 has-[[data-open]]:z-30 flex justify-end">
+        <Dropdown
+          minWidth={260}
+          trigger={({ open, toggle }) => (
+            <button
+              type="button"
+              onClick={toggle}
+              aria-haspopup="menu"
+              aria-expanded={open}
+              aria-label={`Ações de ${item.name}`}
+              title="Ações"
+              className="wk-icon-btn flex items-center justify-center size-10"
+              style={{ background: open ? 'var(--wk-icon-hover)' : undefined }}
+            >
+              <Icon name="more_vert" size={20} color={COLOR.navLabel} />
+            </button>
+          )}
+        >
+          {(close) =>
+            actions.map((action) => (
+              <MenuAction
+                key={action.label}
+                icon={actionIcon(action, 20)}
+                label={action.label}
+                onSelect={() => {
+                  close()
+                  run(action)
+                }}
+              />
+            ))
+          }
+        </Dropdown>
+      </div>
+    </>
   )
 }
 
@@ -359,10 +509,8 @@ function ItemRow({
       onPointerDown={tip.hide}
       onMouseLeave={tip.hide}
       /* 56px no celular contra 44 na mesa: é o piso de alvo de toque, e é o
-         que deixa o nome ocupar duas linhas mais o código sem apertar o texto
-         contra as bordas. Descrição de tarefa tem 40, 60 caracteres — numa
-         coluna de 375px, uma linha só cortaria quase todas no meio da
-         primeira palavra útil. */
+         que deixa o nome ocupar duas linhas mais o detalhe sem apertar o
+         texto contra as bordas. */
       className={`group relative grid items-center min-h-[56px] md:h-11 transition-colors hover:bg-[var(--wk-list-hover)] active:bg-[var(--wk-list-hover)] ${LIST_PAD} ${LIST_COLS}`}
     >
       <button type="button" onClick={() => onOpen(item)} aria-label={item.name} className={OVERLAY} />
@@ -375,12 +523,8 @@ function ItemRow({
         >
           {item.name}
         </span>
-        {/* Abaixo de lg a coluna do metadado não existe, e nela mora o código
-            que o cliente usa para citar a tarefa ou a apresentação — o dado
-            que ele lê para o telefone. Aqui ele desce para uma segunda linha
-            em vez de sumir, e leva junto o nome da coluna: sem o cabeçalho
-            para explicá-lo, um "03" solto embaixo do título não é dado
-            nenhum. */}
+        {/* Abaixo de lg a coluna do metadado não existe: ele desce para uma
+            segunda linha em vez de sumir, e leva junto o nome da coluna. */}
         {meta && (
           <span className="lg:hidden truncate text-[12px] leading-[16px] mt-0.5" style={CONTEXT_STYLE}>
             {metaLabel ? `${metaLabel} ${meta}` : meta}
@@ -396,15 +540,8 @@ function ItemRow({
       {/* Estrela e ⋮ agem sobre o item; o chevron só diz que a linha leva a
           outro nível. Por isso ele fica solto na ponta, e não colado neles. */}
       <div className="flex items-center justify-end">
-        {/* Tarefa e apresentação não entram em Favoritos no Weknow, então ali
-            a vaga da estrela fica vazia em vez de oferecer uma ação que não
-            existe. */}
-        {favoritable(item) && (
-          <FavoriteToggle item={item} favorite={favorite} onToggle={onToggleFavorite} size={20} />
-        )}
-        {(favoritable(item) || item.kind === 'presentation') && (
-          <RowMenu item={item} favorite={favorite} onOpen={onOpen} onToggleFavorite={onToggleFavorite} />
-        )}
+        <FavoriteToggle item={item} favorite={favorite} onToggle={onToggleFavorite} size={20} />
+        <RowMenu item={item} favorite={favorite} onOpen={onOpen} onToggleFavorite={onToggleFavorite} />
         {/* No celular o chevron sai: lá o toque na linha é a única forma de
             abrir, então ele não avisa nada que o dedo não saiba — e os 28px
             dele fazem falta no nome, que é o que se lê. */}
@@ -416,6 +553,42 @@ function ItemRow({
           <Icon name="chevron_right" size={20} color={COLOR.textMuted} />
         </span>
       </div>
+      {tip.tooltip}
+    </div>
+  )
+}
+
+/**
+ * Linha de tarefa ou apresentação: código, nome e as ações do Weknow (ver
+ * PLAIN_COLS). Não abre pela linha — o que se faz com o item está nos botões,
+ * e uma linha clicável que não leva a lugar nenhum prometeria o contrário.
+ */
+function PlainRow({ entry: { item, meta }, actions }: { entry: Listed; actions: RowAction[] }) {
+  const tip = useEllipsisTooltip(item.name)
+  return (
+    <div
+      role="listitem"
+      data-item={item.id}
+      onMouseEnter={tip.show}
+      onPointerDown={tip.hide}
+      onMouseLeave={tip.hide}
+      // 56px no celular: descrição de tarefa tem 40, 60 caracteres, e numa
+      // coluna de 375px uma linha só cortaria quase todas no meio.
+      className={`group relative grid items-center min-h-[56px] md:h-11 transition-colors hover:bg-[var(--wk-list-hover)] ${LIST_PAD} ${PLAIN_COLS}`}
+    >
+      {/* Primeira coluna em texto secundário: ela é o rótulo da linha (Tabela,
+          no design system). Algarismos tabulares para os códigos alinharem. */}
+      <span className="text-[13px] leading-[20px] tabular-nums" style={{ fontFamily: FONT, color: COLOR.textSecondary }}>
+        {meta}
+      </span>
+      <span
+        ref={tip.ref}
+        className="min-w-0 py-1.5 md:py-0 text-[14px] leading-[20px] line-clamp-2 md:truncate md:line-clamp-none"
+        style={NAME_STYLE}
+      >
+        {item.name}
+      </span>
+      <RowActions item={item} actions={actions} />
       {tip.tooltip}
     </div>
   )
@@ -1622,6 +1795,22 @@ export function ItemCollection({
       <div role="list" className="grid gap-3 md:gap-4" style={CARD_COLUMNS}>
         {entries.map((e) => (
           <ItemTile key={e.item.id} entry={e} favorite={favorites.has(e.item.id)} {...common} />
+        ))}
+      </div>
+    )
+  }
+
+  /* Tarefas e Apresentações são listas de um tipo só: o primeiro item diz
+     quantos botões a coluna de ações reserva, no cabeçalho e em toda linha. */
+  const actions = entries.length ? ROW_ACTIONS[entries[0].item.kind] : undefined
+  const actionsStyle = actions ? ({ '--wk-row-actions': actionsWidth(actions.length) } as CSSProperties) : undefined
+
+  if (actions) {
+    return (
+      <div role="list" className="flex flex-col -mx-3 divide-y divide-[var(--wk-row-divider)]" style={actionsStyle}>
+        {showHeader && <PlainHeader columns={columns} />}
+        {entries.map((e) => (
+          <PlainRow key={e.item.id} entry={e} actions={actions} />
         ))}
       </div>
     )

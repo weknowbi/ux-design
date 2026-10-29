@@ -219,10 +219,17 @@ export function MenuOption({ checked, label, onSelect }: { checked: boolean; lab
   )
 }
 
-export function MenuAction({ icon, label, onSelect }: { icon: string; label: string; onSelect: () => void }) {
+/** `icon`: nome do símbolo, ou um desenho próprio de 20px que herde currentColor. */
+export function MenuAction({ icon, label, onSelect }: { icon: ReactNode; label: string; onSelect: () => void }) {
   return (
     <button type="button" role="menuitem" onClick={onSelect} className={ITEM}>
-      <Icon name={icon} size={20} color={COLOR.navLabel} className="shrink-0" />
+      {typeof icon === 'string' ? (
+        <Icon name={icon} size={20} color={COLOR.navLabel} className="shrink-0" />
+      ) : (
+        <span className="shrink-0 flex" style={{ color: COLOR.navLabel }}>
+          {icon}
+        </span>
+      )}
       <span className="text-left text-[14px] whitespace-nowrap" style={{ fontFamily: FONT, color: COLOR.navText }}>
         {label}
       </span>
