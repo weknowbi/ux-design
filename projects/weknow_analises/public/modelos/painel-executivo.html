@@ -1,0 +1,1176 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Painel executivo · Weknow</title>
+<script>
+/* Tema antes de pintar: o da URL (quando o painel mora dentro do editor), senão
+   escuro. Dentro do editor (embed=1) o painel não repete a marca: o
+   cabeçalho do editor já diz qual dashboard é. */
+(function(){
+  var q=new URLSearchParams(location.search), t=q.get('theme');
+  var h=document.documentElement; h.dataset.theme = t==='light'?'light':'dark';
+  if(q.get('embed')) h.classList.add('embed');
+  var pad=parseInt(q.get('pad')||'0',10); if(pad>0) h.style.setProperty('--pad-b',pad+'px');
+})();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+/* As cores do painel ficam todas aqui. O padrão é o do Weknow: no escuro, os
+   cinzas neutros da interface (#131314, #1a1b1c) e séries contidas; um
+   cliente troca o tema mudando só estes tokens. */
+:root{
+  --bg:#131314; --card:#1A1B1C; --card-2:#202122; --card-hi:#27292A;
+  --line:rgba(255,255,255,.07); --line-2:rgba(255,255,255,.11); --line-3:rgba(255,255,255,.18);
+  --text:#EFF0F0; --text-2:#B0B2B5; --text-3:#8E9196;
+  --blue:#5A8FE6; --teal:#1E9F89; --orange:#C4842F; --violet:#8E78E0;
+  --bad:#E3AE6A; --prior:rgba(255,255,255,.18); --meta:#B0B2B5;
+  --radius:14px;
+  color-scheme:dark;
+}
+:root[data-theme="light"]{
+  --bg:#FFFFFF; --card:#FFFFFF; --card-2:#F7F8FA; --card-hi:#FFFFFF;
+  --line:rgba(15,23,42,.10); --line-2:rgba(15,23,42,.14); --line-3:rgba(15,23,42,.24);
+  --text:#101828; --text-2:#475467; --text-3:#5B6678;
+  --blue:#2F6FE0; --teal:#0E9F8D; --orange:#D9711A; --violet:#7059E8;
+  --bad:#B45309; --prior:rgba(15,23,42,.16); --meta:#667085;
+  color-scheme:light;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--bg);color:var(--text)}
+body{
+  font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;font-size:14px;line-height:1.45;
+  -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;min-height:100vh;
+  background:radial-gradient(1100px 420px at 12% -8%,rgba(76,141,255,.065),transparent 62%),var(--bg);
+}
+.num,td,.kpi-value{font-variant-numeric:tabular-nums}
+button{font:inherit;color:inherit}
+:focus-visible{outline:2px solid rgba(76,141,255,.7);outline-offset:2px;border-radius:8px}
+
+/* ---------- Top bar ----------
+   Sem fio embaixo: parada, a barra é o próprio fundo da página; ao rolar, o
+   conteúdo passa por trás de um fundo translúcido e desfocado, e é isso que
+   a separa. */
+.topbar{position:sticky;top:0;z-index:30;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;
+  padding:12px 28px;background:rgba(10,14,21,.72);backdrop-filter:saturate(140%) blur(16px);-webkit-backdrop-filter:saturate(140%) blur(16px)}
+.brand{display:flex;align-items:center;gap:12px;min-width:0}
+.logo{width:34px;height:34px;flex:none;border-radius:10px;border:1px solid var(--line-2);background:linear-gradient(180deg,#19222F,#10161F);display:grid;place-items:center}
+.brand-name{font-weight:600;font-size:14px;letter-spacing:-.01em;white-space:nowrap}
+.brand-sub{font-size:12px;color:var(--text-3);white-space:nowrap}
+.badge-fict{font-size:11px;font-weight:500;color:#F3B676;background:rgba(245,158,66,.07);border:1px solid rgba(245,158,66,.22);padding:3px 9px;border-radius:999px;white-space:nowrap}
+.controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.seg{display:inline-flex;background:var(--card-2);border:1px solid var(--line-2);border-radius:10px;padding:3px}
+.seg button{border:0;background:none;cursor:pointer;font-size:12.5px;font-weight:500;color:var(--text-2);padding:6px 12px;border-radius:7px;transition:background .15s,color .15s}
+.seg button:hover{color:var(--text)}
+.seg button[aria-pressed="true"]{background:#1C2636;color:var(--text);box-shadow:inset 0 0 0 1px rgba(255,255,255,.07)}
+.select{appearance:none;-webkit-appearance:none;background:var(--card-2) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%238A94A6' stroke-width='1.4' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat right 11px center;
+  border:1px solid var(--line-2);color:var(--text);font:inherit;font-size:12.5px;font-weight:500;padding:7px 32px 7px 12px;border-radius:10px;cursor:pointer;min-width:178px}
+.select:hover{border-color:var(--line-3)}
+.select option{background:#121923}
+.btn{display:inline-flex;align-items:center;gap:7px;cursor:pointer;background:var(--card-2);border:1px solid var(--line-2);color:var(--text);font-size:12.5px;font-weight:500;padding:7px 12px;border-radius:10px;transition:border-color .15s,background .15s}
+.btn:hover{border-color:var(--line-3);background:#141B26}
+.btn svg{opacity:.8}
+
+/* ---------- Layout ---------- */
+main{max-width:1440px;margin:0 auto;padding:26px 28px calc(40px + var(--pad-b,0px))}
+.context{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;margin-bottom:18px;flex-wrap:wrap}
+.eyebrow{font-size:11.5px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--text-3);margin-bottom:6px}
+h1{font-size:22px;font-weight:600;letter-spacing:-.022em}
+.ctx-sub{color:var(--text-2);font-size:13px;margin-top:4px}
+.ctx-sub b{color:var(--text);font-weight:500}
+.chips{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.chip{display:inline-flex;align-items:center;gap:8px;font-size:12px;color:var(--text);background:rgba(76,141,255,.08);border:1px solid rgba(76,141,255,.25);padding:4px 6px 4px 10px;border-radius:999px}
+.chip span{color:var(--text-2)}
+.chip button{border:0;cursor:pointer;background:rgba(255,255,255,.06);width:18px;height:18px;border-radius:50%;display:grid;place-items:center;color:var(--text-2);font-size:12px;line-height:1}
+.chip button:hover{background:rgba(255,255,255,.12);color:var(--text)}
+.status{font-size:12px;color:var(--text-3);display:flex;align-items:center;gap:7px}
+.status i{width:6px;height:6px;border-radius:50%;background:var(--teal);box-shadow:0 0 0 3px rgba(45,212,191,.12)}
+
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);position:relative;min-width:0}
+.card::before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;background:linear-gradient(180deg,rgba(255,255,255,.022),transparent 34%)}
+
+/* KPIs */
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;margin-bottom:16px}
+.kpi{padding:18px 18px 0;display:flex;flex-direction:column;overflow:hidden}
+.kpi-head{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.kpi-label{font-size:12.5px;color:var(--text-2);font-weight:500}
+.kpi-value{font-size:30px;font-weight:600;letter-spacing:-.03em;margin-top:10px;line-height:1.1;white-space:nowrap}
+.kpi-value small{font-size:14px;font-weight:500;color:var(--text-3);letter-spacing:0;margin-left:4px}
+.kpi-foot{font-size:12px;color:var(--text-3);margin-top:6px;min-height:18px}
+.kpi-foot b{color:var(--text-2);font-weight:500}
+.kpi-spark{height:46px;margin:10px -18px 0;position:relative}
+.delta{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:600;padding:2px 7px;border-radius:6px;white-space:nowrap}
+.delta.good{color:#5EE3CF;background:rgba(45,212,191,.09)}
+.delta.bad{color:#F7B26C;background:rgba(245,158,66,.10)}
+.delta.neutral{color:#C2C9D6;background:rgba(255,255,255,.06)}
+.delta.warn{color:#F7B26C;background:rgba(245,158,66,.10)}
+.delta.low{color:#B3A9FA;background:rgba(139,124,246,.11)}
+
+.grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:16px}
+.s4{grid-column:span 4}.s5{grid-column:span 5}.s7{grid-column:span 7}.s8{grid-column:span 8}.s12{grid-column:span 12}
+.card-h{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding:18px 20px 0;flex-wrap:wrap}
+.card-t{font-size:14px;font-weight:600;letter-spacing:-.01em}
+.card-d{font-size:12px;color:var(--text-3);margin-top:3px}
+.legend{display:flex;gap:14px;flex-wrap:wrap;align-items:center;font-size:12px;color:var(--text-2)}
+.legend span{display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.sw{width:8px;height:8px;border-radius:2px;display:inline-block}
+.sw.line{width:14px;height:0;border-top:2px solid;border-radius:0}
+.sw.dash{width:14px;height:0;border-top:1.5px dashed;border-radius:0}
+.chart-wrap{position:relative;height:290px;padding:14px 14px 14px 10px}
+.chart-wrap.sm{height:250px}
+.hint{font-size:11.5px;color:var(--text-3);padding:0 20px 16px;display:flex;gap:6px;align-items:center}
+.hint svg{flex:none;opacity:.7}
+
+/* Insights */
+.insights{display:flex;flex-direction:column}
+.ins-list{list-style:none;padding:10px 12px 12px;overflow:auto;max-height:340px;flex:1}
+.ins{padding:12px 10px;border-radius:10px;border-top:1px solid var(--line);transition:background .15s}
+.ins:first-child{border-top:0}
+.ins.clickable{cursor:pointer}
+.ins.clickable:hover{background:rgba(255,255,255,.025)}
+.ins-top{display:flex;align-items:center;gap:8px;margin-bottom:5px}
+.tag{font-size:10.5px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;padding:2px 7px;border-radius:5px}
+.tag.gargalo{color:#F7B26C;background:rgba(245,158,66,.10)}
+.tag.atencao{color:#B3A9FA;background:rgba(139,124,246,.12)}
+.tag.tendencia{color:#8DB5FF;background:rgba(76,141,255,.11)}
+.tag.concentracao{color:#5EE3CF;background:rgba(45,212,191,.09)}
+.tag.eficiencia{color:#5EE3CF;background:rgba(45,212,191,.09)}
+.tag.contexto{color:#B8C0CE;background:rgba(255,255,255,.06)}
+.ins-title{font-size:13px;font-weight:600;letter-spacing:-.005em}
+.ins-body{font-size:12.5px;color:var(--text-2);line-height:1.55}
+.ins-body strong{color:var(--text);font-weight:600}
+.ins-more{font-size:11.5px;color:#8DB5FF;margin-top:6px;display:inline-block}
+
+/* Payers */
+.payer-body{display:grid;grid-template-columns:170px 1fr;gap:18px;align-items:center;padding:18px 20px 20px}
+.donut{position:relative;height:170px;width:170px}
+.donut-c{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;text-align:center}
+.donut-c b{font-size:17px;font-weight:600;letter-spacing:-.02em}
+.donut-c span{font-size:11px;color:var(--text-3)}
+.plist{list-style:none;display:flex;flex-direction:column;gap:2px}
+.plist li{display:grid;grid-template-columns:10px 1fr auto;gap:10px;align-items:center;padding:8px 8px;border-radius:8px;cursor:pointer;transition:background .15s,opacity .15s}
+.plist li:hover{background:rgba(255,255,255,.03)}
+.plist li.dim{opacity:.38}
+.plist .pn{font-size:12.5px;color:var(--text)}
+.plist .pv{font-size:11.5px;color:var(--text-3)}
+.plist .ps{font-size:13px;font-weight:600;text-align:right}
+.plist .pd{font-size:11px;color:var(--text-3);text-align:right}
+
+/* Table */
+.table-wrap{overflow-x:auto;padding:8px 8px 6px}
+table{width:100%;border-collapse:collapse;min-width:900px}
+th{font-size:11.5px;font-weight:500;color:var(--text-3);text-align:right;padding:10px 12px;border-bottom:1px solid var(--line);white-space:nowrap;cursor:pointer;user-select:none}
+th:first-child,td:first-child{text-align:left}
+th:hover{color:var(--text-2)}
+th .ar{display:inline-block;width:10px;color:var(--blue)}
+td{padding:12px;text-align:right;border-bottom:1px solid var(--line);font-size:13px;white-space:nowrap}
+tbody tr{cursor:pointer;transition:background .12s,opacity .15s}
+tbody tr:hover{background:rgba(255,255,255,.025)}
+tbody tr.sel{background:rgba(76,141,255,.07)}
+tbody tr.sel td:first-child{box-shadow:inset 2px 0 0 var(--blue)}
+tbody tr.dim{opacity:.45}
+tfoot td{font-weight:600;border-bottom:0;color:var(--text);background:rgba(255,255,255,.015)}
+.sname{font-weight:500}
+.sub{display:block;font-size:11px;font-weight:500;margin-top:2px;color:var(--text-3)}
+.sub.good{color:#5EE3CF}.sub.bad{color:#F7B26C}.sub.neutral{color:#AEB6C4}
+.occ-cell{display:inline-flex;flex-direction:column;align-items:flex-end;gap:5px}
+.occ-bar{position:relative;width:96px;height:4px;border-radius:2px;background:rgba(255,255,255,.07)}
+.occ-bar i{position:absolute;left:0;top:0;bottom:0;border-radius:2px}
+.occ-bar b{position:absolute;top:-3px;width:1.5px;height:10px;background:rgba(231,235,242,.65)}
+.share{display:inline-flex;align-items:center;gap:8px}
+.share i{display:inline-block;height:4px;border-radius:2px;background:var(--blue);opacity:.7}
+
+/* Footer */
+.method{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:20px;padding:20px;margin-top:16px}
+.method h4{font-size:12px;font-weight:600;color:var(--text);margin-bottom:6px}
+.method p{font-size:12px;color:var(--text-3);line-height:1.55}
+.method code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11.5px;color:var(--text-2);background:rgba(255,255,255,.04);padding:1px 5px;border-radius:4px}
+.foot{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-size:11.5px;color:var(--text-3);margin-top:18px;padding:0 4px}
+
+/* Drawer */
+.scrim{position:fixed;inset:0;background:rgba(4,7,12,.55);opacity:0;pointer-events:none;transition:opacity .2s;z-index:40}
+.scrim.open{opacity:1;pointer-events:auto}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:min(480px,100vw);background:#0F151E;border-left:1px solid var(--line-2);z-index:41;transform:translateX(100%);transition:transform .25s cubic-bezier(.2,.8,.2,1);display:flex;flex-direction:column}
+.drawer.open{transform:none}
+.dr-h{padding:20px 22px 16px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.dr-h h3{font-size:17px;font-weight:600;letter-spacing:-.02em}
+.dr-x{border:1px solid var(--line-2);background:none;width:30px;height:30px;border-radius:8px;cursor:pointer;color:var(--text-2);display:grid;place-items:center}
+.dr-x:hover{color:var(--text);border-color:var(--line-3)}
+.dr-b{padding:18px 22px 28px;overflow:auto;flex:1}
+.dr-kpis{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:20px}
+.dr-k{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.dr-k span{font-size:11.5px;color:var(--text-3)}
+.dr-k b{display:block;font-size:18px;font-weight:600;letter-spacing:-.02em;margin-top:3px}
+.dr-k em{font-style:normal;font-size:11px;color:var(--text-3)}
+.dr-sec{font-size:11.5px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--text-3);margin:4px 0 8px}
+.dr-table{width:100%;border-collapse:collapse;min-width:0;margin-bottom:20px}
+.dr-table th{cursor:default;padding:8px 6px;font-size:11px}
+.dr-table td{padding:9px 6px;font-size:12.5px}
+.dr-table tr.sel td{color:#8DB5FF}
+.pbar{display:flex;height:8px;border-radius:4px;overflow:hidden;margin:6px 0 10px;gap:2px}
+.prow{display:flex;justify-content:space-between;font-size:12.5px;padding:6px 0;border-bottom:1px solid var(--line)}
+.prow span{display:flex;align-items:center;gap:8px;color:var(--text-2)}
+
+/* Responsive */
+@media (max-width:980px){
+  .kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .s8,.s4,.s7,.s5{grid-column:span 12}
+  .ins-list{max-height:none}
+  .method{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (max-width:720px){
+  .topbar{padding:12px 16px}
+  .brand-sub{display:none}
+  main{padding:18px 16px 32px}
+  .kpis{grid-template-columns:1fr;gap:12px}
+  .grid{gap:12px}
+  .controls{width:100%}
+  .seg{flex:1 1 100%}.seg button{flex:1;text-align:center;white-space:nowrap;padding:6px 8px}
+  .dd{flex:1;min-width:0}.select{min-width:0}
+  .chart-wrap{height:250px}
+  .payer-body{grid-template-columns:1fr;justify-items:center}
+  .plist{width:100%}
+  .method{grid-template-columns:1fr}
+  h1{font-size:19px}
+}
+/* Tema claro: as cores que o modelo fixou para o escuro */
+[data-theme="light"] body{background:var(--bg)}
+[data-theme="light"] .topbar{background:rgba(255,255,255,.76)}
+[data-theme="light"] .logo{background:#fff}
+[data-theme="light"] .badge-fict{color:#B45309;background:rgba(217,113,26,.08);border-color:rgba(217,113,26,.30)}
+[data-theme="light"] .seg button[aria-pressed="true"]{background:#fff;box-shadow:0 1px 2px rgba(16,24,40,.08),inset 0 0 0 1px rgba(15,23,42,.08)}
+[data-theme="light"] .select option{background:#fff}
+[data-theme="light"] .btn:hover{background:#fff}
+[data-theme="light"] .chip{background:rgba(47,111,224,.07);border-color:rgba(47,111,224,.28)}
+[data-theme="light"] .chip button{background:rgba(15,23,42,.06)}
+[data-theme="light"] .chip button:hover{background:rgba(15,23,42,.12)}
+[data-theme="light"] .card{box-shadow:0 1px 2px rgba(16,24,40,.05)}
+[data-theme="light"] .card::before{display:none}
+[data-theme="light"] .status i{box-shadow:0 0 0 3px rgba(14,159,141,.16)}
+[data-theme="light"] .delta.good,[data-theme="light"] .tag.concentracao,[data-theme="light"] .tag.eficiencia{color:#0B7A6C;background:rgba(14,159,141,.10)}
+[data-theme="light"] .delta.bad,[data-theme="light"] .delta.warn,[data-theme="light"] .tag.gargalo{color:#B45309;background:rgba(217,113,26,.10)}
+[data-theme="light"] .delta.neutral,[data-theme="light"] .tag.contexto{color:#475467;background:rgba(15,23,42,.05)}
+[data-theme="light"] .delta.low,[data-theme="light"] .tag.atencao{color:#5B45D6;background:rgba(112,89,232,.10)}
+[data-theme="light"] .tag.tendencia{color:#2557C7;background:rgba(47,111,224,.09)}
+[data-theme="light"] .ins-more,[data-theme="light"] .dr-table tr.sel td{color:#2557C7}
+[data-theme="light"] .ins.clickable:hover,[data-theme="light"] .plist li:hover,[data-theme="light"] tbody tr:hover{background:rgba(15,23,42,.03)}
+[data-theme="light"] tbody tr.sel{background:rgba(47,111,224,.07)}
+[data-theme="light"] tfoot td{background:rgba(15,23,42,.02)}
+[data-theme="light"] .sub.good{color:#0B7A6C}
+[data-theme="light"] .sub.bad{color:#B45309}
+[data-theme="light"] .sub.neutral{color:#475467}
+[data-theme="light"] .occ-bar{background:rgba(15,23,42,.08)}
+[data-theme="light"] .occ-bar b{background:rgba(16,24,40,.6)}
+[data-theme="light"] .method code{background:rgba(15,23,42,.05)}
+[data-theme="light"] .scrim{background:rgba(16,24,40,.35)}
+[data-theme="light"] .drawer{background:#fff}
+/* Escuro do Weknow: as cores que o modelo fixou em azul-marinho */
+[data-theme="dark"] body{background:var(--bg)}
+[data-theme="dark"] .topbar{background:rgba(19,19,20,.72)}
+[data-theme="dark"] .logo{background:var(--card-2)}
+[data-theme="dark"] .badge-fict{color:#E3AE6A;background:rgba(196,132,47,.10);border-color:rgba(196,132,47,.30)}
+[data-theme="dark"] .seg button[aria-pressed="true"]{background:#2D2E30;box-shadow:inset 0 0 0 1px rgba(255,255,255,.06)}
+[data-theme="dark"] .select option{background:#1A1B1C}
+[data-theme="dark"] .btn:hover{background:#27292A}
+[data-theme="dark"] .chip{background:rgba(138,180,248,.08);border-color:rgba(138,180,248,.24)}
+[data-theme="dark"] .card::before{display:none}
+[data-theme="dark"] .status i{background:var(--teal);box-shadow:0 0 0 3px rgba(30,159,137,.18)}
+[data-theme="dark"] .delta.good,[data-theme="dark"] .tag.concentracao,[data-theme="dark"] .tag.eficiencia{color:#7FD3C3;background:rgba(30,159,137,.14)}
+[data-theme="dark"] .delta.bad,[data-theme="dark"] .delta.warn,[data-theme="dark"] .tag.gargalo{color:#E3AE6A;background:rgba(196,132,47,.14)}
+[data-theme="dark"] .delta.neutral,[data-theme="dark"] .tag.contexto{color:#C4C7C5;background:rgba(255,255,255,.06)}
+[data-theme="dark"] .delta.low,[data-theme="dark"] .tag.atencao{color:#B4A7F2;background:rgba(142,120,224,.16)}
+[data-theme="dark"] .tag.tendencia{color:#8AB4F8;background:rgba(138,180,248,.12)}
+[data-theme="dark"] .ins-more,[data-theme="dark"] .dr-table tr.sel td{color:#8AB4F8}
+[data-theme="dark"] tbody tr.sel{background:rgba(138,180,248,.08)}
+[data-theme="dark"] tbody tr.sel td:first-child{box-shadow:inset 2px 0 0 #8AB4F8}
+[data-theme="dark"] .sub.good{color:#7FD3C3}
+[data-theme="dark"] .sub.bad{color:#E3AE6A}
+[data-theme="dark"] .sub.neutral{color:#B0B2B5}
+[data-theme="dark"] .scrim{background:rgba(0,0,0,.5)}
+[data-theme="dark"] .drawer{background:#1A1B1C}
+[data-theme="dark"] :focus-visible{outline-color:rgba(138,180,248,.8)}
+/* Dentro do editor: sem a marca, os controles à direita */
+.embed .brand{display:none}
+.embed .topbar{justify-content:flex-end;padding-top:10px;padding-bottom:10px}
+/* Controles no padrão do design system do Weknow: botão pequeno (32, raio 6,
+   texto 13 no peso 400), ações como botão fantasma, seletor como campo (borda
+   do campo, raio 6) e o período com o "ativo" do menu (véu e texto primários). */
+:root{--fld:#37393D;--ghost-h:#26282A;--act-bg:rgba(138,180,248,.12);--act-fg:#8AB4F8;--ico:#B0B2B5}
+:root[data-theme="light"]{--fld:#CED4DA;--ghost-h:#EEF3FB;--act-bg:#E4E9F1;--act-fg:#3366CC;--ico:#8C98A8}
+.seg,.select,.btn{height:32px;border-radius:6px;font-size:13px;font-weight:400}
+.seg{padding:2px;border-color:var(--fld);background:transparent}
+.seg button{font-size:13px;font-weight:400;padding:0 12px;border-radius:4px;height:26px}
+.seg button[aria-pressed="true"],[data-theme] .seg button[aria-pressed="true"]{background:var(--act-bg);color:var(--act-fg);box-shadow:none}
+.select{border-color:var(--fld);background-color:transparent;padding:0 32px 0 12px}
+.select:hover{border-color:var(--line-3)}
+/* O seletor do corte é um campo de seleção do design system, e não o
+   <select> nativo: a lista do navegador (azul do sistema, sem raio, sem
+   sombra) não segue o padrão. Painel de raio 6 com sombra de menu, opções
+   de 36 com o hover do menu, e a escolhida na primária com o check à direita. */
+:root{--menu-bg:var(--card-2);--menu-hover:rgba(138,180,248,.08);--menu-shadow:0 8px 24px rgba(0,0,0,.5)}
+:root[data-theme="light"]{--menu-bg:#fff;--menu-hover:#F1F5F9;--menu-shadow:0 3px 10px rgba(15,23,42,.1)}
+.dd{position:relative;display:flex}
+.dd .select{display:inline-flex;align-items:center;text-align:left;cursor:pointer;width:100%}
+.dd .select[aria-expanded="true"]{border-color:var(--act-fg)}
+.dd-menu{position:absolute;top:calc(100% + 4px);left:0;min-width:100%;max-height:min(332px,70vh);overflow-y:auto;z-index:40;
+  background:var(--menu-bg);border:1px solid var(--line-2);border-radius:6px;box-shadow:var(--menu-shadow);padding:4px;outline:none}
+.dd-opt{display:flex;align-items:center;gap:8px;height:36px;padding:0 12px;border-radius:6px;cursor:pointer;font-size:14px;color:var(--text);white-space:nowrap;user-select:none}
+.dd-opt.active{background:var(--menu-hover)}
+.dd-opt[aria-selected="true"]{color:var(--act-fg)}
+.dd-opt svg{margin-left:auto;flex:none}
+.btn,[data-theme] .btn{background:transparent;border-color:transparent;color:var(--text-2);padding:0 12px;gap:6px}
+.btn:hover,[data-theme] .btn:hover{background:var(--ghost-h);border-color:transparent}
+.btn svg{color:var(--ico);opacity:1}
+/* Rolagem fina, da cor do fio */
+html,*{scrollbar-width:thin;scrollbar-color:var(--line-3) transparent}
+/* Ajustes de visual pedidos pela conversa (ver "Visual" no script). Cantos:
+   só o cartão muda; as pontas das barras ficam em 4, que é a marca do dado. */
+:root[data-corners="soft"]{--radius:8px}
+:root[data-corners="square"]{--radius:4px}
+/* Compacta: o mesmo painel com menos respiro, para caber mais sem rolar. */
+:root[data-density="compact"] main{padding-top:14px;padding-left:20px;padding-right:20px}
+[data-density="compact"] .context{margin-bottom:12px}
+[data-density="compact"] .context h1{font-size:20px}
+[data-density="compact"] .kpis{gap:10px;margin-bottom:10px}
+[data-density="compact"] .grid{gap:10px}
+[data-density="compact"] .kpi{padding:14px 14px 0}
+[data-density="compact"] .kpi-value{font-size:26px;margin-top:6px}
+[data-density="compact"] .kpi-spark{height:36px;margin:6px -14px 0}
+[data-density="compact"] .card-h{padding:14px 16px 0}
+[data-density="compact"] .chart-wrap{height:228px;padding:10px 12px 10px 8px}
+[data-density="compact"] .hint{padding:0 16px 12px}
+[data-density="compact"] .ins-list{max-height:268px;padding:6px 8px 8px}
+[data-density="compact"] .ins{padding:9px 8px}
+[data-density="compact"] .payer-body{padding:14px 16px 16px;grid-template-columns:150px 1fr}
+[data-density="compact"] .donut{height:150px;width:150px}
+[data-density="compact"] td{padding:9px 12px}
+[data-density="compact"] .method{margin-top:10px;padding:16px;gap:16px}
+.no-sparks .kpi-spark{display:none}
+.no-sparks .kpi{padding-bottom:16px}
+[hidden]{display:none!important}
+/* Antes da base chegar */
+.wait{padding:80px 28px;text-align:center;color:var(--text-3);font-size:13px}
+body:not(.ready) main,body:not(.ready) .controls{display:none}
+body.ready .wait{display:none}
+.theme-ico{display:block}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <div class="logo" aria-hidden="true">
+      <svg width="18" height="18" viewBox="0 0 24 24"><path d="M4 5.5 12 19 20 5.5" fill="none" stroke="var(--blue)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="19" r="2.1" fill="var(--teal)"/></svg>
+    </div>
+    <div>
+      <div class="brand-name" id="brandName">Painel executivo</div>
+      <div class="brand-sub" id="brandSub"></div>
+    </div>
+    <span class="badge-fict" title="Todos os números deste painel são simulados e não representam nenhuma instituição real.">Dados fictícios</span>
+  </div>
+  <div class="controls">
+    <div class="seg" role="group" aria-label="Período">
+      <button data-period="6m" aria-pressed="false">6 meses</button>
+      <button data-period="12m" aria-pressed="true">12 meses</button>
+      <button data-period="all" aria-pressed="false">Período completo</button>
+    </div>
+    <div class="dd">
+      <button class="select" id="filter" type="button" aria-haspopup="listbox" aria-expanded="false" aria-controls="filterMenu"></button>
+      <div class="dd-menu" id="filterMenu" role="listbox" tabindex="-1" hidden></div>
+    </div>
+    <button class="btn" id="exportBtn" title="Exportar dados agregados do recorte atual">
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M8 2v8m0 0 3-3m-3 3L5 7M3 12.5h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Exportar CSV
+    </button>
+    <button class="btn" id="themeBtn" type="button" aria-pressed="false">
+      <svg class="theme-ico" id="themeIco" width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true"></svg>
+      <span id="themeLbl">Tema claro</span>
+    </button>
+  </div>
+</header>
+
+<div class="wait" id="wait">Carregando o painel…</div>
+
+<main>
+  <section class="context">
+    <div>
+      <div class="eyebrow" id="eyebrow">Painel executivo</div>
+      <h1 id="title">Visão consolidada</h1>
+      <div class="ctx-sub" id="periodLabel"></div>
+    </div>
+    <div class="chips" id="chips"></div>
+  </section>
+
+  <section class="kpis">
+    <article class="card kpi"><div class="kpi-head"><span class="kpi-label" id="k0-l"></span><span id="k0-d"></span></div><div class="kpi-value" id="k0"></div><div class="kpi-foot" id="k0-f"></div><div class="kpi-spark"><canvas id="sp0"></canvas></div></article>
+    <article class="card kpi"><div class="kpi-head"><span class="kpi-label" id="k1-l"></span><span id="k1-d"></span></div><div class="kpi-value" id="k1"></div><div class="kpi-foot" id="k1-f"></div><div class="kpi-spark"><canvas id="sp1"></canvas></div></article>
+    <article class="card kpi"><div class="kpi-head"><span class="kpi-label" id="k2-l"></span><span id="k2-d"></span></div><div class="kpi-value" id="k2"></div><div class="kpi-foot" id="k2-f"></div><div class="kpi-spark"><canvas id="sp2"></canvas></div></article>
+    <article class="card kpi"><div class="kpi-head"><span class="kpi-label" id="k3-l"></span><span id="k3-d"></span></div><div class="kpi-value" id="k3"></div><div class="kpi-foot" id="k3-f"></div><div class="kpi-spark"><canvas id="sp3"></canvas></div></article>
+  </section>
+
+  <section class="grid">
+    <article class="card s8" data-sec="trend">
+      <div class="card-h">
+        <div><div class="card-t" id="t-trend"></div><div class="card-d" id="d-trend"></div></div>
+        <div class="legend"><span><i class="sw line" style="border-color:var(--blue)"></i>Período</span><span><i class="sw dash" style="border-color:var(--teal)"></i>Mesmo mês, ano anterior</span></div>
+      </div>
+      <div class="chart-wrap"><canvas id="c-trend"></canvas></div>
+      <div class="hint"><svg width="12" height="12" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6.5" stroke="currentColor"/><path d="M8 7v4M8 5h.01" stroke="currentColor" stroke-linecap="round"/></svg><span id="h-trend"></span></div>
+    </article>
+
+    <article class="card s4 insights" data-sec="insights">
+      <div class="card-h">
+        <div><div class="card-t">Insights do recorte</div><div class="card-d" id="ins-sub">Gerados a partir dos dados filtrados</div></div>
+      </div>
+      <ul class="ins-list" id="insights"></ul>
+    </article>
+
+    <article class="card s7" data-sec="volume">
+      <div class="card-h">
+        <div><div class="card-t" id="t-vol"></div><div class="card-d" id="d-vol"></div></div>
+        <div class="legend"><span><i class="sw" style="background:var(--blue)"></i>Mês</span><span><i class="sw" style="background:var(--orange)"></i>Acima da média +5%</span><span><i class="sw dash" style="border-color:var(--meta)"></i>Média do período</span></div>
+      </div>
+      <div class="chart-wrap"><canvas id="c-vol"></canvas></div>
+    </article>
+
+    <article class="card s5" data-sec="rate">
+      <div class="card-h">
+        <div><div class="card-t" id="t-main"></div><div class="card-d" id="d-main"></div></div>
+        <div class="legend"><span><i class="sw" style="background:var(--blue)"></i>Atual</span><span><i class="sw" style="background:var(--prior)"></i>Anterior</span></div>
+      </div>
+      <div class="chart-wrap"><canvas id="c-main"></canvas></div>
+      <div class="hint"><svg width="12" height="12" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6.5" stroke="currentColor"/><path d="M8 7v4M8 5h.01" stroke="currentColor" stroke-linecap="round"/></svg><span id="h-main"></span></div>
+    </article>
+
+    <article class="card s8" data-sec="stack">
+      <div class="card-h">
+        <div><div class="card-t" id="t-stack"></div><div class="card-d" id="d-stack"></div></div>
+        <div class="legend" id="lg-stack"></div>
+      </div>
+      <div class="chart-wrap"><canvas id="c-stack"></canvas></div>
+    </article>
+
+    <article class="card s4" data-sec="split">
+      <div class="card-h">
+        <div><div class="card-t" id="t-split"></div><div class="card-d">Participação no período · clique para destacar</div></div>
+      </div>
+      <div class="payer-body">
+        <div class="donut"><canvas id="c-split"></canvas><div class="donut-c"><b id="donutVal"></b><span id="donutLbl"></span></div></div>
+        <ul class="plist" id="plist"></ul>
+      </div>
+    </article>
+
+    <article class="card s12" data-sec="table">
+      <div class="card-h">
+        <div><div class="card-t" id="t-tbl"></div><div class="card-d">Período selecionado vs. período anterior equivalente · clique na linha para filtrar, no cabeçalho para ordenar</div></div>
+      </div>
+      <div class="table-wrap">
+        <table id="tbl"><thead><tr id="thead"></tr></thead><tbody></tbody><tfoot></tfoot></table>
+      </div>
+    </article>
+  </section>
+
+  <section class="card method" id="method"></section>
+  <div class="foot"><span id="footL"></span><span id="footR"></span></div>
+</main>
+
+<div class="scrim" id="scrim"></div>
+<aside class="drawer" id="drawer" aria-hidden="true" aria-labelledby="drTitle">
+  <div class="dr-h">
+    <div><div class="eyebrow" style="margin-bottom:4px">Detalhamento mensal</div><h3 id="drTitle"></h3></div>
+    <button class="dr-x" id="drClose" aria-label="Fechar">✕</button>
+  </div>
+  <div class="dr-b" id="drBody"></div>
+</aside>
+
+<script>
+(function(){
+'use strict';
+
+/* =========================================================
+   O desenho é o do modelo de referência; os números vêm do metadado.
+   O editor manda a base agregada (mês × parte × grupo) e a descrição das
+   medidas; daqui para baixo tudo é conta sobre ela, como no modelo.
+   ========================================================= */
+
+/* ---- Formatação (pt-BR) ---- */
+const NF0 = new Intl.NumberFormat('pt-BR',{maximumFractionDigits:0});
+const NF1 = new Intl.NumberFormat('pt-BR',{minimumFractionDigits:1,maximumFractionDigits:1});
+const NF2 = new Intl.NumberFormat('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+const BRL = new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL',maximumFractionDigits:0});
+const MINUS = '−';
+const f0 = v => NF0.format(v), f1 = v => NF1.format(v), f2 = v => NF2.format(v);
+const brl = v => BRL.format(Math.round(v));
+function brlC(v){
+  const a=Math.abs(v);
+  if(a>=1e9) return 'R$ '+f2(v/1e9)+' bi';
+  if(a>=1e6) return 'R$ '+f1(v/1e6)+' mi';
+  if(a>=1e3) return 'R$ '+f0(v/1e3)+' mil';
+  return brl(v);
+}
+const sgn = (v,fn=f1) => (v>0.0001?'+':v<-0.0001?MINUS:'')+fn(Math.abs(v));
+const pct = (a,b) => b ? (a/b-1)*100 : 0;
+function hexA(hex,a){const n=parseInt(hex.slice(1),16);return `rgba(${n>>16&255},${n>>8&255},${n&255},${a})`;}
+const esc = s => String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+/* ---- Cores por tema ---- */
+const THEMES = {
+  /* O escuro do Weknow: os cinzas neutros da interface e séries contidas. */
+  dark:{blue:'#5A8FE6',teal:'#1E9F89',orange:'#C4842F',violet:'#8E78E0',gray:'#7D8085',text:'#EFF0F0',text2:'#B0B2B5',text3:'#8E9196',
+    grid:'rgba(255,255,255,0.06)',ttBg:'rgba(32,33,34,0.98)',ttBorder:'rgba(255,255,255,0.10)',ttBody:'#D3D4D5',
+    prior:'rgba(255,255,255,.14)',meta:'rgba(211,212,213,.55)',card:'#1A1B1C',bg:'#131314'},
+  light:{blue:'#2F6FE0',teal:'#0E9F8D',orange:'#D9711A',violet:'#7059E8',gray:'#98A2B3',text:'#101828',text2:'#475467',text3:'#5B6678',
+    grid:'rgba(15,23,42,0.07)',ttBg:'rgba(255,255,255,0.98)',ttBorder:'rgba(15,23,42,0.12)',ttBody:'#344054',
+    prior:'rgba(15,23,42,.14)',meta:'rgba(52,64,84,.55)',card:'#FFFFFF',bg:'#FFFFFF'},
+};
+const $ = id => document.getElementById(id);
+let theme = document.documentElement.dataset.theme==='light' ? 'light' : 'dark';
+const C = {...THEMES[theme]};
+
+/* ---- Visual ----
+   O que a conversa ajusta além do tema. As cores são papéis: blue é a
+   principal (a razão, o volume, as barras), teal a de comparação (o ano
+   anterior), e violet e orange fecham a composição; orange também marca o mês
+   acima da média. Cada paleta só reordena os quatro tons do tema, numa ordem
+   em que vizinhos se distinguem também com daltonismo (conferido com o
+   validador do dataviz, nos dois temas). A cor própria troca só a principal. */
+const PALETTES = { blue:['blue','teal','violet','orange'], green:['teal','blue','orange','violet'], violet:['violet','teal','blue','orange'] };
+const LOOK0 = { palette:'blue', accent:null, density:'comfortable', corners:'round', lines:'smooth', hidden:[] };
+const SECTIONS = ['insights','volume','rate','composition','table','notes','sparks'];
+const look = {...LOOK0, hidden:[]};
+const tension = () => look.lines==='straight' ? 0 : .35;
+function applyColors(){
+  const base=THEMES[theme], order=PALETTES[look.palette]||PALETTES.blue;
+  ['blue','teal','violet','orange'].forEach((role,k)=>{ C[role]=base[order[k]]; });
+  if(look.accent) C.blue=look.accent;
+  const st=document.documentElement.style;
+  ['blue','teal','violet','orange'].forEach(role=>st.setProperty('--'+role,C[role]));
+}
+/* Devolve se as cores ou as linhas mudaram: aí os gráficos se refazem. */
+function applyLook(s){
+  const before=look.palette+look.accent+look.lines;
+  if(PALETTES[s.palette]) look.palette=s.palette;
+  if(s.accent===null || /^#[0-9a-f]{6}$/i.test(s.accent||'')) look.accent=s.accent===undefined?look.accent:s.accent;
+  if(['comfortable','compact'].includes(s.density)) look.density=s.density;
+  if(['round','soft','square'].includes(s.corners)) look.corners=s.corners;
+  if(['smooth','straight'].includes(s.lines)) look.lines=s.lines;
+  if(Array.isArray(s.hidden)) look.hidden=s.hidden.filter(x=>SECTIONS.includes(x));
+  const h=document.documentElement;
+  h.dataset.density=look.density; h.dataset.corners=look.corners;
+  layout();
+  return before!==look.palette+look.accent+look.lines;
+}
+/* Esconder uma seção: a vizinha de linha fica com a largura toda. */
+function layout(){
+  const H=new Set(look.hidden), q=n=>document.querySelector(`[data-sec="${n}"]`);
+  const put=(n,on,span)=>{ const el=q(n); el.hidden=!on; el.classList.remove('s4','s5','s7','s8','s12'); el.classList.add('s'+span); };
+  put('trend',true,H.has('insights')?12:8);
+  put('insights',!H.has('insights'),4);
+  put('volume',!H.has('volume'),H.has('rate')?12:7);
+  put('rate',!H.has('rate'),H.has('volume')?12:5);
+  put('stack',!H.has('composition'),8);
+  put('split',!H.has('composition'),4);
+  put('table',!H.has('table'),12);
+  $('method').hidden=H.has('notes');
+  document.documentElement.classList.toggle('no-sparks',H.has('sparks'));
+}
+const splitColor = (g,i) => g==='Outros' ? C.gray : [C.blue,C.teal,C.violet,C.orange][i%4];
+
+/* ---- Base e estado ---- */
+let S=null, M=[], LAST=0, BY=[];
+const state={period:'12m',filter:'all',highlight:null,sort:{k:'d',dir:-1}};
+const embedded = window.parent !== window;
+const range=(a,b)=>{const r=[];for(let i=a;i<=b;i++)r.push(i);return r;};
+
+function load(spec){
+  S=spec; M=spec.months; LAST=M.length-1;
+  BY=M.map(()=>[]); for(const c of S.cells) BY[c[0]].push(c);
+  $('brandName').textContent = `${S.code} - ${S.name}`;
+  $('brandSub').textContent = `Metadado do Weknow · ${S.group}`;
+  $('eyebrow').textContent = `Painel executivo · ${S.name}`;
+  $('filter').setAttribute('aria-label', `Filtrar por ${S.main.label.toLowerCase()}`);
+  $('filterMenu').setAttribute('aria-label', `Filtrar por ${S.main.label.toLowerCase()}`);
+  $('method').innerHTML = S.method.map(m=>`<div><h4>${esc(m.h)}</h4><p>${esc(m.p)}</p></div>`).join('');
+  $('footL').textContent = `Dados fictícios do metadado ${S.code} - ${S.name}, ${M[0].label} – ${M[LAST].label}.`;
+  $('footR').textContent = `Base fechada em ${M[LAST].long.toLowerCase()}`;
+}
+
+const rateOf = (n,d) => d ? (S.rate.kind==='pct' ? n/d*100 : n/d) : 0;
+const selIdx = () => state.filter==='all' ? -1 : S.main.values.indexOf(state.filter);
+function agg(idxs, main = selIdx()){
+  const a={n:0,d:0,sn:0,sd:0,split:S.split.groups.map(()=>0)};
+  for(const i of idxs){ const cs=BY[i]; if(!cs) continue;
+    for(const c of cs){ if(main>=0 && c[1]!==main) continue;
+      a.n+=c[4]; a.d+=c[5]; if(c[3]){a.sn+=c[4]; a.sd+=c[5];}
+      a.split[c[2]] += S.split.of==='num' ? c[4] : c[5]; } }
+  a.rate = rateOf(a.n,a.d);
+  a.share = S.share.of==='num' ? (a.n ? a.sn/a.n*100 : 0) : (a.d ? a.sd/a.d*100 : 0);
+  return a;
+}
+function getRanges(){
+  const len = state.period==='6m'?6 : state.period==='12m'?12 : M.length;
+  const cur = range(LAST-len+1,LAST);
+  const prev = len<M.length && LAST-2*len+1>=0 ? range(LAST-2*len+1,LAST-len) : [];
+  return {len, cur, prev, cmp: prev.length===len};
+}
+const periodTxt = idx => M[idx[0]].label+' – '+M[idx[idx.length-1]].label;
+
+/* ---- As medidas como o metadado as descreve ---- */
+const isDays = () => S.rate.kind==='days';
+const fmtRate = v => isDays() ? f2(v)+' dias' : f1(v)+'%';
+/* Nos textos de comparação, uma casa a mais: 3,06% contra 3,14% não pode virar "3,1% para 3,1%". */
+const fineRate = v => isDays() ? f2(v)+' dias' : f2(v)+'%';
+const tickRate = v => isDays() ? f2(v)+' d' : f1(v)+'%';
+const bigRate = v => isDays() ? `${f1(v)}<small>dias</small>` : `${f1(v)}<small>%</small>`;
+const rateDelta = (a,b) => isDays() ? sgn(pct(a,b))+'%' : sgn(a-b)+' p.p.';
+const amt = (m,v) => S[m].money ? brlC(v) : f0(v);
+const amtFull = (m,v) => S[m].money ? brl(v) : f0(v);
+const tickAmt = (m,v) => S[m].money ? brlC(v) : f0(v);
+function tone(better,d){ if(!better || Math.abs(d)<0.05) return 'neutral'; return (better==='up') === (d>0) ? 'good' : 'bad'; }
+function deltaPill(v,cls,unit='%',fn=f1){
+  const arrow = v>0.05?'↑':v<-0.05?'↓':'→';
+  return `<span class="delta ${cls}">${arrow} ${sgn(v,fn)}${unit}</span>`;
+}
+function ratePill(c,p){
+  const d = isDays() ? pct(c,p) : c-p;
+  return deltaPill(d, tone(S.rate.better, d), isDays()?'%':' p.p.');
+}
+
+/* ---- Chart.js ---- */
+Chart.defaults.font.family="Inter, system-ui, sans-serif";
+Chart.defaults.font.size=11;
+Chart.defaults.animation.duration=450;
+Chart.defaults.plugins.legend.display=false;
+let TT;
+const gridY = {color:C.grid,drawTicks:false};
+function themeDefaults(){
+  Chart.defaults.color=C.text3;
+  Chart.defaults.borderColor=C.grid;
+  gridY.color=C.grid;
+  TT = {
+    backgroundColor:C.ttBg, borderColor:C.ttBorder, borderWidth:1,
+    padding:{x:12,y:10}, cornerRadius:10, caretSize:0, caretPadding:8,
+    titleColor:C.text, titleFont:{weight:'600',size:12}, titleMarginBottom:8,
+    bodyColor:C.ttBody, bodyFont:{size:12}, bodySpacing:5,
+    footerColor:C.text2, footerFont:{weight:'500',size:11.5}, footerMarginTop:8,
+    usePointStyle:true, boxWidth:7, boxHeight:7, boxPadding:5
+  };
+}
+themeDefaults();
+const axisX = {grid:{display:false},border:{display:false},ticks:{maxRotation:0,autoSkipPadding:14,padding:6}};
+function vGrad(chart,color,a1,a0){
+  const {ctx,chartArea}=chart; if(!chartArea) return hexA(color,a0);
+  const g=ctx.createLinearGradient(0,chartArea.top,0,chartArea.bottom);
+  g.addColorStop(0,hexA(color,a1)); g.addColorStop(1,hexA(color,a0)); return g;
+}
+const pointerHover = (e,els,chart)=>{ chart.canvas.style.cursor = els.length ? 'pointer' : 'default'; };
+const monthClick = (e,els,chart)=>{
+  const pts = chart.getElementsAtEventForMode(e,'index',{intersect:false},true);
+  if(pts.length) openDrawer(chart.$idx[pts[0].index]);
+};
+
+let SP=[], chTrend, chVol, chMain, chStack, chSplit;
+function spark(id,color,fmt){
+  return new Chart($(id),{
+    type:'line',
+    data:{labels:[],datasets:[{data:[],borderColor:color,borderWidth:1.6,tension:tension(),pointRadius:0,pointHoverRadius:3,pointHoverBackgroundColor:color,pointHoverBorderWidth:0,fill:true,
+      backgroundColor:c=>vGrad(c.chart,color,.20,0)}]},
+    options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:4,bottom:0}},
+      scales:{x:{display:false},y:{display:false,grace:'10%'}},
+      interaction:{mode:'index',intersect:false},
+      plugins:{tooltip:{...TT,displayColors:false,padding:{x:9,y:6},titleFont:{size:11,weight:'500'},titleColor:C.text2,titleMarginBottom:2,bodyFont:{size:12,weight:'600'},bodyColor:C.text,
+        callbacks:{label:c=>fmt(c.parsed.y)}}}}
+  });
+}
+function build(){
+  SP = [
+    spark('sp0',C.blue,  v=>fmtRate(v)),
+    spark('sp1',C.teal,  v=>amtFull('den',v)+' · '+S.den.label.toLowerCase()),
+    spark('sp2',C.violet,v=>amtFull('num',v)+' · '+S.num.label.toLowerCase()),
+    spark('sp3',C.blue,  v=>f1(v)+'%'),
+  ];
+
+  chTrend = new Chart($('c-trend'),{
+    type:'line',
+    data:{labels:[],datasets:[
+      {label:'Período',data:[],borderColor:C.blue,borderWidth:2,tension:tension(),pointRadius:0,pointHoverRadius:4,pointHoverBackgroundColor:C.blue,pointHoverBorderColor:C.bg,pointHoverBorderWidth:2,fill:true,backgroundColor:c=>vGrad(c.chart,C.blue,.16,0)},
+      {label:'Ano anterior',data:[],borderColor:C.teal,borderWidth:1.5,borderDash:[4,4],tension:tension(),pointRadius:0,pointHoverRadius:3,pointHoverBackgroundColor:C.teal,pointHoverBorderWidth:0,fill:false,spanGaps:false}
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
+      onClick:monthClick,onHover:pointerHover,
+      scales:{x:axisX,y:{grid:gridY,border:{display:false},grace:'8%',ticks:{padding:8,maxTicksLimit:6,callback:tickRate}}},
+      plugins:{tooltip:{...TT,callbacks:{
+        title:it=>M[it[0].chart.$idx[it[0].dataIndex]].long,
+        label:c=>c.parsed.y==null?null:`  ${c.datasetIndex?'Mesmo mês, ano anterior':S.rate.label}: ${fmtRate(c.parsed.y)}`,
+        footer:it=>{const d=it[0].chart.data.datasets; const i=it[0].dataIndex; const a=d[0].data[i], b=d[1].data[i]; return b==null?'':`Contra o ano anterior: ${rateDelta(a,b)}`;}
+      }}}}
+  });
+
+  chVol = new Chart($('c-vol'),{
+    data:{labels:[],datasets:[
+      {type:'bar',label:S.den.label,data:[],backgroundColor:[],hoverBackgroundColor:[],borderRadius:4,borderSkipped:false,maxBarThickness:22,order:2},
+      {type:'line',label:'Média do período',data:[],borderColor:C.meta,borderWidth:1.25,borderDash:[4,4],pointRadius:0,pointHoverRadius:0,order:1}
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
+      onClick:monthClick,onHover:pointerHover,
+      scales:{x:axisX,y:{grid:gridY,border:{display:false},beginAtZero:true,ticks:{padding:8,callback:v=>tickAmt('den',v)}}},
+      plugins:{tooltip:{...TT,filter:c=>c.datasetIndex===0,callbacks:{
+        title:it=>M[it[0].chart.$idx[it[0].dataIndex]].long,
+        label:c=>`  ${S.den.label}: ${amtFull('den',c.parsed.y)}`,
+        footer:it=>{const avg=it[0].chart.data.datasets[1].data[0]; return `Contra a média do período: ${sgn(pct(it[0].parsed.y,avg))}%`;}
+      }}}}
+  });
+
+  chMain = new Chart($('c-main'),{
+    type:'bar',
+    data:{labels:[],datasets:[
+      {label:'Período atual',data:[],backgroundColor:[],borderRadius:4,borderSkipped:false,barPercentage:.78,categoryPercentage:.72},
+      {label:'Período anterior',data:[],backgroundColor:C.prior,borderRadius:4,borderSkipped:false,barPercentage:.78,categoryPercentage:.72}
+    ]},
+    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,interaction:{mode:'index',axis:'y',intersect:false},
+      onHover:pointerHover,
+      onClick:(e,els,chart)=>{const p=chart.getElementsAtEventForMode(e,'index',{axis:'y',intersect:false},true); if(p.length) toggleFilter(chart.$rows[p[0].index].name);},
+      scales:{x:{grid:gridY,border:{display:false},beginAtZero:true,ticks:{padding:6,maxTicksLimit:6,callback:tickRate}},
+              y:{grid:{display:false},border:{display:false},ticks:{color:C.text2,font:{size:12}}}},
+      plugins:{tooltip:{...TT,callbacks:{
+        label:c=>{const r=c.chart.$rows[c.dataIndex][c.datasetIndex?'p':'c'];return `  ${c.dataset.label}: ${fmtRate(r.rate)} · ${amt('den',r.d)} ${S.den.label.toLowerCase()}`;},
+        footer:it=>{const r=it[0].chart.$rows[it[0].dataIndex];return r.p.d?`Variação: ${rateDelta(r.c.rate,r.p.rate)}`:'';}
+      }}}}
+  });
+
+  chStack = new Chart($('c-stack'),{
+    type:'bar',
+    data:{labels:[],datasets:S.split.groups.map((g,i)=>({label:g,data:[],backgroundColor:hexA(splitColor(g,i),.85),hoverBackgroundColor:splitColor(g,i),stack:'r',borderSkipped:false,maxBarThickness:26,borderRadius:0}))},
+    options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
+      onClick:monthClick,onHover:pointerHover,
+      scales:{x:{...axisX,stacked:true},y:{stacked:true,grid:gridY,border:{display:false},ticks:{padding:8,callback:v=>tickAmt(S.split.of,v)}}},
+      plugins:{tooltip:{...TT,itemSort:(a,b)=>b.parsed.y-a.parsed.y,callbacks:{
+        title:it=>M[it[0].chart.$idx[it[0].dataIndex]].long,
+        label:c=>{const tot=c.chart.$tot[c.dataIndex];return `  ${c.dataset.label}: ${amtFull(S.split.of,c.parsed.y)} (${f1(tot?c.parsed.y/tot*100:0)}%)`;},
+        footer:it=>`Total: ${amtFull(S.split.of,it[0].chart.$tot[it[0].dataIndex])}`
+      }}}}
+  });
+
+  chSplit = new Chart($('c-split'),{
+    type:'doughnut',
+    data:{labels:S.split.groups,datasets:[{data:[],backgroundColor:[],hoverBackgroundColor:S.split.groups.map(splitColor),borderColor:C.card,borderWidth:2,hoverOffset:3}]},
+    options:{responsive:true,maintainAspectRatio:false,cutout:'74%',
+      onHover:pointerHover,
+      onClick:(e,els)=>{ if(els.length) toggleHighlight(S.split.groups[els[0].index]); },
+      plugins:{tooltip:{...TT,callbacks:{
+        label:c=>{const t=c.dataset.data.reduce((a,b)=>a+b,0);return `  ${amtFull(S.split.of,c.parsed)} · ${f1(t?c.parsed/t*100:0)}%`;}
+      }}}}
+  });
+}
+const allCharts = () => [...SP,chTrend,chVol,chMain,chStack,chSplit].filter(Boolean);
+
+/* ---- Render ---- */
+function render(){
+  if(!S) return;
+  const r=getRanges();
+  const cur=agg(r.cur), prv=agg(r.prev);
+  const monthly=r.cur.map(i=>agg([i]));
+  const labels=r.cur.map(i=>M[i].label);
+  const sel=selIdx();
+
+  $('title').textContent = sel<0 ? 'Visão consolidada' : state.filter;
+  $('periodLabel').innerHTML = r.cmp
+    ? `<b>${periodTxt(r.cur)}</b> · ${r.len} meses · comparado a ${periodTxt(r.prev)}`
+    : `<b>${periodTxt(r.cur)}</b> · toda a base, sem período anterior para comparar`;
+  renderChips();
+
+  /* KPIs */
+  $('k0-l').textContent=S.rate.label;
+  $('k0').innerHTML=bigRate(cur.rate); $('k0').title=fmtRate(cur.rate);
+  $('k0-d').innerHTML=r.cmp?ratePill(cur.rate,prv.rate):'';
+  $('k0-f').innerHTML=r.cmp?`antes <b>${fineRate(prv.rate)}</b> · ${amt('den',cur.d)} ${esc(S.den.label.toLowerCase())}`:`${amt('den',cur.d)} ${esc(S.den.label.toLowerCase())} no período`;
+
+  [['den',1],['num',2]].forEach(([m,k])=>{
+    const v=m==='den'?cur.d:cur.n, p=m==='den'?prv.d:prv.n, d=pct(v,p);
+    $(`k${k}-l`).textContent=S[m].label;
+    $(`k${k}`).textContent=amt(m,v); $(`k${k}`).title=amtFull(m,v);
+    $(`k${k}-d`).innerHTML=r.cmp?deltaPill(d,tone(S[m].better,d)):'';
+    $(`k${k}-f`).innerHTML=r.cmp?`vs <b>${amt(m,p)}</b> no período anterior`:`em ${r.len} meses`;
+  });
+
+  $('k3-l').textContent=S.share.label;
+  $('k3').innerHTML=`${f1(cur.share)}<small>%</small>`;
+  $('k3-d').innerHTML=r.cmp?deltaPill(cur.share-prv.share,'neutral',' p.p.'):'';
+  $('k3-f').innerHTML=`${esc(S.share.foot)}${r.cmp?` · antes <b>${f1(prv.share)}%</b>`:''}`;
+
+  setSpark(SP[0],labels,monthly.map(a=>a.rate));
+  setSpark(SP[1],labels,monthly.map(a=>a.d));
+  setSpark(SP[2],labels,monthly.map(a=>a.n));
+  setSpark(SP[3],labels,monthly.map(a=>a.share));
+
+  /* Evolução contra o ano anterior */
+  $('t-trend').textContent=`${S.rate.label} mês a mês`;
+  $('d-trend').textContent=`${S.rate.label} do recorte · a linha tracejada é o mesmo mês do ano anterior`;
+  $('h-trend').textContent=`Clique em um mês para abrir o detalhamento por ${S.main.label.toLowerCase()}.`;
+  chTrend.$idx=r.cur; chTrend.data.labels=labels;
+  chTrend.data.datasets[0].data=monthly.map(a=>a.rate);
+  chTrend.data.datasets[1].data=r.cur.map(i=>i-12>=0?agg([i-12]).rate:null);
+  chTrend.update();
+
+  /* Volume por mês */
+  const vols=monthly.map(a=>a.d), avg=vols.reduce((a,b)=>a+b,0)/vols.length;
+  $('t-vol').textContent=`${S.den.label} por mês`;
+  $('d-vol').textContent=`Média do período: ${amtFull('den',avg)} por mês`;
+  chVol.$idx=r.cur; chVol.data.labels=labels;
+  chVol.data.datasets[0].data=vols;
+  chVol.data.datasets[0].backgroundColor=vols.map(v=>hexA(v>avg*1.05?C.orange:C.blue,.82));
+  chVol.data.datasets[0].hoverBackgroundColor=vols.map(v=>v>avg*1.05?C.orange:C.blue);
+  chVol.data.datasets[1].data=vols.map(()=>avg);
+  chVol.update();
+
+  /* Taxa por parte do corte principal */
+  const rows=S.main.values.map((name,i)=>({name,i,c:agg(r.cur,i),p:agg(r.prev,i)})).filter(x=>x.c.d>0||x.p.d>0);
+  $('t-main').textContent=`${S.rate.label} por ${S.main.label.toLowerCase()}`;
+  $('d-main').textContent=r.cmp?`Período atual e anterior`:`Toda a base`;
+  $('h-main').textContent=`Cada ${S.main.label.toLowerCase()} tem o próprio perfil: compare com o próprio histórico. Clique para filtrar.`;
+  chMain.$rows=rows; chMain.data.labels=rows.map(x=>x.name);
+  chMain.data.datasets[0].data=rows.map(x=>x.c.rate);
+  chMain.data.datasets[0].backgroundColor=rows.map(x=>sel<0||sel===x.i?C.blue:hexA(C.blue,.25));
+  chMain.data.datasets[1].data=r.cmp?rows.map(x=>x.p.rate):[];
+  chMain.update();
+
+  /* Composição por mês e rosca */
+  const G=S.split.groups;
+  $('t-stack').textContent=`${S.split.title} por mês`;
+  $('d-stack').textContent=`${S[S.split.of].label} de cada mês, dividido por ${S.split.label.toLowerCase()}`;
+  chStack.$idx=r.cur; chStack.$tot=monthly.map(a=>a.split.reduce((x,y)=>x+y,0)); chStack.data.labels=labels;
+  chStack.data.datasets.forEach((ds,k)=>{
+    const on=!state.highlight||state.highlight===G[k];
+    ds.data=monthly.map(a=>a.split[k]);
+    ds.backgroundColor=hexA(splitColor(G[k],k),on?.85:.12); ds.hoverBackgroundColor=hexA(splitColor(G[k],k),on?1:.2);
+    ds.borderRadius = k===G.length-1 ? {topLeft:4,topRight:4} : 0;
+  });
+  chStack.update();
+  $('lg-stack').innerHTML=G.map((g,k)=>`<span style="opacity:${!state.highlight||state.highlight===g?1:.4}"><i class="sw" style="background:${splitColor(g,k)}"></i>${esc(g)}</span>`).join('');
+
+  const tot=cur.split.reduce((a,b)=>a+b,0), totP=prv.split.reduce((a,b)=>a+b,0);
+  $('t-split').textContent=S.split.title;
+  chSplit.data.datasets[0].data=cur.split;
+  chSplit.data.datasets[0].backgroundColor=G.map((g,k)=>hexA(splitColor(g,k),!state.highlight||state.highlight===g?.9:.15));
+  chSplit.update();
+  const hk=G.indexOf(state.highlight);
+  if(hk>=0){ $('donutVal').textContent=f1(tot?cur.split[hk]/tot*100:0)+'%'; $('donutLbl').textContent=G[hk]; }
+  else { $('donutVal').textContent=amt(S.split.of,tot); $('donutLbl').textContent='total no período'; }
+  $('plist').innerHTML=G.map((g,k)=>{
+    const sh=tot?cur.split[k]/tot*100:0, shp=totP?prv.split[k]/totP*100:0;
+    return `<li data-g="${esc(g)}" class="${state.highlight&&state.highlight!==g?'dim':''}" title="${esc(g)}: ${amtFull(S.split.of,cur.split[k])}">
+      <i class="sw" style="background:${splitColor(g,k)}"></i>
+      <div><div class="pn">${esc(g)}</div><div class="pv">${amt(S.split.of,cur.split[k])}</div></div>
+      <div><div class="ps">${f1(sh)}%</div><div class="pd">${r.cmp?sgn(sh-shp)+' p.p.':''}</div></div></li>`;
+  }).join('');
+
+  renderTable(r,rows);
+  renderInsights(r,rows,cur,prv,monthly);
+  syncControls();
+  post();
+}
+function setSpark(ch,labels,data){ ch.data.labels=labels; ch.data.datasets[0].data=data; ch.update(); }
+
+function renderChips(){
+  const c=[];
+  if(state.filter!=='all') c.push(`<span class="chip"><span>${esc(S.main.label)}</span>${esc(state.filter)}<button data-clear="filter" aria-label="Remover filtro">×</button></span>`);
+  if(state.highlight) c.push(`<span class="chip"><span>Destaque</span>${esc(state.highlight)}<button data-clear="highlight" aria-label="Remover destaque">×</button></span>`);
+  c.push(`<span class="status"><i></i>Base fechada até ${M[LAST].label}</span>`);
+  $('chips').innerHTML=c.join('');
+}
+
+/* ---- Tabela ---- */
+const COLS = () => [
+  {k:'name',  h:S.main.label},
+  {k:'d',     h:S.den.label},
+  {k:'n',     h:S.num.label},
+  {k:'rate',  h:S.rate.label},
+  {k:'share', h:S.share.label},
+  {k:'part',  h:`Part. em ${S.den.label.toLowerCase()}`},
+];
+function renderTable(r,rows){
+  const T=agg(r.cur,-1), TP=agg(r.prev,-1);
+  $('t-tbl').textContent=`Desempenho por ${S.main.label.toLowerCase()}`;
+  const data=rows.map(x=>({...x,d:x.c.d,n:x.c.n,rate:x.c.rate,share:x.c.share,part:T.d?x.c.d/T.d*100:0}));
+  const {k,dir}=state.sort;
+  data.sort((a,b)=> (k==='name' ? a.name.localeCompare(b.name,'pt-BR') : a[k]-b[k]) * dir);
+  const maxPart=Math.max(...data.map(d=>d.part),1);
+  const sel=selIdx();
+  const subPct=(a,b,better)=>r.cmp?`<span class="sub ${tone(better,pct(a,b))}">${sgn(pct(a,b))}%</span>`:'';
+  const subRate=(a,b)=>r.cmp?`<span class="sub ${tone(S.rate.better,isDays()?pct(a,b):a-b)}">${rateDelta(a,b)}</span>`:'';
+  const subPP=(a,b)=>r.cmp?`<span class="sub neutral">${sgn(a-b)} p.p.</span>`:'';
+  $('thead').innerHTML=COLS().map(c=>`<th data-k="${c.k}">${esc(c.h)} <span class="ar">${c.k===k?(dir>0?'↑':'↓'):''}</span></th>`).join('');
+  $('tbl').querySelector('tbody').innerHTML=data.map(x=>{
+    const cls = sel<0?'':(sel===x.i?'sel':'dim');
+    return `<tr data-v="${esc(x.name)}" class="${cls}" tabindex="0">
+      <td><span class="sname">${esc(x.name)}</span></td>
+      <td title="${amtFull('den',x.d)}">${amt('den',x.d)}${subPct(x.c.d,x.p.d,S.den.better)}</td>
+      <td title="${amtFull('num',x.n)}">${amt('num',x.n)}${subPct(x.c.n,x.p.n,S.num.better)}</td>
+      <td>${fmtRate(x.rate)}${subRate(x.c.rate,x.p.rate)}</td>
+      <td>${f1(x.share)}%${subPP(x.c.share,x.p.share)}</td>
+      <td><span class="share"><i style="width:${Math.round(x.part/maxPart*44)}px"></i>${f1(x.part)}%</span></td>
+    </tr>`;
+  }).join('');
+  $('tbl').querySelector('tfoot').innerHTML=`<tr>
+    <td>${esc(S.total)}</td>
+    <td title="${amtFull('den',T.d)}">${amt('den',T.d)}${subPct(T.d,TP.d,S.den.better)}</td>
+    <td title="${amtFull('num',T.n)}">${amt('num',T.n)}${subPct(T.n,TP.n,S.num.better)}</td>
+    <td>${fmtRate(T.rate)}${subRate(T.rate,TP.rate)}</td>
+    <td>${f1(T.share)}%${subPP(T.share,TP.share)}</td>
+    <td>100,0%</td></tr>`;
+}
+
+/* ---- Insights: contas sobre o recorte ---- */
+function renderInsights(r,rows,cur,prv,monthly){
+  const out=[]; const all=selIdx()<0;
+  const ML=S.main.label.toLowerCase();
+  const worse = d => S.rate.better==='down' ? d>0 : d<0;
+  const scope = rows.filter(x=>all||x.name===state.filter);
+
+  if(r.cmp){
+    /* 1. A variação da razão, dividida em composição e taxa */
+    const dR=cur.rate-prv.rate, rel=Math.abs(pct(cur.rate,prv.rate));
+    if(all && rel>=0.5 && prv.d && cur.d){
+      let mix=0,tax=0; const parts=[];
+      rows.forEach(x=>{ const w0=x.p.d/prv.d, w1=x.c.d/cur.d; const m=(w1-w0)*x.p.rate, t=w1*(x.c.rate-x.p.rate); mix+=m; tax+=t; parts.push({x,m,t,w0,w1}); });
+      const den=Math.abs(mix)+Math.abs(tax)||1;
+      const tm=parts.slice().sort((a,b)=>Math.abs(b.m)-Math.abs(a.m))[0], tt=parts.slice().sort((a,b)=>Math.abs(b.t)-Math.abs(a.t))[0];
+      const mixFirst=Math.abs(mix)>=Math.abs(tax);
+      out.push({p:100+rel,type:worse(dR)?'atencao':'eficiencia',tag:worse(dR)?'Atenção':'Melhora',
+        title:`${S.rate.label} ${dR>0?'subiu':'caiu'} ${rateDelta(cur.rate,prv.rate)}`,
+        body:`Foi de <strong>${fineRate(prv.rate)}</strong> para <strong>${fineRate(cur.rate)}</strong>. ${mixFirst?'A maior parte':'Uma parte menor'} (<strong>${f0(Math.abs(mix)/den*100)}%</strong>) vem da composição: <strong>${esc(tm.x.name)}</strong> ${tm.w1>tm.w0?'ganhou':'perdeu'} peso (${f1(tm.w0*100)}% → ${f1(tm.w1*100)}% ${esc(S.den.label.toLowerCase())}). O resto vem ${esc(S.rate.article.replace(/^a /,'da ').replace(/^o /,'do '))} dentro de cada ${esc(ML)}, puxado por <strong>${esc(tt.x.name)}</strong>.`});
+    }
+    /* 2. A parte que mais mudou */
+    const movers=scope.filter(x=>x.p.d>0&&x.c.d>0).map(x=>({x,d:isDays()?pct(x.c.rate,x.p.rate):x.c.rate-x.p.rate,rel:pct(x.c.rate,x.p.rate)})).sort((a,b)=>Math.abs(b.rel)-Math.abs(a.rel));
+    const mv=movers[0];
+    if(mv && Math.abs(mv.rel)>=3){
+      const bad=worse(mv.d);
+      out.push({p:85+Math.abs(mv.rel)/2,type:bad&&Math.abs(mv.rel)>=8?'gargalo':'tendencia',tag:bad&&Math.abs(mv.rel)>=8?'Gargalo':'Tendência',v:all?mv.x.name:null,
+        title:`${mv.x.name}: ${S.rate.noun} ${mv.d>0?'em alta':'em queda'}`,
+        body:`Passou de <strong>${fineRate(mv.x.p.rate)}</strong> para <strong>${fineRate(mv.x.c.rate)}</strong> (${rateDelta(mv.x.c.rate,mv.x.p.rate)}), com ${amt('den',mv.x.c.d)} ${esc(S.den.label.toLowerCase())} no período (${sgn(pct(mv.x.c.d,mv.x.p.d))}% contra o anterior).`});
+    }
+    /* 3. Volume */
+    const dD=pct(cur.d,prv.d);
+    let vb=`${S.den.label} ${dD>=0?'cresceu':'recuou'} <strong>${sgn(dD)}%</strong> (${S.den.money?sgn(cur.d-prv.d,v=>brlC(v)):sgn(cur.d-prv.d,f0)}) frente a ${periodTxt(r.prev)}.`;
+    if(all){
+      const diffs=rows.map(x=>({x,d:x.c.d-x.p.d})).sort((a,b)=>Math.abs(b.d)-Math.abs(a.d));
+      const t=cur.d-prv.d, top=diffs[0];
+      if(t!==0 && top && Math.sign(top.d)===Math.sign(t)) vb+=` <strong>${esc(top.x.name)}</strong> responde por ${f0(Math.min(100,top.d/t*100))}% da variação.`;
+    }
+    out.push({p:60,type:'tendencia',tag:'Tendência',title:`Volume de ${S.den.label.toLowerCase()}`,body:vb});
+    /* 4. O quarto número */
+    const dS=cur.share-prv.share;
+    if(Math.abs(dS)>=1) out.push({p:58+Math.abs(dS),type:'contexto',tag:'Contexto',title:`${S.share.label}: ${sgn(dS)} p.p.`,
+      body:`<strong>${f1(cur.share)}%</strong> ${esc(S.share.foot)}, contra ${f1(prv.share)}% no período anterior.`});
+  }
+  /* 5. Concentração na composição */
+  const G=S.split.groups, tot=cur.split.reduce((a,b)=>a+b,0);
+  const ps=G.map((g,k)=>({g,s:tot?cur.split[k]/tot*100:0})).filter(x=>x.g!=='Outros').sort((a,b)=>b.s-a.s);
+  if(ps.length>1) out.push({p:52,type:'concentracao',tag:'Concentração',title:`${ps[0].g} concentra ${S[S.split.of].label.toLowerCase()}`,
+    body:`<strong>${esc(ps[0].g)}</strong> responde por <strong>${f1(ps[0].s)}%</strong> de ${esc(S[S.split.of].label.toLowerCase())}; as duas maiores partes somam ${f1(ps[0].s+ps[1].s)}%. Mudanças nelas pesam mais no resultado.`});
+  /* 6. Pico do período */
+  const pk=monthly.reduce((a,m,i)=>m.rate>monthly[a].rate?i:a,0);
+  out.push({p:45,type:'contexto',tag:'Contexto',title:`Pico em ${M[r.cur[pk]].label}`,
+    body:`${S.rate.label} chegou a <strong>${fmtRate(monthly[pk].rate)}</strong> em ${M[r.cur[pk]].long.toLowerCase()}, o ${S.rate.better==='down'?'pior':'melhor'} mês do recorte.`});
+
+  out.sort((a,b)=>b.p-a.p);
+  const list=out.slice(0,6);
+  $('ins-sub').textContent=`${list.length} sinais em ${periodTxt(r.cur)}${all?'':' · '+state.filter}`;
+  $('insights').innerHTML=list.map(i=>`<li class="ins ${i.v?'clickable':''}" ${i.v?`data-v="${esc(i.v)}"`:''}>
+    <div class="ins-top"><span class="tag ${i.type}">${i.tag}</span><span class="ins-title">${esc(i.title)}</span></div>
+    <div class="ins-body">${i.body}</div>
+    ${i.v?`<span class="ins-more">Filtrar ${esc(i.v)} →</span>`:''}</li>`).join('');
+}
+
+/* ---- Detalhamento do mês ---- */
+function openDrawer(i){
+  const T=agg([i]), Y=i>=12?agg([i-12]):null;
+  $('drTitle').textContent=M[i].long + (state.filter==='all'?'':' · '+state.filter);
+  const yy=(a,b)=>Y?`<em>${sgn(pct(a,b))}% vs ${M[i-12].label}</em>`:'';
+  let h=`<div class="dr-kpis">
+    <div class="dr-k"><span>${esc(S.rate.label)}</span><b>${fmtRate(T.rate)}</b>${Y?`<em>${rateDelta(T.rate,Y.rate)} vs ${M[i-12].label}</em>`:''}</div>
+    <div class="dr-k"><span>${esc(S.den.label)}</span><b>${amtFull('den',T.d)}</b>${yy(T.d,Y&&Y.d)}</div>
+    <div class="dr-k"><span>${esc(S.num.label)}</span><b>${amtFull('num',T.n)}</b>${yy(T.n,Y&&Y.n)}</div>
+    <div class="dr-k"><span>${esc(S.share.label)}</span><b>${f1(T.share)}%</b>${Y?`<em>${sgn(T.share-Y.share)} p.p. vs ${M[i-12].label}</em>`:''}</div>
+  </div>
+  <div class="dr-sec">Por ${esc(S.main.label.toLowerCase())}</div>
+  <table class="dr-table"><thead><tr><th>${esc(S.main.label)}</th><th>${esc(S.den.label)}</th><th>${esc(S.rate.label)}</th></tr></thead><tbody>`;
+  S.main.values.forEach((v,k)=>{const a=agg([i],k); if(!a.d) return;
+    h+=`<tr class="${state.filter===v?'sel':''}"><td>${esc(v)}</td><td title="${amtFull('den',a.d)}">${amt('den',a.d)}</td><td>${fmtRate(a.rate)}</td></tr>`;});
+  const tot=T.split.reduce((a,b)=>a+b,0);
+  h+=`</tbody></table><div class="dr-sec">${esc(S.split.title)}</div>
+  <div class="pbar">${S.split.groups.map((g,k)=>`<i style="flex:${T.split[k]};background:${splitColor(g,k)}"></i>`).join('')}</div>
+  ${S.split.groups.map((g,k)=>`<div class="prow"><span><i class="sw" style="background:${splitColor(g,k)}"></i>${esc(g)}</span><b class="num">${amtFull(S.split.of,T.split[k])} · ${f1(tot?T.split[k]/tot*100:0)}%</b></div>`).join('')}
+  <p style="font-size:11.5px;color:var(--text-3);margin-top:16px">Metadado ${esc(S.code)} - ${esc(S.name)}. Dados fictícios.</p>`;
+  $('drBody').innerHTML=h;
+  $('drawer').classList.add('open'); $('scrim').classList.add('open'); $('drawer').setAttribute('aria-hidden','false');
+  $('drClose').focus();
+}
+function closeDrawer(){ $('drawer').classList.remove('open'); $('scrim').classList.remove('open'); $('drawer').setAttribute('aria-hidden','true'); }
+
+/* ---- CSV do recorte ---- */
+function exportCSV(){
+  const r=getRanges(), n1=v=>v.toFixed(2).replace('.',',');
+  const head=['Mês',S.main.label,S.den.label,S.num.label,S.rate.label,S.share.label+' (%)'];
+  const lines=[[`# ${S.code} - ${S.name} — DADOS FICTÍCIOS — ${periodTxt(r.cur)}`],head];
+  const idxs = selIdx()<0 ? S.main.values.map((_,k)=>k) : [selIdx()];
+  r.cur.forEach(i=>idxs.forEach(k=>{const a=agg([i],k); if(a.d) lines.push([M[i].key,S.main.values[k],Math.round(a.d),Math.round(a.n),n1(a.rate),n1(a.share)]);}));
+  const csv='﻿'+lines.map(l=>l.map(v=>{const s=String(v);return /[;"\n]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s;}).join(';')).join('\r\n');
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
+  a.download=`metadado-${S.code}_${state.period}_${M[r.cur[0]].key}_a_${M[LAST].key}.csv`;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+}
+
+/* ---- Eventos ---- */
+function toggleFilter(v){ state.filter = state.filter===v ? 'all' : v; render(); }
+function toggleHighlight(g){ state.highlight = state.highlight===g ? null : g; render(); }
+function syncControls(){
+  document.querySelectorAll('.seg button').forEach(x=>x.setAttribute('aria-pressed',String(x.dataset.period===state.period)));
+  $('filter').textContent=filterOpts().find(o=>o.v===state.filter).l;
+  if(!$('filterMenu').hidden) drawFilterMenu();
+}
+
+/* ---- Seletor do corte (listbox do design system) ----
+   Abre no clique, Enter, espaço ou seta; as setas, Home e End andam; Enter
+   ou espaço escolhem; Esc e Tab fecham. Fecha também no clique fora e quando
+   a moldura perde o foco (o clique foi no editor, do lado de fora). */
+const CHECK='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const filterOpts = () => [{v:'all',l:`Todos os ${S.main.plural}`}, ...S.main.values.map(v=>({v,l:v}))];
+let fActive=-1;
+function drawFilterMenu(){
+  const m=$('filterMenu');
+  m.innerHTML=filterOpts().map((o,i)=>{const on=o.v===state.filter;
+    return `<div class="dd-opt${i===fActive?' active':''}" role="option" id="fo-${i}" data-i="${i}" aria-selected="${on}"><span>${esc(o.l)}</span>${on?CHECK:''}</div>`;}).join('');
+  if(fActive>=0){ m.setAttribute('aria-activedescendant','fo-'+fActive); $('fo-'+fActive).scrollIntoView({block:'nearest'}); }
+  else m.removeAttribute('aria-activedescendant');
+}
+function openFilter(){
+  fActive=Math.max(0,filterOpts().findIndex(o=>o.v===state.filter));
+  drawFilterMenu();
+  $('filterMenu').hidden=false; $('filter').setAttribute('aria-expanded','true');
+  $('filterMenu').focus({preventScroll:true});
+}
+function closeFilter(back){
+  if($('filterMenu').hidden) return;
+  $('filterMenu').hidden=true; $('filter').setAttribute('aria-expanded','false');
+  if(back) $('filter').focus();
+}
+function chooseFilter(i){ state.filter=filterOpts()[i].v; closeFilter(true); render(); }
+$('filter').addEventListener('click',()=>$('filterMenu').hidden?openFilter():closeFilter(true));
+$('filter').addEventListener('keydown',e=>{if(['ArrowDown','ArrowUp','Enter',' '].includes(e.key)){e.preventDefault(); openFilter();}});
+$('filterMenu').addEventListener('keydown',e=>{
+  const n=filterOpts().length;
+  const go={ArrowDown:fActive+1,ArrowUp:fActive-1,Home:0,End:n-1}[e.key];
+  if(go!==undefined){e.preventDefault(); fActive=Math.min(n-1,Math.max(0,go)); drawFilterMenu(); return;}
+  if(e.key==='Enter'||e.key===' '){e.preventDefault(); chooseFilter(fActive); return;}
+  if(e.key==='Escape'){e.preventDefault(); e.stopPropagation(); closeFilter(true); return;}
+  if(e.key==='Tab') closeFilter(false);
+});
+$('filterMenu').addEventListener('click',e=>{const o=e.target.closest('[data-i]'); if(o) chooseFilter(+o.dataset.i);});
+$('filterMenu').addEventListener('mousemove',e=>{const o=e.target.closest('[data-i]'); if(o&&+o.dataset.i!==fActive){fActive=+o.dataset.i; drawFilterMenu();}});
+document.addEventListener('mousedown',e=>{if(!e.target.closest('.dd')) closeFilter(false);});
+window.addEventListener('blur',()=>closeFilter(false));
+document.querySelectorAll('.seg button').forEach(b=>b.addEventListener('click',()=>{state.period=b.dataset.period;render();}));
+$('exportBtn').addEventListener('click',exportCSV);
+$('chips').addEventListener('click',e=>{const b=e.target.closest('[data-clear]'); if(!b) return;
+  if(b.dataset.clear==='filter') state.filter='all'; else state.highlight=null; render();});
+$('plist').addEventListener('click',e=>{const li=e.target.closest('li'); if(li) toggleHighlight(li.dataset.g);});
+$('insights').addEventListener('click',e=>{const li=e.target.closest('[data-v]'); if(li) toggleFilter(li.dataset.v);});
+const tbody=$('tbl').querySelector('tbody');
+tbody.addEventListener('click',e=>{const tr=e.target.closest('tr'); if(tr) toggleFilter(tr.dataset.v);});
+tbody.addEventListener('keydown',e=>{if(e.key==='Enter'){const tr=e.target.closest('tr'); if(tr) toggleFilter(tr.dataset.v);}});
+$('thead').addEventListener('click',e=>{const th=e.target.closest('th'); if(!th) return;
+  const k=th.dataset.k; state.sort = state.sort.k===k ? {k,dir:-state.sort.dir} : {k,dir:k==='name'?1:-1}; render();});
+$('drClose').addEventListener('click',closeDrawer);
+$('scrim').addEventListener('click',closeDrawer);
+/* Dentro do editor, F (modo expandido) e Esc (sair dele) valem também com o
+   foco aqui dentro: a tecla vai para o editor. Esc só vai quando não há o
+   que fechar no painel (o detalhamento ou o seletor), e nada vai de campo
+   de texto ou com Ctrl/Alt/⌘, para o Ctrl+F do navegador continuar. */
+window.addEventListener('keydown',e=>{
+  if(!embedded||e.repeat||e.ctrlKey||e.metaKey||e.altKey) return;
+  if(e.target.closest&&e.target.closest('input,textarea,select,[contenteditable]')) return;
+  const k=e.key.toLowerCase();
+  if(k==='escape'&&($('drawer').classList.contains('open')||!$('filterMenu').hidden)) return;
+  if(k==='f'||k==='escape') parent.postMessage({type:'painel:key',key:k},location.origin);
+},true);
+document.addEventListener('keydown',e=>{if(e.key==='Escape') closeDrawer();});
+
+/* ---- Tema ---- */
+const SUN='<circle cx="8" cy="8" r="3" stroke="currentColor" stroke-width="1.4"/><path d="M8 1.5v1.6M8 12.9v1.6M1.5 8h1.6M12.9 8h1.6M3.4 3.4l1.1 1.1M11.5 11.5l1.1 1.1M3.4 12.6l1.1-1.1M11.5 4.5l1.1-1.1" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>';
+const MOON='<path d="M13.5 9.6A5.6 5.6 0 0 1 6.4 2.5a5.6 5.6 0 1 0 7.1 7.1Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>';
+function themeButton(){
+  const toLight = theme==='dark';
+  $('themeIco').innerHTML = toLight ? SUN : MOON;
+  $('themeLbl').textContent = toLight ? 'Tema claro' : 'Tema escuro';
+  $('themeBtn').title = toLight ? 'Mudar para o tema claro' : 'Mudar para o tema escuro';
+  $('themeBtn').setAttribute('aria-pressed', String(theme==='light'));
+}
+function setTheme(t){
+  t = t==='light' ? 'light' : 'dark';
+  if(t===theme) return;
+  theme = t;
+  document.documentElement.dataset.theme = t;
+  repaint();
+  render();
+}
+function repaint(){
+  Object.assign(C, THEMES[theme]);
+  applyColors();
+  themeDefaults();
+  if(S){ allCharts().forEach(c=>c.destroy()); build(); }
+  themeButton();
+}
+$('themeBtn').addEventListener('click',()=>setTheme(theme==='dark'?'light':'dark'));
+themeButton();
+
+/* ---- Conversa com o editor ----
+   O painel avisa que carregou; o editor responde com a base e o estado.
+   Depois, o editor manda o que a conversa mudou e o painel devolve o que a
+   pessoa mudou clicando, para entrar no documento e no desfazer. */
+function post(){
+  if(!embedded) return;
+  parent.postMessage({type:'painel:state',state:{period:state.period,filter:state.filter,highlight:state.highlight,theme}},location.origin);
+}
+function applyState(s){
+  if(['6m','12m','all'].includes(s.period)) state.period=s.period;
+  if(s.filter==='all'||S.main.values.includes(s.filter)) state.filter=s.filter;
+  if(s.highlight===null||S.split.groups.includes(s.highlight)) state.highlight=s.highlight;
+}
+window.addEventListener('message',e=>{
+  if(e.origin!==location.origin) return;
+  const d=e.data; if(!d) return;
+  if(d.type==='painel:spec'){
+    if(S) allCharts().forEach(c=>c.destroy());
+    SP=[]; chTrend=chVol=chMain=chStack=chSplit=null;
+    load(d.spec);
+    const st=d.state||{};
+    applyState(st); applyLook(st);
+    if(st.theme==='light'||st.theme==='dark'){ theme=st.theme; document.documentElement.dataset.theme=theme; }
+    repaint(); document.body.classList.add('ready');
+    render();
+    return;
+  }
+  if(d.type==='painel:set' && S){
+    const st=d.state||{};
+    applyState(st);
+    const t=st.theme==='light'||st.theme==='dark' ? st.theme : theme;
+    const redo=applyLook(st);
+    if(t!==theme){ theme=t; document.documentElement.dataset.theme=t; repaint(); }
+    else if(redo) repaint();
+    render();
+  }
+});
+if(embedded) parent.postMessage({type:'painel:ready'},location.origin);
+else $('wait').textContent='Este painel é montado pelo editor de dashboards: abra um dashboard criado no portal.';
+})();
+</script>
+</body>
+</html>

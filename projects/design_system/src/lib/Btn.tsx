@@ -119,11 +119,15 @@ export function Btn({
   const [ringed, setRinged] = useState(false)
   const ring = ringed ? 'var(--wk-btn-focus-ring)' : undefined
 
+  /* A borda da contornada é a primária, a menos que o tema diga outra: no
+     escuro do portal ela é a primária a 40%, como no Weknow de produção. */
+  const outline = `var(--wk-btn-outlined-border, ${COLOR.primary})`
+
   type StyleMap = Record<BtnVariant, React.CSSProperties>
   const base: StyleMap = {
     primary:   { background: hovered ? COLOR.primaryHover : COLOR.primary, color: 'var(--wk-btn-on-primary)', border: '1px solid transparent', boxShadow: hovered ? 'var(--wk-btn-primary-shadow)' : ring ?? 'none' },
     secondary: { background: hovered ? COLOR.tintHover : COLOR.tint, color: COLOR.primary, border: '1px solid transparent', boxShadow: ring ?? 'none' },
-    outlined:  { background: hovered ? 'var(--wk-btn-outlined-hover-bg)' : 'transparent', color: hovered ? 'var(--wk-btn-outlined-hover-fg)' : COLOR.primary, border: '1px solid ' + COLOR.primary, boxShadow: hovered ? 'var(--wk-btn-outlined-shadow)' : ring ?? 'none' },
+    outlined:  { background: hovered ? 'var(--wk-btn-outlined-hover-bg)' : 'transparent', color: hovered ? 'var(--wk-btn-outlined-hover-fg)' : COLOR.primary, border: '1px solid ' + outline, boxShadow: hovered ? 'var(--wk-btn-outlined-shadow)' : ring ?? 'none' },
     ghost:     { background: hovered ? 'var(--wk-btn-ghost-hover)' : 'transparent', color: COLOR.textSecondary, border: '1px solid transparent', boxShadow: ring ?? 'none' },
     danger:    { background: hovered ? 'var(--wk-btn-danger-hover)' : 'var(--wk-btn-danger)', color: 'var(--wk-btn-on-danger)', border: '1px solid transparent', boxShadow: hovered ? 'var(--wk-btn-danger-shadow)' : ring ?? 'none' },
   }
@@ -180,18 +184,22 @@ export function IconBtn({
   onClick,
   children,
   active,
+  disabled,
 }: {
   title: string
   onClick?: () => void
   children: ReactNode
   active?: boolean
+  /** Sem ação no momento (o desfazer sem histórico): apagado e sem hover. */
+  disabled?: boolean
 }) {
   return (
     <button
       title={title}
       aria-label={title}
       onClick={onClick}
-      className="wk-icon-btn w-8 h-8 flex items-center justify-center"
+      disabled={disabled}
+      className="wk-icon-btn w-8 h-8 flex items-center justify-center disabled:opacity-40 disabled:pointer-events-none"
       style={{ color: active ? COLOR.primary : COLOR.navLabel }}
     >
       {children}

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { COLOR, FONT } from './tokens'
 import { Icon } from './icons'
+import { onFrameClick } from './Menu'
 
 /**
  * Campo de formulário do design system: espec. do nó `form-item` (4454:8719):
@@ -104,11 +105,13 @@ export function Select<T extends string>({
       if (!rootRef.current?.contains(e.target as Node)) setOpen(false)
     }
     const onKey = (e: KeyboardEvent) => e.key === 'Escape' && setOpen(false)
+    const offFrame = onFrameClick(() => setOpen(false))
     document.addEventListener('mousedown', close)
     window.addEventListener('keydown', onKey)
     return () => {
       document.removeEventListener('mousedown', close)
       window.removeEventListener('keydown', onKey)
+      offFrame()
     }
   }, [open])
 

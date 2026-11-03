@@ -55,6 +55,22 @@ function clipFrame(el: HTMLElement) {
   return { top, bottom, left, right }
 }
 
+/**
+ * Clique numa moldura (iframe) da página: ele não chega como `mousedown` a
+ * este documento, então o "clique fora" não o via e o menu ficava aberto
+ * sobre um painel embutido. O que chega é a janela perdendo o foco para a
+ * moldura. Trocar de aplicativo também tira o foco, mas aí ele não vai para
+ * uma moldura, e o menu fica (um formulário dentro dele não se perde).
+ */
+export function onFrameClick(fn: () => void) {
+  const onBlur = () =>
+    setTimeout(() => {
+      if (document.activeElement instanceof HTMLIFrameElement) fn()
+    })
+  window.addEventListener('blur', onBlur)
+  return () => window.removeEventListener('blur', onBlur)
+}
+
 /** Menu suspenso ancorado no gatilho; fecha com clique fora ou Esc. */
 export function Dropdown({
   trigger,
@@ -160,11 +176,13 @@ export function Dropdown({
       if (!ref.current?.contains(e.target as Node)) close()
     }
     const onKey = (e: KeyboardEvent) => e.key === 'Escape' && close()
+    const offFrame = onFrameClick(close)
     document.addEventListener('mousedown', onDown)
     window.addEventListener('keydown', onKey)
     return () => {
       document.removeEventListener('mousedown', onDown)
       window.removeEventListener('keydown', onKey)
+      offFrame()
     }
   }, [open])
 
