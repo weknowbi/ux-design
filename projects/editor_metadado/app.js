@@ -398,7 +398,7 @@ else 'Não Aceito' end`;
         el.innerHTML = `<div class="pgrid">${campos}<span class="lbl${away ? '' : ' lbl-top'}">Fórmula</span>${formulaRow}${checks}</div>`;
       } else {
         const tab = (id, nome) => `<span class="ptab${S.propTab === id ? ' on' : ''}" role="tab" aria-selected="${S.propTab === id}" data-ptab="${id}">${nome}</span>`;
-        el.innerHTML = `<div class="ptabs" role="tablist">${tab('formula', 'Fórmula')}${tab('props', 'Propriedades')}</div>
+        el.innerHTML = `<div class="ptabs" role="tablist">${tab('props', 'Propriedades')}${tab('formula', 'Fórmula')}</div>
           <div class="ptab-body">
             <div class="ptab-page${S.propTab === 'formula' ? ' on' : ''}" data-page="formula">${formulaRow}</div>
             <div class="ptab-page${S.propTab === 'props' ? ' on' : ''}" data-page="props"><div class="pgrid">${campos}${checks}</div></div>
