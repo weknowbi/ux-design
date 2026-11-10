@@ -1,0 +1,6 @@
+{
+  "name": "Editor de metadado - Campo calculado",
+  "description": "Mais área para editar a fórmula do campo calculado: abas Fórmula e Propriedades, ou a fórmula ao lado do SQL",
+  "devCommand": "npm run dev",
+  "port": 5185
+}

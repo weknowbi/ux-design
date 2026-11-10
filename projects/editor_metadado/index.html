@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Editor de metadado</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+<div class="app" id="app">
+
+  <header class="titlebar">
+    <span class="tb-logo" aria-hidden="true"></span>
+    <span class="tb-title">Editor de metadado</span>
+    <span class="grow"></span>
+    <button class="tb-proto" id="btnProto" data-nolog title="Opções do protótipo (não faz parte da tela)">Protótipo</button>
+    <span class="tb-win" aria-hidden="true"><i class="ti ti-minus"></i><i class="ti ti-square"></i><i class="ti ti-x"></i></span>
+  </header>
+
+  <div class="body">
+    <!-- Estrutura -->
+    <aside class="col-estrutura">
+      <div class="col-head"><span>Estrutura</span><button class="mini" title="Opções da estrutura">…</button></div>
+      <div class="panel tree" id="tree" role="tree"></div>
+    </aside>
+
+    <div class="main">
+      <div class="top">
+        <!-- Tabelas disponíveis -->
+        <section class="col-tabelas">
+          <div class="col-head"><span>Tabelas disponíveis</span></div>
+          <div class="row-gap">
+            <select class="ctl" style="flex:1"><option>[Conexão padrão]</option></select>
+            <button class="mini" title="Conexões">…</button>
+          </div>
+          <input class="ctl" placeholder="Digite aqui para filtrar..." />
+          <div class="panel tree" id="treeTabelas"></div>
+        </section>
+
+        <!-- Metadado -->
+        <section class="col-metadado">
+          <div class="col-head"><span>Metadado</span></div>
+          <div class="toolbar">
+            <button class="tbtn" title="Visualizar dados"><i class="ti ti-table ic-blue"></i></button>
+            <button class="tbtn on sql-chip" title="Editar SQL">SQL</button>
+            <span class="tsep"></span>
+            <button class="tbtn" title="Filtros"><i class="ti ti-filter ic-gray"></i></button>
+            <span class="tsep"></span>
+            <button class="tbtn" title="Carregar dados"><i class="ti ti-database ic-blue"></i></button>
+            <button class="tbtn" title="Carregar dados (cache)"><i class="ti ti-database-import ic-green"></i></button>
+            <button class="tbtn" title="Exportar dados"><i class="ti ti-database-export ic-amber"></i></button>
+            <span class="tsep"></span>
+            <button class="tbtn" title="Conexão ativa"><span class="dot-green"></span></button>
+            <span class="tsep"></span>
+            <button class="tbtn" title="Exportar"><i class="ti ti-file-export ic-amber"></i><i class="ti ti-caret-down-filled caret"></i></button>
+            <input class="ctl num" value="1000" title="Limite de linhas" />
+          </div>
+
+          <div class="tabs-row">
+            <span class="tab on">Metadado</span><span class="tab plus" title="Novo">+</span>
+          </div>
+
+          <div class="sheet">
+            <div class="toolbar">
+              <button class="tbtn" title="Executar SQL"><i class="ti ti-player-play ic-green"></i></button>
+              <button class="tbtn" title="Testar SQL"><i class="ti ti-circle-check ic-green"></i></button>
+              <button class="tbtn" title="Formatar SQL"><i class="ti ti-align-left ic-blue"></i></button>
+              <button class="tbtn" title="Ver campos do SQL"><i class="ti ti-list-details ic-amber"></i></button>
+              <span class="tsep"></span>
+              <button class="tbtn" title="Ver histórico"><i class="ti ti-history ic-blue"></i></button>
+              <button class="tbtn" title="SQL anterior"><i class="ti ti-arrow-back-up ic-blue"></i></button>
+              <button class="tbtn" title="Próximo SQL"><i class="ti ti-arrow-forward-up ic-blue"></i></button>
+              <button class="tbtn" title="Apagar histórico"><i class="ti ti-clock-x ic-amber"></i></button>
+              <span class="tsep" data-place="barra"></span>
+              <button class="tbtn" id="btnBesideBar" data-place="barra" title="Abrir a fórmula ao lado do SQL (Ctrl+Shift+F)"><i class="ti ti-layout-sidebar-right ic-blue"></i></button>
+            </div>
+            <div class="subtabs"><span class="subtab on">SQL</span></div>
+
+            <div class="sqlarea" id="sqlArea">
+              <div class="pane" id="paneLeft">
+                <div class="pane-body" id="sqlHost"></div>
+                <div class="pane-status"><span id="sqlPos">1: 1</span><span class="grow"></span><i class="ti ti-settings ic-gray" title="Configurações do editor"></i></div>
+              </div>
+              <div class="vsplit" id="vsplit" title="Arraste para redimensionar"></div>
+              <div class="pane" id="paneRight">
+                <div class="rtabs" id="rtabs"></div>
+                <div class="pane-body">
+                  <div class="rhost" id="genHost"></div>
+                  <div class="rhost" id="rFormulaHost"></div>
+                  <div class="rhost rempty" id="rEmpty">Selecione um campo calculado na Estrutura para ver a fórmula aqui.</div>
+                </div>
+                <div class="pane-status" id="rStatus"><span id="rPos">1: 1</span><span class="grow"></span><button class="tbtn sm" id="btnRunGen" title="Executar SQL gerado"><i class="ti ti-player-play ic-green"></i></button></div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- Propriedades -->
+      <section class="props">
+        <div class="props-legend">Propriedades do objeto selecionado</div>
+        <div class="props-body" id="props"></div>
+      </section>
+    </div>
+  </div>
+
+  <footer class="statusbar">
+    <button class="btn" disabled>OK</button>
+    <button class="btn">Cancelar</button>
+    <span class="warn"><i class="ti ti-alert-triangle"></i> [2 inconsistências] [Metadado] O SQL informado não foi testado <a href="#" id="lnkInc">(clique para ver)</a></span>
+  </footer>
+
+  <!-- Janela da lupa: escolher um campo para inserir na fórmula -->
+  <div class="overlay" id="modal" hidden>
+    <div class="dialog picker" role="dialog" aria-labelledby="modalTitle">
+      <div class="dlg-title"><span class="tb-logo" aria-hidden="true"></span><span id="modalTitle">Selecione</span><span class="grow"></span>
+        <span class="tb-win" aria-hidden="true"><i class="ti ti-minus"></i><i class="ti ti-square"></i></span><button class="dlg-x" id="modalX" title="Fechar"><i class="ti ti-x"></i></button></div>
+      <div class="pk-body">
+        <div class="row-gap"><input class="ctl" id="pkFilter" placeholder="Digite para filtrar..." style="flex:1" autocomplete="off" /><button class="mini" title="Opções">…</button></div>
+        <div class="panel tree pk-tree" id="pkTree" role="tree" tabindex="0"></div>
+      </div>
+      <div class="pk-foot"><button class="btn" id="modalOk">OK</button><button class="btn" id="modalCancel">Cancelar</button></div>
+    </div>
+  </div>
+
+  <!-- Painel do protótipo (para quem conduz o teste) -->
+  <div class="proto" id="proto" hidden>
+    <div class="proto-head"><b>Protótipo</b><span class="grow"></span><button class="mini x" id="protoX" title="Fechar"><i class="ti ti-x"></i></button></div>
+    <div class="pgroup">
+      <div class="pcap">Solução</div>
+      <label><input type="radio" name="pSol" value="abas" /> Abas Fórmula e Propriedades</label>
+      <label><input type="radio" name="pSol" value="lado" /> Fórmula ao lado do SQL</label>
+    </div>
+    <div class="pgroup" data-sol="abas">
+      <div class="pcap">Ao entrar em um campo calculado</div>
+      <label><input type="radio" name="pTabRule" value="formula" /> Abre sempre na aba Fórmula</label>
+      <label><input type="radio" name="pTabRule" value="ultima" /> Mantém a última aba usada</label>
+    </div>
+    <label class="pchk"><input type="checkbox" id="pDynamic" /> SQL dinâmico (linguagem de modelo)</label>
+    <div class="pgroup" data-sol="lado">
+      <div class="pcap">Botão de abrir ao lado</div>
+      <label><input type="radio" name="pPlace" value="ambos" /> Ao lado da lupa e na barra do SQL</label>
+      <label><input type="radio" name="pPlace" value="lupa" /> Só ao lado da lupa</label>
+      <label><input type="radio" name="pPlace" value="barra" /> Só na barra do SQL</label>
+    </div>
+    <div class="pgroup" data-sol="lado">
+      <div class="pcap">Ao selecionar item sem fórmula</div>
+      <label><input type="radio" name="pNoF" value="fechar" /> Fecha o painel e reabre no próximo campo calculado</label>
+      <label><input type="radio" name="pNoF" value="manter" /> Mantém o painel com um aviso</label>
+    </div>
+    <div class="pgroup">
+      <div class="pcap">Registro de interações · <span id="pLogCount">0</span></div>
+      <div class="row-gap"><button class="btn" id="pLogCopy">Copiar</button><button class="btn" id="pLogDownload">Baixar</button><button class="btn" id="pLogClear">Limpar</button></div>
+    </div>
+    <div class="row-gap" style="margin-top:8px"><button class="btn" id="pReset">Voltar ao início</button></div>
+  </div>
+
+  <div class="toast" id="toast" role="status" hidden></div>
+</div>
+<script src="app.js"></script>
+</body>
+</html>
