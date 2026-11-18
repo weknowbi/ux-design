@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useRef, useState, type ReactNode } from 'react'
 import { Btn } from '@ds/Btn'
 import { FormField, Select, fieldBoxStyle, fieldTextStyle } from '@ds/Field'
 import { Modal, ModalFooter } from '@ds/Modal'
@@ -207,7 +207,7 @@ export function PublishDialog({ board, onClose, onPublished }: { board: Board; o
   )
 }
 
-export function Radio({ checked, onSelect, label, hint }: { checked: boolean; onSelect: () => void; label: string; hint: string }) {
+export function Radio({ checked, onSelect, label, hint }: { checked: boolean; onSelect: () => void; label: ReactNode; hint: ReactNode }) {
   return (
     <button
       type="button"
@@ -219,7 +219,7 @@ export function Radio({ checked, onSelect, label, hint }: { checked: boolean; on
     >
       <span
         className="shrink-0 flex items-center justify-center rounded-full"
-        style={{ width: 20, height: 20, marginTop: 1, border: `2px solid ${checked ? COLOR.primary : COLOR.borderStrong}` }}
+        style={{ width: 20, height: 20, marginTop: 1, border: `2px solid ${checked ? COLOR.primary : COLOR.navLabel}` }}
       >
         {checked && <span className="rounded-full" style={{ width: 10, height: 10, background: COLOR.primary }} />}
       </span>

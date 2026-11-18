@@ -2,6 +2,7 @@ import { useLayoutEffect, useRef, useState } from 'react'
 import { COLOR, FONT, LAYOUT } from '@/design/tokens'
 import { Icon } from '@/components/icons'
 import { AnaliseInteligenteIcon } from '@/components/dashboard/AnaliseInteligenteIcon'
+import { InsightMenu } from '@/components/dashboard/InsightMenu'
 import { Btn } from '@ds/Btn'
 import { Dropdown } from '@/components/browser/Menu'
 import { useEllipsisTooltip } from '@/components/Tooltip'
@@ -302,11 +303,14 @@ export function DashboardBar({
   active,
   onSelect,
   mobile,
+  dashboard,
 }: {
   tabs: Tab[]
   active: number
   onSelect: (i: number) => void
   mobile?: boolean
+  /** O dashboard aberto: liga a Análise inteligente (ver `InsightMenu`). */
+  dashboard?: { id: string; name: string }
 }) {
   const prev = <Arrow dir="prev" disabled={active === 0} onClick={() => onSelect(active - 1)} />
   const next = <Arrow dir="next" disabled={active === tabs.length - 1} onClick={() => onSelect(active + 1)} />
@@ -340,12 +344,16 @@ export function DashboardBar({
             4 antes do ícone, 8 até o rótulo, 8 depois dele. O desenho do
             ícone já tem folga própria, e com os 12 do botão pequeno ele
             ficava longe da borda. As margens negativas tiram a diferença. */}
-        <Btn size="sm" title={mobile ? 'Análise inteligente' : undefined}>
-          <span className="flex items-center" style={{ gap: 8, marginLeft: -8, marginRight: mobile ? -8 : -4 }}>
-            <AnaliseInteligenteIcon />
-            {!mobile && 'Análise inteligente'}
-          </span>
-        </Btn>
+        {dashboard ? (
+          <InsightMenu dashboard={dashboard} tab={active} mobile={mobile} />
+        ) : (
+          <Btn size="sm" title={mobile ? 'Análise inteligente' : undefined}>
+            <span className="flex items-center" style={{ gap: 8, marginLeft: -8, marginRight: mobile ? -8 : -4 }}>
+              <AnaliseInteligenteIcon />
+              {!mobile && 'Análise inteligente'}
+            </span>
+          </Btn>
+        )}
         {/* O "…" do web fica à vista, mas sem ação por enquanto: o menu
             dele não faz parte do que o protótipo testa. */}
         <span className="shrink-0 w-8 h-8 flex items-center justify-center" aria-hidden>

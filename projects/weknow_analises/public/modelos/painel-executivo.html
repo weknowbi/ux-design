@@ -17,7 +17,7 @@
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
 /* As cores do painel ficam todas aqui. O padrão é o do Weknow: no escuro, os
@@ -357,6 +357,108 @@ html,*{scrollbar-width:thin;scrollbar-color:var(--line-3) transparent}
 body:not(.ready) main,body:not(.ready) .controls{display:none}
 body.ready .wait{display:none}
 .theme-ico{display:block}
+
+/* =========================================================
+   Estilo editorial (look.style = 'editorial'), pedido pela conversa.
+   Outro desenho, e não outra cor: o de um relatório impresso. Fundo creme,
+   títulos e números com serifa, nada de cartão (sem caixa, sombra ou raio):
+   as seções se separam por fios finos e o número de cada indicador fica sob
+   um fio de tinta. Uma cor só de destaque, terracota; o resto é cinza quente.
+   Contrastes medidos contra o fundo de cada tema: texto ≥ 5,1:1, séries ≥ 3,3:1.
+   ========================================================= */
+:root[data-style="editorial"]{
+  --bg:#F6F4EE; --card:transparent; --card-2:#EEEBE3; --card-hi:#FFFFFF;
+  --line:rgba(43,40,35,.13); --line-2:rgba(43,40,35,.20); --line-3:rgba(43,40,35,.34); --ink:#22201B;
+  --text:#22201B; --text-2:#55514A; --text-3:#6B665D;
+  --bad:#A1451F; --good:#4B6B32; --prior:rgba(43,40,35,.16); --meta:#6B665D;
+  --radius:0px; --serif:Newsreader,"Iowan Old Style",Georgia,serif;
+  --fld:rgba(43,40,35,.24); --ghost-h:rgba(43,40,35,.05); --act-bg:transparent; --act-fg:#22201B; --ico:#6B665D;
+  --menu-bg:#FBFAF6; --menu-hover:rgba(43,40,35,.05);
+  color-scheme:light;
+}
+:root[data-style="editorial"][data-theme="dark"]{
+  --bg:#1C1B18; --card:transparent; --card-2:#26241F; --card-hi:#2C2A25;
+  --line:rgba(242,238,230,.10); --line-2:rgba(242,238,230,.16); --line-3:rgba(242,238,230,.30); --ink:#EDEAE2;
+  --text:#EDEAE2; --text-2:#C2BDB2; --text-3:#A39E93;
+  --bad:#EE9E78; --good:#AFC37E; --prior:rgba(242,238,230,.16); --meta:#A39E93;
+  --fld:rgba(242,238,230,.22); --ghost-h:rgba(242,238,230,.06); --act-fg:#EDEAE2; --ico:#A39E93;
+  --menu-bg:#26241F; --menu-hover:rgba(242,238,230,.06);
+  color-scheme:dark;
+}
+[data-style="editorial"] body,[data-style="editorial"][data-theme] body{background:var(--bg)}
+[data-style="editorial"] .topbar,[data-style="editorial"][data-theme] .topbar{background:color-mix(in srgb,var(--bg) 86%,transparent)}
+/* Os controles viram texto: o período ativo é sublinhado, sem véu. */
+[data-style="editorial"] .seg{border:0;padding:0;gap:4px}
+[data-style="editorial"] .seg button,[data-style="editorial"] .seg button[aria-pressed="true"],[data-style="editorial"][data-theme] .seg button[aria-pressed="true"]{border-radius:0;background:none;box-shadow:none;padding:0 8px}
+[data-style="editorial"] .seg button[aria-pressed="true"],[data-style="editorial"][data-theme] .seg button[aria-pressed="true"]{color:var(--text);box-shadow:inset 0 -2px 0 var(--blue)}
+[data-style="editorial"] .select,[data-style="editorial"] .btn,[data-style="editorial"] .dd-menu,[data-style="editorial"] .dd-opt{border-radius:0}
+[data-style="editorial"] .select{border-width:0 0 1px;padding-left:2px}
+[data-style="editorial"] main{max-width:1280px;padding-top:36px;padding-left:40px;padding-right:40px}
+/* Cabeçalho de relatório: o título grande, em serifa, sobre um fio de tinta. */
+[data-style="editorial"] .context{margin-bottom:28px;padding-bottom:20px;border-bottom:1px solid var(--ink)}
+[data-style="editorial"] .eyebrow{letter-spacing:.14em;font-size:11px;color:var(--text-3)}
+[data-style="editorial"] h1{font-family:var(--serif);font-weight:500;font-size:40px;line-height:1.08;letter-spacing:-.015em;margin-top:4px}
+[data-style="editorial"] .ctx-sub{font-size:13.5px;margin-top:10px}
+[data-style="editorial"] .status i{background:var(--blue);box-shadow:none}
+[data-style="editorial"] .chip,[data-style="editorial"][data-theme] .chip{border-radius:0;background:none;border-color:var(--line-3)}
+/* Sem cartões: nem fundo, nem caixa, nem sombra. */
+[data-style="editorial"] .card,[data-style="editorial"][data-theme] .card{background:none;border:0;border-radius:0;box-shadow:none}
+[data-style="editorial"] .card::before{display:none}
+/* Os quatro números: lado a lado, cada um sob um fio de tinta, em serifa grande. */
+[data-style="editorial"] .kpis{gap:36px;margin-bottom:40px}
+[data-style="editorial"] .kpi{padding:14px 0 0;border-top:1px solid var(--ink)}
+[data-style="editorial"] .kpi-label{font-size:11px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:var(--text-2)}
+/* O número acompanha a largura: com o Criar com IA aberto, "R$ 122,6 mi" ainda cabe. */
+[data-style="editorial"] .kpi-value{font-family:var(--serif);font-weight:400;font-size:clamp(32px,3.1vw,48px);letter-spacing:-.02em;margin-top:14px}
+[data-style="editorial"] .kpi-value small{font-family:Inter,system-ui,sans-serif;font-size:15px;color:var(--text-3)}
+[data-style="editorial"] .kpi-foot{margin-top:8px}
+[data-style="editorial"] .kpi-spark{margin:14px 0 0;height:40px}
+/* Variação como texto, na cor do sentido, sem pílula. */
+[data-style="editorial"] .delta,[data-style="editorial"][data-theme] .delta{background:none;padding:0;font-weight:600}
+[data-style="editorial"] .delta.good,[data-style="editorial"][data-theme] .delta.good{color:var(--good)}
+[data-style="editorial"] .delta.bad,[data-style="editorial"] .delta.warn,[data-style="editorial"][data-theme] .delta.bad,[data-style="editorial"][data-theme] .delta.warn{color:var(--bad)}
+[data-style="editorial"] .delta.neutral,[data-style="editorial"] .delta.low,[data-style="editorial"][data-theme] .delta.neutral,[data-style="editorial"][data-theme] .delta.low{color:var(--text-2)}
+/* As seções: um fio fino em cima, título em serifa, e mais ar entre elas. */
+[data-style="editorial"] .grid{column-gap:44px;row-gap:44px}
+[data-style="editorial"] .grid > .card{border-top:1px solid var(--line-2)}
+[data-style="editorial"] .card-h{padding:16px 0 0}
+[data-style="editorial"] .card-t{font-family:var(--serif);font-weight:500;font-size:21px;letter-spacing:-.01em;line-height:1.25}
+[data-style="editorial"] .card-d{font-size:12.5px;margin-top:4px}
+[data-style="editorial"] .chart-wrap{padding:18px 0 10px}
+[data-style="editorial"] .hint{padding:0 0 4px}
+[data-style="editorial"] .sw{border-radius:0}
+/* Insights como notas de rodapé: rótulo em versalete na cor de destaque. */
+[data-style="editorial"] .ins-list{padding:8px 0 0;max-height:none}
+[data-style="editorial"] .ins{padding:14px 0;border-radius:0}
+[data-style="editorial"] .ins.clickable:hover,[data-style="editorial"][data-theme] .ins.clickable:hover{background:none}
+[data-style="editorial"] .ins.clickable:hover .ins-title{text-decoration:underline;text-underline-offset:3px}
+[data-style="editorial"] .tag,[data-style="editorial"][data-theme] .tag{background:none;padding:0;border-radius:0;letter-spacing:.12em;font-size:10px;color:var(--blue)}
+[data-style="editorial"] .ins-title{font-family:var(--serif);font-weight:500;font-size:16px;letter-spacing:0}
+[data-style="editorial"] .ins-more,[data-style="editorial"][data-theme] .ins-more{color:var(--blue)}
+[data-style="editorial"] .payer-body{padding:20px 0 4px}
+[data-style="editorial"] .plist li{border-radius:0}
+[data-style="editorial"] .donut-c b{font-family:var(--serif);font-weight:500;font-size:22px}
+/* Tabela de relatório: cabeçalho em versalete sobre fio de tinta. */
+[data-style="editorial"] .table-wrap{padding:10px 0 0}
+[data-style="editorial"] th{font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-2);border-bottom:1px solid var(--ink)}
+[data-style="editorial"] tbody tr.sel,[data-style="editorial"][data-theme] tbody tr.sel{background:color-mix(in srgb,var(--blue) 7%,transparent)}
+[data-style="editorial"] tbody tr.sel td:first-child,[data-style="editorial"][data-theme] tbody tr.sel td:first-child{box-shadow:inset 2px 0 0 var(--blue)}
+[data-style="editorial"] tfoot td,[data-style="editorial"][data-theme] tfoot td{background:none;border-top:1px solid var(--ink)}
+[data-style="editorial"] .occ-bar,[data-style="editorial"] .occ-bar i,[data-style="editorial"] .share i{border-radius:0}
+[data-style="editorial"] .method{margin-top:44px;padding:20px 0 0;border-top:1px solid var(--ink)}
+[data-style="editorial"] .method h4{font-family:var(--serif);font-weight:500;font-size:15px}
+[data-style="editorial"] .foot{padding:0}
+[data-style="editorial"] .drawer,[data-style="editorial"][data-theme] .drawer{background:var(--bg)}
+[data-style="editorial"] .dr-k{border-radius:0;background:none;border-width:1px 0 0;border-color:var(--ink)}
+[data-style="editorial"] .dr-h h3{font-family:var(--serif);font-weight:500;font-size:22px}
+[data-style="editorial"] :focus-visible{outline-color:var(--blue)}
+@media (max-width:720px){
+  [data-style="editorial"] main{padding:22px 16px 32px}
+  [data-style="editorial"] h1{font-size:30px}
+  [data-style="editorial"] .kpis{gap:20px}
+  [data-style="editorial"] .kpi-value{font-size:40px}
+  [data-style="editorial"] .grid{row-gap:32px}
+}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
@@ -528,6 +630,19 @@ const THEMES = {
     grid:'rgba(15,23,42,0.07)',ttBg:'rgba(255,255,255,0.98)',ttBorder:'rgba(15,23,42,0.12)',ttBody:'#344054',
     prior:'rgba(15,23,42,.14)',meta:'rgba(52,64,84,.55)',card:'#FFFFFF',bg:'#FFFFFF'},
 };
+/* O estilo editorial: os papéis das cores ficam (blue é a principal, teal a de
+   comparação), os tons mudam. Principal terracota, comparação em cinza quente,
+   ardósia e tinta fecham a composição; tinta também marca o mês acima da
+   média. Terracota e ardósia se separam pela cor também com daltonismo, e as
+   quatro passam de 3:1 contra o fundo nos dois temas. */
+const EDITORIAL = {
+  light:{blue:'#B4532A',teal:'#8A8478',orange:'#2B2823',violet:'#3E6280',gray:'#B9B3A6',text:'#22201B',text2:'#55514A',text3:'#6B665D',
+    grid:'rgba(43,40,35,0.08)',ttBg:'rgba(251,250,246,0.98)',ttBorder:'rgba(43,40,35,0.16)',ttBody:'#3A3731',
+    prior:'rgba(43,40,35,.16)',meta:'rgba(43,40,35,.5)',card:'#F6F4EE',bg:'#F6F4EE'},
+  dark:{blue:'#E28A60',teal:'#8F8A7F',orange:'#F2EEE6',violet:'#86AECB',gray:'#6E6A61',text:'#EDEAE2',text2:'#C2BDB2',text3:'#A39E93',
+    grid:'rgba(242,238,230,0.07)',ttBg:'rgba(38,36,31,0.98)',ttBorder:'rgba(242,238,230,0.14)',ttBody:'#D9D5CC',
+    prior:'rgba(242,238,230,.16)',meta:'rgba(237,234,226,.5)',card:'#1C1B18',bg:'#1C1B18'},
+};
 const $ = id => document.getElementById(id);
 let theme = document.documentElement.dataset.theme==='light' ? 'light' : 'dark';
 const C = {...THEMES[theme]};
@@ -540,12 +655,16 @@ const C = {...THEMES[theme]};
    em que vizinhos se distinguem também com daltonismo (conferido com o
    validador do dataviz, nos dois temas). A cor própria troca só a principal. */
 const PALETTES = { blue:['blue','teal','violet','orange'], green:['teal','blue','orange','violet'], violet:['violet','teal','blue','orange'] };
-const LOOK0 = { palette:'blue', accent:null, density:'comfortable', corners:'round', lines:'smooth', hidden:[] };
+const LOOK0 = { style:'weknow', palette:'blue', accent:null, density:'comfortable', corners:'round', lines:'smooth', hidden:[] };
 const SECTIONS = ['insights','volume','rate','composition','table','notes','sparks'];
 const look = {...LOOK0, hidden:[]};
 const tension = () => look.lines==='straight' ? 0 : .35;
+const ed = () => look.style==='editorial';
+const tones = () => (ed() ? EDITORIAL : THEMES)[theme];
+/* No editorial, as marcas do dado são retas: o raio de 4 é do Weknow. */
+const bar = () => ed() ? 0 : 4;
 function applyColors(){
-  const base=THEMES[theme], order=PALETTES[look.palette]||PALETTES.blue;
+  const base=tones(), order=PALETTES[look.palette]||PALETTES.blue;
   ['blue','teal','violet','orange'].forEach((role,k)=>{ C[role]=base[order[k]]; });
   if(look.accent) C.blue=look.accent;
   const st=document.documentElement.style;
@@ -553,7 +672,8 @@ function applyColors(){
 }
 /* Devolve se as cores ou as linhas mudaram: aí os gráficos se refazem. */
 function applyLook(s){
-  const before=look.palette+look.accent+look.lines;
+  const before=look.style+look.palette+look.accent+look.lines;
+  if(['weknow','editorial'].includes(s.style)) look.style=s.style;
   if(PALETTES[s.palette]) look.palette=s.palette;
   if(s.accent===null || /^#[0-9a-f]{6}$/i.test(s.accent||'')) look.accent=s.accent===undefined?look.accent:s.accent;
   if(['comfortable','compact'].includes(s.density)) look.density=s.density;
@@ -561,9 +681,9 @@ function applyLook(s){
   if(['smooth','straight'].includes(s.lines)) look.lines=s.lines;
   if(Array.isArray(s.hidden)) look.hidden=s.hidden.filter(x=>SECTIONS.includes(x));
   const h=document.documentElement;
-  h.dataset.density=look.density; h.dataset.corners=look.corners;
+  h.dataset.density=look.density; h.dataset.corners=look.corners; h.dataset.style=look.style;
   layout();
-  return before!==look.palette+look.accent+look.lines;
+  return before!==look.style+look.palette+look.accent+look.lines;
 }
 /* Esconder uma seção: a vizinha de linha fica com a largura toda. */
 function layout(){
@@ -579,7 +699,9 @@ function layout(){
   $('method').hidden=H.has('notes');
   document.documentElement.classList.toggle('no-sparks',H.has('sparks'));
 }
-const splitColor = (g,i) => g==='Outros' ? C.gray : [C.blue,C.teal,C.violet,C.orange][i%4];
+/* No editorial, o cinza de comparação fica fora da composição: com ele e o
+   cinza de "Outros" lado a lado, as duas partes só se separavam pelo claro. */
+const splitColor = (g,i) => g==='Outros' ? C.gray : (ed() ? [C.blue,C.violet,C.orange,C.teal] : [C.blue,C.teal,C.violet,C.orange])[i%4];
 
 /* ---- Base e estado ---- */
 let S=null, M=[], LAST=0, BY=[];
@@ -654,7 +776,7 @@ function themeDefaults(){
   gridY.color=C.grid;
   TT = {
     backgroundColor:C.ttBg, borderColor:C.ttBorder, borderWidth:1,
-    padding:{x:12,y:10}, cornerRadius:10, caretSize:0, caretPadding:8,
+    padding:{x:12,y:10}, cornerRadius:ed()?2:10, caretSize:0, caretPadding:8,
     titleColor:C.text, titleFont:{weight:'600',size:12}, titleMarginBottom:8,
     bodyColor:C.ttBody, bodyFont:{size:12}, bodySpacing:5,
     footerColor:C.text2, footerFont:{weight:'500',size:11.5}, footerMarginTop:8,
@@ -678,7 +800,7 @@ let SP=[], chTrend, chVol, chMain, chStack, chSplit;
 function spark(id,color,fmt){
   return new Chart($(id),{
     type:'line',
-    data:{labels:[],datasets:[{data:[],borderColor:color,borderWidth:1.6,tension:tension(),pointRadius:0,pointHoverRadius:3,pointHoverBackgroundColor:color,pointHoverBorderWidth:0,fill:true,
+    data:{labels:[],datasets:[{data:[],borderColor:color,borderWidth:ed()?1.3:1.6,tension:tension(),pointRadius:0,pointHoverRadius:3,pointHoverBackgroundColor:color,pointHoverBorderWidth:0,fill:!ed(),
       backgroundColor:c=>vGrad(c.chart,color,.20,0)}]},
     options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:4,bottom:0}},
       scales:{x:{display:false},y:{display:false,grace:'10%'}},
@@ -698,7 +820,7 @@ function build(){
   chTrend = new Chart($('c-trend'),{
     type:'line',
     data:{labels:[],datasets:[
-      {label:'Período',data:[],borderColor:C.blue,borderWidth:2,tension:tension(),pointRadius:0,pointHoverRadius:4,pointHoverBackgroundColor:C.blue,pointHoverBorderColor:C.bg,pointHoverBorderWidth:2,fill:true,backgroundColor:c=>vGrad(c.chart,C.blue,.16,0)},
+      {label:'Período',data:[],borderColor:C.blue,borderWidth:ed()?2.25:2,tension:tension(),pointRadius:0,pointHoverRadius:4,pointHoverBackgroundColor:C.blue,pointHoverBorderColor:C.bg,pointHoverBorderWidth:2,fill:!ed(),backgroundColor:c=>vGrad(c.chart,C.blue,.16,0)},
       {label:'Ano anterior',data:[],borderColor:C.teal,borderWidth:1.5,borderDash:[4,4],tension:tension(),pointRadius:0,pointHoverRadius:3,pointHoverBackgroundColor:C.teal,pointHoverBorderWidth:0,fill:false,spanGaps:false}
     ]},
     options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
@@ -713,7 +835,7 @@ function build(){
 
   chVol = new Chart($('c-vol'),{
     data:{labels:[],datasets:[
-      {type:'bar',label:S.den.label,data:[],backgroundColor:[],hoverBackgroundColor:[],borderRadius:4,borderSkipped:false,maxBarThickness:22,order:2},
+      {type:'bar',label:S.den.label,data:[],backgroundColor:[],hoverBackgroundColor:[],borderRadius:bar(),borderSkipped:false,maxBarThickness:ed()?18:22,order:2},
       {type:'line',label:'Média do período',data:[],borderColor:C.meta,borderWidth:1.25,borderDash:[4,4],pointRadius:0,pointHoverRadius:0,order:1}
     ]},
     options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
@@ -729,8 +851,8 @@ function build(){
   chMain = new Chart($('c-main'),{
     type:'bar',
     data:{labels:[],datasets:[
-      {label:'Período atual',data:[],backgroundColor:[],borderRadius:4,borderSkipped:false,barPercentage:.78,categoryPercentage:.72},
-      {label:'Período anterior',data:[],backgroundColor:C.prior,borderRadius:4,borderSkipped:false,barPercentage:.78,categoryPercentage:.72}
+      {label:'Período atual',data:[],backgroundColor:[],borderRadius:bar(),borderSkipped:false,barPercentage:.78,categoryPercentage:.72},
+      {label:'Período anterior',data:[],backgroundColor:C.prior,borderRadius:bar(),borderSkipped:false,barPercentage:.78,categoryPercentage:.72}
     ]},
     options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,interaction:{mode:'index',axis:'y',intersect:false},
       onHover:pointerHover,
@@ -758,8 +880,8 @@ function build(){
 
   chSplit = new Chart($('c-split'),{
     type:'doughnut',
-    data:{labels:S.split.groups,datasets:[{data:[],backgroundColor:[],hoverBackgroundColor:S.split.groups.map(splitColor),borderColor:C.card,borderWidth:2,hoverOffset:3}]},
-    options:{responsive:true,maintainAspectRatio:false,cutout:'74%',
+    data:{labels:S.split.groups,datasets:[{data:[],backgroundColor:[],hoverBackgroundColor:S.split.groups.map(splitColor),borderColor:C.card,borderWidth:ed()?3:2,hoverOffset:3}]},
+    options:{responsive:true,maintainAspectRatio:false,cutout:ed()?'82%':'74%',
       onHover:pointerHover,
       onClick:(e,els)=>{ if(els.length) toggleHighlight(S.split.groups[els[0].index]); },
       plugins:{tooltip:{...TT,callbacks:{
@@ -823,8 +945,13 @@ function render(){
   $('d-vol').textContent=`Média do período: ${amtFull('den',avg)} por mês`;
   chVol.$idx=r.cur; chVol.data.labels=labels;
   chVol.data.datasets[0].data=vols;
-  chVol.data.datasets[0].backgroundColor=vols.map(v=>hexA(v>avg*1.05?C.orange:C.blue,.82));
-  chVol.data.datasets[0].hoverBackgroundColor=vols.map(v=>v>avg*1.05?C.orange:C.blue);
+  /* No editorial, o mês comum é o cinza quente e o destaque terracota fica só
+     para o que passa da média: a cor diz onde olhar. */
+  const volBase = ed() ? C.teal : C.blue, volHigh = ed() ? C.blue : C.orange;
+  chVol.data.datasets[0].backgroundColor=vols.map(v=>hexA(v>avg*1.05?volHigh:volBase,.82));
+  chVol.data.datasets[0].hoverBackgroundColor=vols.map(v=>v>avg*1.05?volHigh:volBase);
+  const volSw=document.querySelectorAll('[data-sec="volume"] .legend .sw');
+  if(volSw.length>1){ volSw[0].style.background=volBase; volSw[1].style.background=volHigh; }
   chVol.data.datasets[1].data=vols.map(()=>avg);
   chVol.update();
 
@@ -848,7 +975,7 @@ function render(){
     const on=!state.highlight||state.highlight===G[k];
     ds.data=monthly.map(a=>a.split[k]);
     ds.backgroundColor=hexA(splitColor(G[k],k),on?.85:.12); ds.hoverBackgroundColor=hexA(splitColor(G[k],k),on?1:.2);
-    ds.borderRadius = k===G.length-1 ? {topLeft:4,topRight:4} : 0;
+    ds.borderRadius = k===G.length-1 ? {topLeft:bar(),topRight:bar()} : 0;
   });
   chStack.update();
   $('lg-stack').innerHTML=G.map((g,k)=>`<span style="opacity:${!state.highlight||state.highlight===g?1:.4}"><i class="sw" style="background:${splitColor(g,k)}"></i>${esc(g)}</span>`).join('');
@@ -1122,7 +1249,7 @@ function setTheme(t){
   render();
 }
 function repaint(){
-  Object.assign(C, THEMES[theme]);
+  Object.assign(C, tones());
   applyColors();
   themeDefaults();
   if(S){ allCharts().forEach(c=>c.destroy()); build(); }

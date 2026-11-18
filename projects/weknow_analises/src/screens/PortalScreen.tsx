@@ -29,7 +29,7 @@ import { NewFolderButton } from '@/components/browser/NewFolderButton'
 import { PromptModal } from '@/components/PromptModal'
 import { Btn } from '@ds/Btn'
 import { aiFavorite, usePortalRoot } from '@/data/created'
-import { go } from '@/lib/router'
+import { go, goBack } from '@/lib/router'
 import { useStore } from '@/lib/store'
 
 /** Espec. do frame `home` (WP-832): conteúdo de 1159px centrado na coluna de 1617. */
@@ -119,7 +119,8 @@ export function PortalScreen({ onRoute }: { onRoute: (route: PortalRoute) => voi
      imagem, e a mesma tela parecia outra conforme quem abria. */
   const cardStyle: CardStyle = 'padrao'
   const [heroCollapsed, setHeroCollapsed] = useState(false)
-  const [openTab, setSection] = useState<SectionId>('pastas')
+  /* #/tarefas abre a home já em Tarefas: é para onde o alerta criado no Weknow IA leva. */
+  const [openTab, setSection] = useState<SectionId>(() => (window.location.hash === '#/tarefas' ? 'tarefas' : 'pastas'))
   const [iconMode, setIconMode] = usePref<IconMode>('wk-portal-icones', ICON_MODES, 'definidos')
   const prefs = useBrowserPrefs()
   const [toast, setToast] = useState<{ text: string; at: number } | null>(null)
@@ -188,9 +189,20 @@ export function PortalScreen({ onRoute }: { onRoute: (route: PortalRoute) => voi
     setQuery('')
     setGlobalSearch(false)
     if (id) window.location.hash = `/pasta/${encodeURIComponent(id)}`
-    else if (window.location.hash) window.history.pushState(null, '', window.location.pathname + window.location.search)
+    else if (window.location.hash) {
+      window.history.pushState(null, '', window.location.pathname + window.location.search)
+      // `pushState` não avisa ninguém: sem isto, o caminho do "Voltar" não via a saída da pasta.
+      window.dispatchEvent(new Event('popstate'))
+    }
     setFolderId(id)
   }, [])
+
+  /* A seta volta para a tela anterior; o pai é só para quem abriu a pasta direto. */
+  const back = (parent: string | null) => {
+    setQuery('')
+    setGlobalSearch(false)
+    goBack(parent ? `/pasta/${encodeURIComponent(parent)}` : null)
+  }
 
   const toggleFavorite = useCallback((id: string) => {
     setFavorites((prev) => {
@@ -391,7 +403,7 @@ export function PortalScreen({ onRoute }: { onRoute: (route: PortalRoute) => voi
             <div className="pt-4">
               <FolderHeader
                 name={folderName(current)}
-                onBack={() => navigate(path.length > 1 ? path[path.length - 2].id : null)}
+                onBack={() => back(path.length > 1 ? path[path.length - 2].id : null)}
                 aside={controls}
                 compact
                 {...folderHeaderParts(current, true)}
@@ -449,7 +461,7 @@ export function PortalScreen({ onRoute }: { onRoute: (route: PortalRoute) => voi
       <div className="mt-4">
         <FolderHeader
           name={folderName(current)}
-          onBack={() => navigate(path.length > 1 ? path[path.length - 2].id : null)}
+          onBack={() => back(path.length > 1 ? path[path.length - 2].id : null)}
           {...folderHeaderParts(current)}
         />
       </div>
@@ -475,7 +487,7 @@ export function PortalScreen({ onRoute }: { onRoute: (route: PortalRoute) => voi
         <div>
           <FolderHeader
             name={folderName(current)}
-            onBack={() => navigate(path.length > 1 ? path[path.length - 2].id : null)}
+            onBack={() => back(path.length > 1 ? path[path.length - 2].id : null)}
             aside={controls}
             {...folderHeaderParts(current)}
           />

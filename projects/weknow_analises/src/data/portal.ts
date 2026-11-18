@@ -31,6 +31,12 @@ export type Dashboard = Base & {
    * (painel vazio, recém-criado), o card cai no ícone.
    */
   layout?: SketchBlock[]
+  /**
+   * Painel em HTML, como o MCP publica (o contrato `window.weknow` do
+   * Leonel). Quando existe, o dashboard abre esta página na moldura, no lugar
+   * do painel de exemplo. Estudo do visual padrão: `projects/painel_padrao`.
+   */
+  painel?: string
 }
 export type Folder = Base & { kind: 'folder'; children: Item[] }
 export type Item = Folder | Dashboard | Task | Presentation
@@ -118,7 +124,32 @@ const MAIS_PASTAS = [
   'Governança Corporativa',
 ]
 
+/* O painel de teste do visual padrão dos dashboards criados pelo MCP. Ids
+   fixos, fora do `seq`, para não mudar os ids do resto do acervo. Servido
+   por `painel_padrao/server.js` (porta 5190), que faz o papel da moldura. */
+const PASTA_MCP: Folder = {
+  kind: 'folder',
+  id: 'f-mcp',
+  name: 'Painéis criados pelo MCP (teste)',
+  updatedAt: new Date().toISOString(),
+  updatedBy: 'Admin',
+  children: [
+    {
+      kind: 'dashboard',
+      id: 'd-mcp-ps',
+      name: 'Pronto-socorro (visual padrão)',
+      updatedAt: new Date().toISOString(),
+      updatedBy: 'Admin',
+      painel: 'http://localhost:5190/teste.html',
+      layout: [[0, 0, 3, 1, 'label'], [3, 0, 3, 1, 'label'], [6, 0, 3, 1, 'label'], [9, 0, 3, 1, 'label'], [0, 1, 8, 3, 'line'], [8, 1, 4, 3, 'pie'], [0, 4, 6, 2, 'bar'], [6, 4, 6, 2, 'bar']],
+    },
+  ],
+}
+
 export const PORTAL_ROOT: Folder = folder('Portal', 0, [
+  /* Só na máquina: o painel vem do servidor local do painel_padrao, e no
+     link público do workspace a pasta abriria vazia. */
+  ...(import.meta.env.DEV ? [PASTA_MCP] : []),
   folder('Prontuário do Paciente – Indicadores Assistenciais e Evolução Clínica 2024', 2, [
     folder('Internação Clínica e Cirúrgica (Alas A, B e C)', 4, [
       dash('Pacientes internados por ala, especialidade e médico responsável', 4),

@@ -13,7 +13,7 @@ import { DashboardBar } from '@/components/dashboard/DashboardBar'
 import { DASH_TABS } from '@/data/dashboard'
 import { CURRENT_USER } from '@/data/account'
 import { PORTAL_ROOT, flatten } from '@/data/portal'
-import { go } from '@/lib/router'
+import { go, goBack } from '@/lib/router'
 
 /**
  * Um dashboard aberto, na moldura do Weknow web (medida nos dashboards 145 e
@@ -30,6 +30,23 @@ import { go } from '@/lib/router'
  * julgada no lugar onde vai morar. Todo dashboard abre o mesmo painel de
  * exemplo (`DASH_TABS`): só o nome muda.
  */
+/**
+ * Painel publicado pelo MCP (HTML com o contrato `window.weknow`). Abre numa
+ * moldura que ocupa a área do painel e rola sozinha, com o tema do Weknow na
+ * URL: como na moldura de verdade, o painel segue o tema da interface, e
+ * trocar de tema recarrega a página.
+ */
+function PainelMcp({ src }: { src: string }) {
+  const [theme, setTheme] = useState(() => (document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light'))
+  useEffect(() => {
+    const mo = new MutationObserver(() => setTheme(document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light'))
+    mo.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] })
+    return () => mo.disconnect()
+  }, [])
+  const url = `${src}${src.includes('?') ? '&' : '?'}theme=${theme}`
+  return <iframe key={url} src={url} title="Painel" className="block w-full h-full border-0" style={{ background: COLOR.surface }} />
+}
+
 const HEADER_H = 56
 const FILTER_H = 52
 
@@ -42,11 +59,12 @@ function HeaderBtn({ icon, label, onClick }: { icon: string; label: string; onCl
   )
 }
 
-export function DashboardScreen({ dashboardId }: { dashboardId: string; onRoute: (r: PortalRoute) => void }) {
+export function DashboardScreen({ dashboardId, tab: startTab }: { dashboardId: string; tab?: number; onRoute: (r: PortalRoute) => void }) {
   const isMobile = useIsMobile()
   const customized = useAppearances()
   const entry = flatten(PORTAL_ROOT).find((e) => e.item.id === dashboardId && e.item.kind === 'dashboard')
-  const [active, setActive] = useState(0)
+  const first = startTab !== undefined && startTab < DASH_TABS.length ? startTab : 0
+  const [active, setActive] = useState(first)
   const scrollRef = useRef<HTMLDivElement>(null)
   /* O quadro de 1920 × 1080 entra na largura da tela, como o web abre o
      painel ("ajustar à largura"); o que sobra para baixo rola. */
@@ -59,10 +77,10 @@ export function DashboardScreen({ dashboardId }: { dashboardId: string; onRoute:
     return () => ro.disconnect()
   }, [])
 
-  // Outro dashboard começa na primeira aba.
+  // Outro dashboard começa na primeira aba, ou na do momento de uma análise.
   useEffect(() => {
-    setActive(0)
-  }, [dashboardId])
+    setActive(first)
+  }, [dashboardId, first])
 
   // Trocar de aba é virar a página: a nova começa do alto.
   useEffect(() => {
@@ -77,6 +95,9 @@ export function DashboardScreen({ dashboardId }: { dashboardId: string; onRoute:
   const openFolder = (id: string) => go(`/pasta/${encodeURIComponent(id)}`)
 
   const tab = DASH_TABS[active]
+  /* Painel do MCP: os filtros são do próprio painel (os parâmetros), então
+     não há linha de filtros do Weknow nem as páginas do painel de exemplo. */
+  const painel = entry?.item.kind === 'dashboard' ? entry.item.painel : undefined
 
   const chevron = <Icon name="chevron_right" size={24} color={COLOR.navLabel} className="shrink-0" />
 
@@ -87,7 +108,7 @@ export function DashboardScreen({ dashboardId }: { dashboardId: string; onRoute:
       className="shrink-0 flex items-center gap-2"
       style={{ height: HEADER_H, padding: '0 12px', background: COLOR.surface, fontFamily: FONT }}
     >
-      <HeaderBtn icon="chevron_left" label="Voltar" onClick={() => (parent ? openFolder(parent.id) : go(null))} />
+      <HeaderBtn icon="chevron_left" label="Voltar" onClick={() => goBack(parent ? `/pasta/${encodeURIComponent(parent.id)}` : null)} />
       {!isMobile && (
         <button type="button" onClick={() => go(null)} aria-label="Portal" className="shrink-0 px-1">
           <WeknowLogo width={93} height={28} />
@@ -191,7 +212,9 @@ export function DashboardScreen({ dashboardId }: { dashboardId: string; onRoute:
     </div>
   )
 
-  const body = entry ? (
+  const body = painel ? (
+    <PainelMcp src={painel} />
+  ) : entry ? (
     <div style={{ width: CANVAS_W * scale, height: CANVAS_H * scale }}>
       {scale > 0 && (
         <div style={{ transform: `scale(${scale})`, transformOrigin: '0 0' }}>
@@ -208,17 +231,17 @@ export function DashboardScreen({ dashboardId }: { dashboardId: string; onRoute:
   return (
     <div className="flex flex-col" style={{ width: '100%', height: '100dvh', background: COLOR.canvas, fontFamily: FONT }}>
       {header}
-      {filterRow}
+      {!painel && filterRow}
       <div
         ref={scrollRef}
         role="tabpanel"
-        aria-label={tab.name}
-        className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden [scrollbar-gutter:stable]"
-        style={{ marginTop: 1, background: '#FFFFFF', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.12)' }}
+        aria-label={painel ? title : tab.name}
+        className={painel ? 'flex-1 min-h-0 overflow-hidden' : 'flex-1 min-h-0 overflow-y-auto overflow-x-hidden [scrollbar-gutter:stable]'}
+        style={{ marginTop: 1, background: painel ? COLOR.surface : '#FFFFFF', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.12)' }}
       >
         {body}
       </div>
-      {entry && <DashboardBar tabs={DASH_TABS} active={active} onSelect={setActive} mobile={isMobile} />}
+      {entry && !painel && <DashboardBar tabs={DASH_TABS} active={active} onSelect={setActive} mobile={isMobile} dashboard={{ id: entry.item.id, name: title }} />}
     </div>
   )
 }

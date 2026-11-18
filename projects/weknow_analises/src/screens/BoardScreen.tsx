@@ -3,6 +3,7 @@ import { Btn, IconBtn } from '@ds/Btn'
 import { COLOR, FONT } from '@/design/tokens'
 import { Icon } from '@/components/icons'
 import { AppShell } from '@/components/AppShell'
+import type { Crumb } from '@/components/Header'
 import { Composer } from '@/components/Composer'
 import { Dropdown, MenuOption } from '@/components/browser/Menu'
 import type { PortalRoute } from '@/components/PortalSidebar'
@@ -13,7 +14,7 @@ import { DataDialog } from '@/blocks/DataDialog'
 import { GuideDialog } from '@/blocks/GuideDialog'
 import { WEKNOW_GUIDE_NAME } from '@/engine/guide'
 import { PainelFrame } from '@/blocks/PainelFrame'
-import { folderIdOf } from '@/data/created'
+import { DRAFTS_ID, folderIdOf } from '@/data/created'
 import { modelPrompt } from '@/engine/config'
 import { aiMessage, respond, suggestions, userMessage, type Message } from '@/engine/assistant'
 import { boardFilter, dimValues, measureValue, prevMonth, titleOf, type Board, type Op, type Widget } from '@/engine/board'
@@ -24,7 +25,8 @@ import { MONTHS } from '@/engine/data'
 import * as F from '@/engine/format'
 import { DIMENSIONS, INDICATORS } from '@/engine/semantic'
 import { Modal, ModalFooter } from '@ds/Modal'
-import { go, setLeaveGuard } from '@/lib/router'
+import { go, goBack, setLeaveGuard } from '@/lib/router'
+import { useConversations } from '@/lib/conversations'
 import { addMessages, change, redo, undo, useStore, type Analysis } from '@/lib/store'
 
 /**
@@ -44,7 +46,7 @@ import { addMessages, change, redo, undo, useStore, type Analysis } from '@/lib/
  */
 const SIDEBAR_KEY = 'wk-sidebar'
 
-function useRoomyMenu() {
+export function useRoomyMenu() {
   const restore = useRef(false)
   useState(() => {
     try {
@@ -103,7 +105,7 @@ function useAppTheme(): 'dark' | 'light' {
   )
 }
 
-function useNarrow(q: string) {
+export function useNarrow(q: string) {
   const [m, setM] = useState(() => window.matchMedia(q).matches)
   useEffect(() => {
     const mq = window.matchMedia(q)
@@ -115,11 +117,28 @@ function useNarrow(q: string) {
 }
 
 export const FOCUS_KEY = 'wk-an-focus'
-const CHAT_KEY = 'wk-an-chat'
+export const CHAT_KEY = 'wk-an-chat'
 const EXPANDED_KEY = 'wk-an-expanded'
+/** Vale para a próxima abertura do editor e some: o painel abre sem a conversa. */
+const NO_CHAT_KEY = 'wk-an-no-chat'
+
+/**
+ * Leva ao painel com a conversa fechada, sem mexer na escolha guardada. É o
+ * caminho do Weknow IA: a pessoa vem de uma conversa e quer ver o resultado;
+ * o "Criar com IA" da barra abre a conversa quando ela quiser continuar.
+ */
+export function openBoardWithoutChat(id: string) {
+  try {
+    sessionStorage.setItem(NO_CHAT_KEY, id)
+  } catch {
+    /* sem armazenamento: abre como estiver */
+  }
+  go(`/dashboard/${id}`)
+}
 
 function Workspace({ a, canUndo, canRedo, onRoute }: { a: Analysis; canUndo: boolean; canRedo: boolean; onRoute: (r: PortalRoute) => void }) {
   const { board, messages } = a
+  const { list: conversations } = useConversations()
   const id = board.id
   const narrow = useNarrow('(max-width: 1099px)')
   const phone = useNarrow('(max-width: 640px)')
@@ -132,6 +151,7 @@ function Workspace({ a, canUndo, canRedo, onRoute }: { a: Analysis; canUndo: boo
        quando chega a primeira resposta. */
     if (!board.widgets.length) return false
     try {
+      if (sessionStorage.getItem(NO_CHAT_KEY) === board.id) return false
       return localStorage.getItem(CHAT_KEY) !== 'closed'
     } catch {
       return true
@@ -203,6 +223,7 @@ function Workspace({ a, canUndo, canRedo, onRoute }: { a: Analysis; canUndo: boo
   useEffect(() => {
     try {
       sessionStorage.removeItem(FOCUS_KEY)
+      sessionStorage.removeItem(NO_CHAT_KEY)
     } catch {
       /* sem armazenamento: nada a limpar */
     }
@@ -211,7 +232,7 @@ function Workspace({ a, canUndo, canRedo, onRoute }: { a: Analysis; canUndo: boo
   /**
    * Sair com trabalho por publicar (o rascunho que nunca foi publicado, ou
    * alterações depois de publicar) pergunta antes: pelo logo, pelo caminho,
-   * pelo menu ou pelo voltar do navegador. O dashboard vazio sai direto, não
+   * pelo menu, pela seta ou pelo voltar do navegador. O dashboard vazio sai direto, não
    * há o que perder. Publicar por ali publica e depois sai.
    */
   const [leaving, setLeaving] = useState<(() => void) | null>(null)
@@ -221,8 +242,11 @@ function Workspace({ a, canUndo, canRedo, onRoute }: { a: Analysis; canUndo: boo
   pendingRef.current = pending
   useEffect(
     () =>
-      setLeaveGuard((leave) => {
+      setLeaveGuard((leave, target) => {
         if (!pendingRef.current) return false
+        /* Voltar para a conversa que criou o dashboard não é sair: o caminho
+           até ele está lá, e ir e vir entre os dois não pede confirmação. */
+        if (board.conversation && target === `#/ia/${board.conversation}`) return false
         setLeaving(() => leave)
         return true
       }),
@@ -296,6 +320,26 @@ function Workspace({ a, canUndo, canRedo, onRoute }: { a: Analysis; canUndo: boo
     />
   )
 
+  /* Onde o dashboard mora, no caminho do topo: enquanto rascunho, na conversa
+     do Weknow IA que o criou ou em Meus rascunhos; publicado, na pasta dele.
+     A seta volta para a tela anterior; este é o destino só de quem abriu
+     direto, por um link. */
+  const conversation = !board.saved && board.conversation ? conversations.find((c) => c.id === board.conversation) : undefined
+  const home = board.saved ? folderIdOf(board.saved.folder) : DRAFTS_ID
+  const parentPath = conversation ? `/ia/${conversation.id}` : home ? `/pasta/${encodeURIComponent(home)}` : null
+  const trail: Crumb[] = [
+    { label: 'Portal', icon: <Icon name="home" size={24} />, iconOnly: true, onClick: () => go(null) },
+    ...(conversation
+      ? [
+          { label: 'Weknow Ask', onClick: () => go('/ia') },
+          { label: conversation.title, onClick: () => go(`/ia/${conversation.id}`) },
+        ]
+      : home
+        ? [{ label: board.saved?.folder ?? 'Meus rascunhos', onClick: () => go(parentPath) }]
+        : []),
+    { label: board.title },
+  ]
+
   /* O painel é a análise e fica com a folha inteira. A conversa mora numa
      folha própria ao lado, que se fecha: antes ela dividia a folha do painel,
      o canto arredondado ficava com ela e o painel parecia solto ao lado. */
@@ -305,7 +349,7 @@ function Workspace({ a, canUndo, canRedo, onRoute }: { a: Analysis; canUndo: boo
       bare={expanded}
       gutter={!painel && !blocks}
       onNavigate={onRoute}
-      trail={[{ label: 'Portal', onClick: () => go(null) }, { label: board.title }]}
+      trail={trail}
       aside={!narrow && chatShown ? <FactsContext.Provider value={board.facts}>{chat}</FactsContext.Provider> : undefined}
     >
       <FactsContext.Provider value={board.facts}>
@@ -320,6 +364,7 @@ function Workspace({ a, canUndo, canRedo, onRoute }: { a: Analysis; canUndo: boo
             style={painel || blocks ? { padding: narrow ? '12px 16px' : '12px 28px' } : { maxWidth: 1280, padding: narrow ? '20px 16px 64px' : '28px 32px 64px' }}
           >
             <BoardHeader
+              onBack={() => goBack(parentPath)}
               compact={!!painel || blocks}
               expanded={expanded}
               onExpand={narrow ? undefined : () => expand(!expanded)}
@@ -530,12 +575,15 @@ function BoardHeader({
   onRename,
   onSave,
   onData,
+  onBack,
   compact,
   expanded,
   onExpand,
   phone,
 }: {
   board: Board
+  /** A seta antes do nome, a mesma das pastas e das configurações. */
+  onBack: () => void
   /** Celular: as ações descem para uma linha própria, só com ícones (ver abaixo). */
   phone?: boolean
   /** Modo expandido ligado: o botão vira "Sair do modo expandido". */
@@ -669,6 +717,15 @@ function BoardHeader({
     </button>
   )
 
+  /* A margem negativa tira o respiro do botão: a seta fica na margem do cabeçalho. */
+  const back = (
+    <span className="shrink-0" style={{ marginLeft: -4 }}>
+      <IconBtn title="Voltar" onClick={onBack}>
+        <Icon name="arrow_back" size={24} />
+      </IconBtn>
+    </span>
+  )
+
   /* Com o painel executivo, o cabeçalho cabe numa linha: o painel tem os
      próprios controles e precisa da altura. A situação (rascunho ou
      publicado) vira texto miúdo ao lado do nome, a origem fica no title. */
@@ -676,6 +733,7 @@ function BoardHeader({
     return (
       <div className={phone ? 'flex flex-col' : 'flex items-center'} style={{ gap: phone ? 8 : 16 }}>
         <div className="flex items-center flex-1 min-w-0" style={{ gap: 12 }}>
+          {back}
           {title}
           {!editing && (
             <span className="truncate" title={meta} style={{ fontFamily: FONT, fontSize: 13, lineHeight: '18px', color: COLOR.textSecondary, minWidth: phone ? 0 : 80, maxWidth: phone ? '45%' : undefined }}>
@@ -693,6 +751,7 @@ function BoardHeader({
         {/* A linha de cima diz o que é e de onde vem, antes do nome: é o que
             separa o dashboard criado aqui de um do acervo. */}
         <div className="flex items-center flex-1 min-w-0" style={{ gap: 6, fontFamily: FONT, fontSize: 13, lineHeight: '18px', color: COLOR.textSecondary }}>
+          {back}
           <Icon name="dashboard" size={20} color={COLOR.navLabel} className="shrink-0" />
           <span className="truncate">{meta}</span>
         </div>
@@ -1083,7 +1142,7 @@ function Chat({
  * recolhido em seis linhas, para não empurrar a resposta para fora da tela;
  * "Mostrar tudo" abre o texto inteiro.
  */
-function UserBubble({ text }: { text: Message['text'] }) {
+export function UserBubble({ text }: { text: Message['text'] }) {
   const long = text.join('').length > 280
   const [open, setOpen] = useState(false)
   return (

@@ -481,6 +481,58 @@ body {
   scrollbar-color: color-mix(in srgb, var(--wk-text-muted) 45%, transparent) transparent;
 }
 
+/*
+ * Rolagem que só aparece com o mouse em cima (a lista de conversas): parada,
+ * a lista fica limpa. A faixa da barra continua reservada, então nada se
+ * mexe quando ela surge. Com o foco do teclado dentro, ela também aparece.
+ * Vem depois da regra de cima, com o mesmo peso, para ganhar dela.
+ */
+.wk-hover-scroll { scrollbar-color: transparent transparent; }
+.wk-hover-scroll:hover,
+.wk-hover-scroll:focus-within { scrollbar-color: color-mix(in srgb, var(--wk-text-muted) 45%, transparent) transparent; }
+
+/*
+ * A folha das conversas do Weknow IA recolhe na largura; a da conversa
+ * acompanha porque é flexível. A mesma curva do menu lateral do portal.
+ */
+.wk-side-panel { transition: width 0.22s cubic-bezier(0.2, 0, 0, 1), margin-right 0.22s cubic-bezier(0.2, 0, 0, 1); }
+/* Os botões que ficam no lugar dela entram quando ela já quase fechou. */
+.wk-fade-in { animation: wk-tip-in 160ms ease-out 120ms both; }
+@media (prefers-reduced-motion: reduce) { .wk-side-panel { transition: none; } .wk-fade-in { animation: none; } }
+
+/*
+ * Cola de demonstração (components/DemoPrompts): o botão fica invisível no
+ * canto de baixo à direita e aparece com o mouse em cima, com o foco do
+ * teclado ou com o painel aberto. A área de hover é maior que o botão, para
+ * achar o canto sem mirar.
+ */
+.wk-demo { position: fixed; right: 0; bottom: 0; z-index: 90; padding: 8px; }
+.wk-demo-trigger {
+  display: grid; place-items: center; width: 32px; height: 32px; border-radius: 8px;
+  color: var(--wk-text-secondary); background: var(--wk-surface); border: 1px solid var(--wk-border);
+  box-shadow: var(--wk-shadow-menu); cursor: pointer; opacity: 0; transition: opacity 0.15s;
+}
+.wk-demo:hover .wk-demo-trigger,
+.wk-demo[data-open] .wk-demo-trigger,
+.wk-demo-trigger:focus-visible { opacity: 1; }
+.wk-demo-trigger:hover { color: var(--wk-text); }
+.wk-demo-panel {
+  position: absolute; right: 8px; bottom: 48px; width: min(400px, calc(100vw - 16px));
+  max-height: min(72vh, 640px); display: flex; flex-direction: column;
+  background: var(--wk-surface); color: var(--wk-text); border: 1px solid var(--wk-border);
+  border-radius: 12px; box-shadow: var(--wk-shadow-menu); overflow: hidden;
+}
+.wk-demo-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; padding: 14px 12px 10px 16px; border-bottom: 1px solid var(--wk-border); }
+.wk-demo-title { font-size: 14px; font-weight: 600; }
+.wk-demo-sub { font-size: 12px; color: var(--wk-text-secondary); margin-top: 2px; }
+.wk-demo-close { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 6px; color: var(--wk-text-secondary); }
+.wk-demo-close:hover { background: var(--wk-list-hover); color: var(--wk-text); }
+.wk-demo-body { overflow-y: auto; padding: 4px 8px 12px; }
+.wk-demo-group { font-size: 11px; font-weight: 600; letter-spacing: 0.02em; color: var(--wk-text-secondary); margin: 12px 8px 4px; }
+.wk-demo-item { display: block; width: 100%; text-align: left; padding: 7px 8px; border-radius: 6px; font-size: 13px; line-height: 1.4; color: var(--wk-text); }
+.wk-demo-item:hover, .wk-demo-item:focus-visible { background: var(--wk-list-hover); }
+.wk-demo-note { display: block; font-size: 12px; color: var(--wk-text-secondary); margin-top: 1px; }
+
 /* Dica: aparece por opacidade, sem deslizar — o movimento chamaria mais atenção que o texto. */
 @keyframes wk-tip-in {
   from { opacity: 0 }
@@ -579,6 +631,83 @@ body {
   .an-spin, .an-arrive, .wk-enter { animation: none; }
 }
 
+/* Uma chamada de ferramenta aberta (Weknow IA): a ferramenta em monoespaçada,
+   o pedido e o resultado num quadro discreto, como o Claude mostra um MCP. */
+.wk-step-detail {
+  max-width: 560px;
+  padding: 10px 12px;
+  border: 1px solid var(--wk-border);
+  border-radius: 10px;
+  background: var(--wk-surface-subtle);
+  font-size: 12.5px;
+  line-height: 19px;
+  color: var(--wk-text);
+}
+.wk-step-tool, .wk-step-key { font-family: ui-monospace, 'Cascadia Code', Consolas, monospace; }
+.wk-step-tool { font-size: 12px; font-weight: 600; margin-bottom: 6px; }
+.wk-step-key { color: var(--wk-text-secondary); }
+.wk-step-detail dl { margin: 0; display: grid; grid-template-columns: 72px 1fr; gap: 4px 8px; }
+.wk-step-detail dt { color: var(--wk-text-secondary); }
+.wk-step-detail dd { margin: 0; min-width: 0; overflow-wrap: anywhere; }
+
+/* ---------------------------------------------------------------------------
+   Respostas em markdown (components/Markdown.tsx). O ritmo de leitura dos chats
+   de IA: 15px com entrelinha folgada, títulos que separam as partes com mais
+   ar em cima que embaixo, e a tabela numa moldura que rola sozinha.
+--------------------------------------------------------------------------- */
+.wk-md { font-size: 15px; line-height: 1.65; color: var(--wk-text); }
+.wk-md > * { margin: 0; }
+.wk-md > * + * { margin-top: 12px; }
+.wk-md h3, .wk-md h4 { font-weight: 600; color: var(--wk-text); }
+.wk-md h3 { font-size: 17px; line-height: 26px; }
+.wk-md h4 { font-size: 15px; line-height: 24px; }
+.wk-md > * + h3, .wk-md > * + h4 { margin-top: 24px; }
+.wk-md > h3 + *, .wk-md > h4 + * { margin-top: 6px; }
+.wk-md ul, .wk-md ol { padding-left: 22px; }
+.wk-md ul { list-style: disc; }
+.wk-md ol { list-style: decimal; }
+.wk-md li { padding-left: 4px; }
+.wk-md li + li { margin-top: 6px; }
+.wk-md li::marker { color: var(--wk-text-secondary); }
+.wk-md ol li::marker { font-variant-numeric: tabular-nums; }
+.wk-md blockquote {
+  padding: 2px 0 2px 14px;
+  border-left: 3px solid color-mix(in srgb, var(--wk-primary) 45%, transparent);
+  color: var(--wk-text-secondary);
+}
+.wk-md-code {
+  font-family: ui-monospace, 'Cascadia Code', Consolas, monospace;
+  font-size: .87em;
+  padding: 2px 6px;
+  border-radius: 6px;
+  background: var(--wk-hover-strong);
+}
+.wk-md pre {
+  padding: 12px 16px;
+  border-radius: 12px;
+  background: var(--wk-surface-subtle);
+  border: 1px solid var(--wk-border);
+  overflow-x: auto;
+  font: 13px/1.6 ui-monospace, 'Cascadia Code', Consolas, monospace;
+}
+.wk-md-table {
+  overflow-x: auto;
+  border: 1px solid var(--wk-border);
+  border-radius: 12px;
+  outline: none;
+}
+.wk-md-table:focus-visible { box-shadow: 0 0 0 2px var(--wk-primary); }
+.wk-md table { width: 100%; border-collapse: collapse; font-size: 14px; line-height: 20px; font-variant-numeric: tabular-nums; }
+.wk-md th {
+  padding: 10px 14px;
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--wk-text-secondary);
+  background: var(--wk-surface-subtle);
+  white-space: nowrap;
+}
+.wk-md td { padding: 10px 14px; border-top: 1px solid var(--wk-border); white-space: nowrap; }
+
 /* ---------------------------------------------------------------------------
    Hover. Tudo que responde ao clique avisa antes, com o mesmo vocabulário:
 
@@ -622,4 +751,96 @@ body {
   .an-card, .an-mark, .an-rowbg, .an-dot, .an-cross, .an-thumb > * { transition: none; }
   .an-tip { animation: none; }
   .group:hover .an-thumb > * { transform: none; }
+}
+
+/* Prévia de mensagem no WhatsApp (alertas do Weknow IA): o balão verde num
+   fundo que lembra a conversa, para a pessoa ver o que os outros recebem.
+   Contrastes medidos: texto 15,8:1 (claro) e 6,8:1 (escuro); hora 5,1:1 e 4,7:1. */
+:root {
+  --wk-wa-icon: #128c4a;
+  --wk-wa-bg: #efeae2;
+  --wk-wa-caption: #4a5560;
+  --wk-wa-bubble: #d9fdd3;
+  --wk-wa-text: #111b21;
+  --wk-wa-time: #5b6b63;
+}
+:root[data-theme='dark'],
+.wk-scope-dark {
+  --wk-wa-icon: #25d366;
+  --wk-wa-bg: #0b141a;
+  --wk-wa-caption: #aebac1;
+  --wk-wa-bubble: #005c4b;
+  --wk-wa-text: #e9edef;
+  --wk-wa-time: #a9cfc5;
+}
+.wk-wa {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 12px 12px;
+  border-radius: 12px;
+  background: var(--wk-wa-bg);
+  color: var(--wk-wa-caption);
+}
+.wk-wa-bubble {
+  position: relative;
+  align-self: flex-start;
+  max-width: min(100%, 420px);
+  padding: 6px 9px 18px;
+  border-radius: 0 8px 8px 8px;
+  background: var(--wk-wa-bubble);
+  color: var(--wk-wa-text);
+  font-size: 14px;
+  line-height: 19px;
+  box-shadow: 0 1px 0.5px rgba(11, 20, 26, 0.13);
+  overflow-wrap: anywhere;
+}
+.wk-wa-time {
+  position: absolute;
+  right: 8px;
+  bottom: 3px;
+  font-size: 11px;
+  line-height: 15px;
+  color: var(--wk-wa-time);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Análise salva (InsightScreen) e o menu da Análise inteligente ─────── */
+.wk-count {
+  min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 600; font-variant-numeric: tabular-nums;
+  background: color-mix(in srgb, currentColor 22%, transparent);
+}
+.wk-title-input {
+  background: transparent; border: 1px solid transparent; border-radius: 8px;
+  padding: 2px 8px; margin: 0 -9px; outline: none;
+  transition: border-color .15s ease, background-color .15s ease;
+}
+.wk-title-input:hover { border-color: var(--wk-border); }
+.wk-title-input:focus { border-color: var(--wk-primary); background: var(--wk-surface); }
+.wk-field {
+  font-family: inherit; color: var(--wk-text); background: var(--wk-surface);
+  border: 1px solid var(--wk-border-strong); border-radius: 8px; outline: none;
+  transition: border-color .15s ease, box-shadow .15s ease;
+}
+.wk-field::placeholder { color: var(--wk-text-muted); }
+.wk-field:hover { border-color: var(--wk-nav-label); }
+.wk-field:focus { border-color: var(--wk-primary); box-shadow: 0 0 0 3px color-mix(in srgb, var(--wk-primary) 18%, transparent); }
+.wk-moment {
+  border: 1px solid var(--wk-border); border-radius: 12px; background: var(--wk-surface);
+  transition: border-color .2s ease, box-shadow .2s ease;
+}
+.wk-moment:hover { border-color: var(--wk-border-strong); box-shadow: 0 4px 14px rgba(15, 23, 42, .08); }
+.wk-moment:focus-visible { outline: 2px solid var(--wk-primary); outline-offset: 2px; }
+.wk-moment-open {
+  position: absolute; top: 10px; right: 10px; display: inline-flex; align-items: center; gap: 6px;
+  height: 30px; padding: 0 10px; border-radius: 15px; font-size: 13px; font-weight: 500;
+  background: var(--wk-surface); color: var(--wk-text); border: 1px solid var(--wk-border);
+  box-shadow: 0 2px 6px rgba(15, 23, 42, .10);
+  opacity: 0; transform: translateY(-2px); transition: opacity .2s ease, transform .2s ease;
+}
+.wk-moment:hover .wk-moment-open, .wk-moment:focus-visible .wk-moment-open { opacity: 1; transform: none; }
+@media (prefers-reduced-motion: reduce) {
+  .wk-moment-open { transition: none; }
 }

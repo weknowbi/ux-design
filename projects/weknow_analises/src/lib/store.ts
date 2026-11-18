@@ -86,6 +86,13 @@ export function useStore(): State & { canUndo: (id: string) => boolean; canRedo:
   return { ...s, canUndo: (id) => !!past.get(id)?.length, canRedo: (id) => !!future.get(id)?.length }
 }
 
+/** Leitura fora da tela: o histórico de exemplo do Weknow IA aponta para estes dashboards. */
+export const currentAnalyses = () => state.analyses
+
+export function linkConversation(id: string, conversation: string) {
+  replace(id, (a) => ({ ...a, board: { ...a.board, conversation } }))
+}
+
 export function createAnalysis(a: Analysis) {
   commit({ analyses: [a, ...state.analyses.filter((x) => x.board.id !== a.board.id)] })
 }

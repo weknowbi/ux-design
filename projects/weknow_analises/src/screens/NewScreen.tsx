@@ -11,7 +11,7 @@ import type { PortalRoute } from '@/components/PortalSidebar'
 import { create, type Origin } from '@/engine/assistant'
 import { CATALOG, DASHBOARDS, catalogItem, dashboardsOfCode, type CatalogItem, type SourceDashboard } from '@/engine/catalog'
 import { DIMENSIONS } from '@/engine/semantic'
-import { go } from '@/lib/router'
+import { go, goBack } from '@/lib/router'
 import { createAnalysis } from '@/lib/store'
 
 /**
@@ -287,7 +287,7 @@ function SourceStep({
           )}
         </div>
         {!isMobile && (
-          <Btn variant="ghost" onClick={() => go(null)}>
+          <Btn variant="ghost" onClick={() => goBack(null)}>
             Cancelar
           </Btn>
         )}

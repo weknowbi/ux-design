@@ -358,6 +358,8 @@ function respondPainel(b: Board, w: Extract<Widget, { kind: 'painel' }>, raw: st
   else if (/\b(escuro|dark|preto)\b/.test(t)) set.theme = 'dark'
   const look = readLook(b, w, raw, t)
   Object.assign(set, look.set)
+  /* Fundo creme, papel ou bege é o tema claro do editorial. */
+  if (!set.theme && /\b(creme|papel|bege)\b/.test(t)) set.theme = 'light'
 
   const changes: string[] = []
   if (set.period && set.period !== w.period) changes.push(`Período: ${PERIODOS[set.period]}`)
@@ -373,7 +375,7 @@ function respondPainel(b: Board, w: Extract<Widget, { kind: 'painel' }>, raw: st
       changes: [],
       reply: [
         look.note ??
-          `Neste painel eu mudo o período (6 meses, 12 meses ou o período completo), filtro por ${main.label}, destaco uma parte de ${lower(cfg.splitTitle)} e troco o tema. No visual, troco as cores (azul, verde, roxo ou uma cor própria em hexadecimal), a densidade, os cantos, as linhas e escondo ou volto seções. Para montar gráfico a gráfico, peça “trocar pelos blocos”.`,
+          `Neste painel eu mudo o período (6 meses, 12 meses ou o período completo), filtro por ${main.label}, destaco uma parte de ${lower(cfg.splitTitle)} e troco o tema. No visual, troco o estilo (o do Weknow ou um editorial, de relatório), as cores (azul, verde, roxo ou uma cor própria em hexadecimal), a densidade, os cantos, as linhas e escondo ou volto seções. Para montar gráfico a gráfico, peça “trocar pelos blocos”.`,
       ],
     }
   if (!changes.length) return { ops: [], understood: true, changes: [], reply: ['O painel já está assim.'] }
@@ -435,6 +437,18 @@ function readLook(b: Board, w: Extract<Widget, { kind: 'painel' }>, raw: string,
     Object.assign(set, PAINEL_LOOK)
     if (JSON.stringify(cur) !== JSON.stringify(PAINEL_LOOK)) changes.push('Visual de volta ao padrão do Weknow')
     return { set, changes, note }
+  }
+
+  /* Estilo: o desenho inteiro. O editorial é o de relatório impresso (fundo
+     creme, serifa, sem cartões, fios finos, um destaque terracota); pedir os
+     cartões ou o estilo do Weknow volta ao de sempre, sem mexer no resto. */
+  const editorial = /editorial|\brevista\b|relatorio impresso|\bjornal\b|serifa|terracota|\bcreme\b/.test(t)
+  const weknowStyle = /(estilo|visual|desenho) (do |de )?weknow|volta\w* (com )?(os )?cartoes|com cartoes/.test(t)
+  if (editorial || weknowStyle) {
+    const style: PainelLook['style'] = editorial ? 'editorial' : 'weknow'
+    set.style = style
+    if (style !== cur.style)
+      changes.push(style === 'editorial' ? 'Estilo editorial: fundo creme, títulos e números com serifa, sem cartões, fios finos entre as seções e destaque terracota' : 'Estilo do Weknow, com cartões')
   }
 
   /* Cores: uma das paletas, ou uma cor própria (a do cliente) para a principal. */
@@ -607,7 +621,12 @@ export type Origin = { kind: 'metadado'; code: string } | { kind: 'dashboard'; i
  *
  * Com `request`, o dashboard já nasce montado: é o caminho dos exemplos.
  */
-export function create(origin: Origin, request?: string): { board: Board; messages: Message[]; focus?: string } | null {
+export function create(
+  origin: Origin,
+  request?: string,
+  /** O que vem do Weknow IA: a diretriz e a configuração acertadas antes de criar, e a conversa. */
+  base?: Pick<Board, 'guide' | 'config' | 'conversation'>,
+): { board: Board; messages: Message[]; focus?: string } | null {
   const dash = origin.kind === 'dashboard' ? DASHBOARDS.find((d) => d.id === origin.id) : undefined
   const md = METADADOS.find((m) => m.code === (dash ? dash.code : origin.kind === 'metadado' ? origin.code : ''))
   if (!md) return null
@@ -615,7 +634,7 @@ export function create(origin: Origin, request?: string): { board: Board; messag
   /* Nome provisório, para trocar no título: o do dashboard de origem com
      "(novo)", senão o "Original" e o novo apareceriam iguais na pasta. */
   const title = dash ? `${dash.name} (novo)` : cap(md.name)
-  let board = newBoard(md.ind, title, [], dash ? { dashboard: dash.name, folder: dash.folder, dims: dash.dims } : undefined)
+  let board = { ...newBoard(md.ind, title, [], dash ? { dashboard: dash.name, folder: dash.folder, dims: dash.dims } : undefined), ...base }
   let r: Response | null = null
   if (q) {
     r = respond(board, q)
@@ -633,7 +652,7 @@ export function create(origin: Origin, request?: string): { board: Board; messag
   const intro: Rich = dash
     ? [`Carreguei os dados de “${dash.name}”: o metadado ${md.code} - ${md.name}, com os mesmos filtros. O original continua como está. `]
     : [`Carreguei o metadado ${md.code} - ${md.name}. `]
-  intro.push('Diga o que você quer ver e eu monto o dashboard seguindo a configuração do metadado.')
+  if (!q) intro.push('Diga o que você quer ver e eu monto o dashboard seguindo a configuração do metadado.')
   return {
     board,
     focus: r?.focus,

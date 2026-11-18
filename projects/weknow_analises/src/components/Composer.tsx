@@ -15,6 +15,7 @@ export function Composer({
   disabled,
   initial = '',
   compact,
+  onEmptyEnter,
 }: {
   onSend: (text: string) => void
   placeholder: string
@@ -23,6 +24,8 @@ export function Composer({
   disabled?: boolean
   /** Na coluna do Criar com IA: texto de 14, o mesmo das mensagens acima. Os 16 são da caixa grande do dashboard vazio. */
   compact?: boolean
+  /** Enter com a caixa vazia: confirma o que está proposto na tela (o Weknow IA). */
+  onEmptyEnter?: () => void
   /** Texto que já entra na caixa, para ler e ajustar antes de enviar. */
   initial?: string
 }) {
@@ -77,7 +80,8 @@ export function Composer({
           onKeyDown={(e) => {
             if (e.key === 'Enter' && !e.shiftKey) {
               e.preventDefault()
-              submit()
+              if (!value.trim() && !disabled) onEmptyEnter?.()
+              else submit()
             }
           }}
           placeholder={placeholder}

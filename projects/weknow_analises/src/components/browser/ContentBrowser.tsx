@@ -1,6 +1,7 @@
 import { Fragment, useContext, useMemo, type ReactNode } from 'react'
 import { COLOR, FONT } from '@/design/tokens'
-import { PRESENTATIONS, TASKS, flatten, stats, type Entry, type Folder, type Item } from '@/data/portal'
+import { allTasks } from '@/data/alerts'
+import { PRESENTATIONS, flatten, stats, type Entry, type Folder, type Item } from '@/data/portal'
 import { describeCounts, normalize } from '@/lib/format'
 import { go } from '@/lib/router'
 import { sortItems, type BrowserPrefs, type ViewMode } from '@/components/browser/prefs'
@@ -169,7 +170,7 @@ export function ContentBrowser({
      A busca da barra de topo não tem aba: ela varre o acervo e ocupa a folha
      inteira (ver o ramo de `globalSearch` mais abaixo). */
   if (!globalSearch && section !== 'pastas') {
-    const source: Item[] = section === 'tarefas' ? TASKS : PRESENTATIONS
+    const source: Item[] = section === 'tarefas' ? allTasks() : PRESENTATIONS
     const matches = q
       ? source.filter((item) => normalize(item.name).includes(q) || ('code' in item && item.code.includes(q)))
       : source

@@ -1,0 +1,10 @@
+{
+  "name": "weknow-ask-mcp",
+  "private": true,
+  "version": "1.0.0",
+  "description": "O Weknow Ask como a IA do Weknow: escolhe o metadado sozinho pelo MCP e absorve a Análise inteligente",
+  "scripts": {
+    "dev": "cd ../weknow_analises && npm run dev:ask",
+    "build": "cd ../weknow_analises && npm install && npm run build:ask --"
+  }
+}

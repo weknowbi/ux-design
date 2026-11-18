@@ -36,7 +36,17 @@ export function AppShell({
   aside,
   bare,
   gutter = true,
+  panel,
+  panelCollapsed,
 }: {
+  /** A folha do `panel` recolhida: fecha na largura e a do conteúdo cresce. */
+  panelCollapsed?: boolean
+  /**
+   * Folha à esquerda da folha do conteúdo, com o mesmo vão do menu e os mesmos
+   * cantos: as conversas do Weknow IA. O vão é o que separa as duas, e
+   * não um fio. Só em tela larga.
+   */
+  panel?: ReactNode
   /**
    * Reserva o lugar da barra de rolagem da folha, para o conteúdo não pular
    * quando ela aparece. Sem ele, para a tela que rola por dentro (o painel
@@ -175,6 +185,22 @@ export function AppShell({
         style={{ minHeight: 0, paddingRight: LAYOUT.sheetMarginRight }}
       >
         <PortalSidebar active={route} onNavigate={onNavigate} collapsed={sidebar.collapsed} />
+
+        {panel && (
+          /* Recolhida, a folha fecha na largura e o conteúdo dentro mantém os
+             312: as linhas não se espremem no caminho, só somem pela borda.
+             `inert` tira a lista do Tab enquanto está fechada. */
+          <div
+            className="wk-side-panel shrink-0 h-full overflow-hidden bg-[var(--wk-surface)]"
+            data-collapsed={panelCollapsed || undefined}
+            inert={panelCollapsed || undefined}
+            style={{ width: panelCollapsed ? 0 : 312, marginRight: panelCollapsed ? 0 : 8, borderTopLeftRadius: LAYOUT.sheetRadius, borderTopRightRadius: LAYOUT.sheetRadius }}
+          >
+            <div className="h-full" style={{ width: 312 }}>
+              {panel}
+            </div>
+          </div>
+        )}
 
         <main
           ref={mainRef}

@@ -7,6 +7,68 @@ mostrar se descreve no **Criar com IA**, e a IA monta seguindo a **configuraçã
 metadado**, que se pode sobrescrever só para aquele dashboard. Publicado, ele
 entra numa pasta do portal; o dashboard de origem não muda.
 
+## Weknow IA
+
+O item "Weknow IA", no menu lateral, é uma conversa: a pessoa diz o que precisa,
+e o Weknow faz. Funciona como o Claude usando o MCP do Weknow, sem sair daqui
+(`engine/mcp.ts`, simulado por regras): a IA escolhe as ferramentas e os
+metadados sozinha, usa quantos precisar e mostra cada chamada. Cada etapa da
+resposta abre e mostra a ferramenta, o que se pediu e o que voltou
+(`engine/tools.ts`; os nomes das ferramentas são provisórios, valem os do MCP).
+
+Como no Claude, só pede permissão o que muda algo de outra pessoa (um
+cadastro). Ler, consultar, achar uma tela e criar um rascunho acontecem direto,
+e corrigir é conversando.
+
+- **Perguntas.** A maior parte do uso: "Por que a permanência média subiu em
+  outubro?", "Qual convênio mais glosou?", "Resumo das internações para a
+  diretoria", "O que é taxa de glosa?", "Por que o MAPA não aparece?" viram uma
+  resposta em markdown (títulos, listas, tabelas), com os números calculados
+  dos mesmos dados dos dashboards (`engine/answers.ts`). "Os setores com
+  permanência maior também glosam mais?" cruza dois metadados (21 e 32) pelo
+  campo em comum, o setor.
+- **Dashboard.** Ninguém escolhe metadado numa lista: a IA escolhe, cria o
+  rascunho direto e diz qual usou e por quê. "Usa o 32" (ou o botão "Refazer
+  com…") refaz com outro e tira o rascunho anterior de Meus rascunhos. Se a
+  mensagem fala de dois assuntos, ela cria com um e oferece outro dashboard ou
+  cruzar os dois numa resposta. Na conversa fica o cartão do dashboard, com a
+  situação ao vivo (rascunho, ou a pasta onde foi publicado), e dele se abre o
+  dashboard ou a pasta. Só 21 e 32 têm dados neste protótipo.
+- **Cadastro.** "Me mostra todos os usuários", "quais estão inativos?" listam.
+  "Tornar a Camila Ferraz administradora" mostra o que muda e só aplica ao
+  confirmar.
+- **Telas e acervo.** "Onde mudo as permissões?" responde com o caminho e o
+  botão da tela. "Quais dashboards usam o 32?" lista os do portal.
+
+As conversas ficam numa folha própria ao lado da aberta, e cada uma tem endereço
+(`#/ia/<id>`). Cada linha diz o que a conversa virou: a marca do tipo (dashboard
+é o vermelho de barras, como no portal), o nome, o metadado e a situação, a hora
+e o que ainda espera confirmação. A folha recolhe pelo ícone de painel na ponta
+da linha "Nova conversa", como no ChatGPT e no Claude: fecha na largura, a
+conversa ocupa o lugar, e no canto dela ficam "Mostrar conversas" e "Nova
+conversa". A escolha fica salva (`wk-ia-list-collapsed`); em tela estreita a
+lista já é gaveta. O protótipo já abre com um histórico de
+exemplo, um de cada estado, que entra uma vez (`wk-ia-examples-v6`). O menu
+lateral não muda ao entrar aqui, ao contrário do Ask: só recolhe em ícones, como
+no editor. O dashboard criado fica ligado à conversa: ela guarda o botão para
+abri-lo, e ele mostra o caminho até ela enquanto for rascunho. Aberto daqui, o
+dashboard vem sem a conversa ao lado, para a pessoa ver o resultado inteiro; o
+"Criar com IA" da barra a abre (`openBoardWithoutChat`).
+
+As respostas vêm assinadas pelo símbolo do Weknow (`WeknowMark`). O resto é o
+visual comum do portal, sem uma cor própria da IA por enquanto.
+
+## Como se volta
+
+Uma regra só, em todas as telas (`goBack` em `lib/router.ts`):
+
+- **A seta "←"** (editor, pasta, tela de configuração, dashboard do acervo) volta
+  para a tela de onde a pessoa veio. Sem tela anterior, porque abriu por um link,
+  vai para o pai.
+- **O caminho no topo** diz onde a coisa mora, e cada nível leva até lá.
+- **O voltar do navegador** faz o mesmo que a seta.
+- **Abas da mesma tela**, como os chips de Configurações, não contam como passo.
+
 ## O fluxo
 
 1. **Portal.** A home e as pastas são as do projeto `portal`, copiadas para
@@ -42,6 +104,13 @@ entra numa pasta do portal; o dashboard de origem não muda.
      que se clica dentro dele volta para o documento e entra no desfazer.
      Com ele, o cabeçalho do editor cabe numa linha.
    - **Visual pelo Criar com IA** (fica no documento e entra no desfazer):
+     - estilo: o do Weknow (cartões, azul) ou o editorial, de relatório
+       impresso: fundo creme, títulos e números com serifa (Newsreader), sem
+       cartões, fios finos entre as seções e um só destaque terracota, com
+       cinza quente e ardósia nas outras séries. Entra com "estilo
+       editorial", "relatório de revista", "serifa", "terracota" ou "fundo
+       creme" (que também põe o tema claro); "estilo do Weknow" ou "volta com
+       os cartões" desfaz. Vale nos dois temas;
      - cores: paleta azul (padrão do Weknow), verde ou roxa, que reordenam os
        mesmos quatro tons validados para daltonismo; ou uma cor própria em
        hexadecimal para a principal ("cor principal #0F766E"), com aviso
@@ -149,6 +218,12 @@ funcionando depois de qualquer pedido porque ninguém reescreve o gráfico.
   gerados com semente fixa em `engine/data.ts`, com uma história plantada em
   outubro de 2026. Tudo fictício: o repositório é público.
 - **Publicar.** As análises ficam no `localStorage`; nada chega ao portal.
+- **Prompts de teste.** No canto de baixo à direita de qualquer tela há um
+  botão invisível, que aparece com o mouse em cima (ou com o Tab). Ele abre a
+  lista dos pedidos que as regras entendem, no Weknow IA e no "Criar com IA"
+  do dashboard. Clicar num pedido o põe na caixa da conversa, pronto para o
+  Enter; fora da tela certa, copia. É cola para quem conduz o teste, não parte
+  do produto (`components/DemoPrompts.tsx`).
 
 ## Rodar
 

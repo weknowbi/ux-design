@@ -11,7 +11,7 @@ import { ThemeSwitch } from '@/components/ThemeSwitch'
  * Ativo: fundo #e4e9f1, texto #3366cc, ícone com FILL 1.
  */
 
-export type PortalRoute = 'portal' | 'ask' | 'sql' | 'configuracoes'
+export type PortalRoute = 'portal' | 'ia' | 'ask' | 'sql' | 'configuracoes'
 
 const MENU: { id: PortalRoute; label: string; icon: React.ReactNode }[] = [
   // "Portal", não "Página inicial": é o nome do nó `sidebar white` (WP-832) e
@@ -19,7 +19,9 @@ const MENU: { id: PortalRoute; label: string; icon: React.ReactNode }[] = [
   // nomes de aplicativo, e o menu é o mesmo dentro do Ask e do SQL AI, onde
   // "página inicial" seria a home de qual dos três?
   { id: 'portal', label: 'Portal', icon: <Icon name="home" size={24} /> },
-  { id: 'ask', label: 'Weknow Ask', icon: <IconWeknowAsk size={24} /> },
+  // O Weknow Ask é a IA do Weknow: pergunta, analisa e faz, sem escolher
+  // metadado antes. O que antes era o "Weknow IA" (o MCP por dentro) virou ele.
+  { id: 'ia', label: 'Weknow Ask', icon: <IconWeknowAsk size={24} /> },
   { id: 'sql', label: 'SQL AI', icon: <Icon name="database" size={24} /> },
 ]
 

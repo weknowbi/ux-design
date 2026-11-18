@@ -44,11 +44,17 @@ export type Widget = { id: string; span: Span; title?: string } & (
 export type PainelState = { period: '6m' | '12m' | 'all'; filter: string; highlight: string | null; theme: 'dark' | 'light' } & Partial<PainelLook>
 
 /**
- * O visual do painel, além do tema: paleta, uma cor principal própria (a do
- * cliente), densidade, cantos, linhas e as seções escondidas. Opcional porque
- * os painéis salvos antes disto não têm; quem lê completa com `PAINEL_LOOK`.
+ * O visual do painel, além do tema: o estilo, paleta, uma cor principal
+ * própria (a do cliente), densidade, cantos, linhas e as seções escondidas.
+ * Opcional porque os painéis salvos antes disto não têm; quem lê completa com
+ * `PAINEL_LOOK`.
+ *
+ * `style` troca o desenho inteiro: `weknow` é o padrão (cartões, azul);
+ * `editorial` é o de relatório (fundo creme, serifa, sem cartões, fios finos e
+ * um só destaque terracota).
  */
 export type PainelLook = {
+  style: 'weknow' | 'editorial'
   palette: 'blue' | 'green' | 'violet'
   accent: string | null
   density: 'comfortable' | 'compact'
@@ -57,7 +63,7 @@ export type PainelLook = {
   hidden: PainelSection[]
 }
 export type PainelSection = 'insights' | 'volume' | 'rate' | 'composition' | 'table' | 'notes' | 'sparks'
-export const PAINEL_LOOK: PainelLook = { palette: 'blue', accent: null, density: 'comfortable', corners: 'round', lines: 'smooth', hidden: [] }
+export const PAINEL_LOOK: PainelLook = { style: 'weknow', palette: 'blue', accent: null, density: 'comfortable', corners: 'round', lines: 'smooth', hidden: [] }
 export const lookOf = (w: Partial<PainelLook>): PainelLook => ({ ...PAINEL_LOOK, ...Object.fromEntries(Object.entries(w).filter(([k, v]) => k in PAINEL_LOOK && v !== undefined)) })
 export type WidgetKind = Widget['kind']
 
@@ -80,6 +86,8 @@ export type Board = {
    * Sem ela, vale a padrão do Weknow (ver `engine/guide.ts`).
    */
   guide?: Guide
+  /** A conversa do Weknow IA que criou este dashboard: enquanto rascunho, é onde ele mora. */
+  conversation?: string
   /**
    * Tema dos blocos, que se troca no botão da barra de filtros. Sem ele, os
    * blocos aparecem no tema do Weknow de quem abre. O painel executivo tem o

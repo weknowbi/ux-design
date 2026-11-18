@@ -20,7 +20,7 @@ import {
   type UserGroup,
 } from '@/data/settings'
 import { normalize } from '@/lib/format'
-import { go } from '@/lib/router'
+import { go, goBack, replace } from '@/lib/router'
 import type { Crumb } from '@/components/Header'
 import type { PortalRoute } from '@/components/PortalSidebar'
 
@@ -346,7 +346,7 @@ export function SettingsPageScreen({ pageId, onRoute }: { pageId: string; onRout
       <FolderHeader
         name={page.name}
         icon={page.icon}
-        onBack={() => go('/configuracoes')}
+        onBack={() => goBack('/configuracoes')}
         compact={isMobile}
         aside={!isMobile && current.action ? <Button iconLeft="add">{current.action}</Button> : undefined}
       />
@@ -366,7 +366,7 @@ export function SettingsPageScreen({ pageId, onRoute }: { pageId: string; onRout
               active={s.id === page.id}
               onSelect={() => {
                 setQuery('')
-                go(`/configuracoes/${s.id}`)
+                replace(`/configuracoes/${s.id}`)
               }}
             />
           ))}

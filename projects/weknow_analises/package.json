@@ -7,7 +7,9 @@
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "dev:ask": "vite --mode ask --port 5185 --strictPort",
+    "build:ask": "tsc --noEmit && vite build --mode ask --outDir ../weknow_ask_mcp/dist --emptyOutDir"
   },
   "dependencies": {
     "react": "^19.0.0",

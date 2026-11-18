@@ -175,42 +175,79 @@ export type User = {
   contactGroups: string[]
   /** ISO; vazio em quem nunca entrou. */
   lastSeen?: string
+  /** O WhatsApp do contato, para os alertas. Quem não tem recebe por e-mail. */
+  whatsapp?: string
 }
 
 const ADMIN: Role[] = ['Visualizador', 'Desenvolvedor', 'Administrador', 'Contato']
 const ANALISTA: Role[] = ['Visualizador', 'Desenvolvedor', 'Contato']
 const LEITOR: Role[] = ['Visualizador', 'Contato']
 
+/** Os três níveis de acesso, com os papéis que cada um soma. */
+export type RoleLevel = 'Administrador' | 'Desenvolvedor' | 'Visualizador'
+export const roleSet = (level: RoleLevel): Role[] => (level === 'Administrador' ? ADMIN : level === 'Desenvolvedor' ? ANALISTA : LEITOR)
+
+
 const days = (d: number) => new Date(Date.now() - d * 86_400_000).toISOString()
 
 export const USERS: User[] = [
   { code: 3, name: 'Admin', email: 'admin@weknow.com.br', active: true, roles: ADMIN, userGroups: ['Administrators'], contactGroups: [], lastSeen: days(0) },
-  { code: 35, name: 'Alexandre da Silva', email: 'alexandre.silva@weknow.com.br', active: true, roles: ADMIN, userGroups: ['Administrators'], contactGroups: ['Diretoria'], lastSeen: days(1) },
+  { code: 35, name: 'Alexandre da Silva', email: 'alexandre.silva@weknow.com.br', active: true, roles: ADMIN, userGroups: ['Administrators'], contactGroups: ['Diretoria'], lastSeen: days(1), whatsapp: '(47) 99620-5531' },
   { code: 13, name: 'Aline Luchtenberg', email: 'aline.luchtenberg@weknow.com.br', active: true, roles: ADMIN, userGroups: ['Administrators'], contactGroups: [], lastSeen: days(2) },
-  { code: 34, name: 'Alini Mello', email: 'alini.mello@weknow.com.br', active: true, roles: ADMIN, userGroups: ['Administrators'], contactGroups: ['Diretoria'], lastSeen: days(4) },
+  { code: 34, name: 'Alini Mello', email: 'alini.mello@weknow.com.br', active: true, roles: ADMIN, userGroups: ['Administrators'], contactGroups: ['Diretoria'], lastSeen: days(4), whatsapp: '(47) 99245-7718' },
   { code: 5, name: 'analista', email: 'analista@weknow.com.br', active: true, roles: ANALISTA, userGroups: ['Analistas'], contactGroups: [], lastSeen: days(9) },
   { code: 11, name: 'Anderson Castilho', email: 'anderson.castilho@weknow.com.br', active: true, roles: ADMIN, userGroups: ['Administrators'], contactGroups: [], lastSeen: days(3) },
   { code: 15, name: 'Anderson Pebrianca', email: 'anderson.pebrianca@hsj.com.br', active: true, roles: LEITOR, userGroups: ['Usuarios'], contactGroups: ['Externos'], lastSeen: days(12) },
   { code: 19, name: 'Andreia, Hospital São José', email: 'andreia@hsj.com.br', active: true, roles: LEITOR, userGroups: ['Usuarios'], contactGroups: ['Externos', 'Enfermagem'], lastSeen: days(21) },
   { code: 27, name: 'Beatriz Nogueira', email: 'beatriz.nogueira@hsj.com.br', active: true, roles: LEITOR, userGroups: ['Usuarios'], contactGroups: ['Externos'], expiresAt: '2026-12-31', lastSeen: days(5) },
   { code: 8, name: 'Bruno Tavares', email: 'bruno.tavares@weknow.com.br', active: false, roles: ANALISTA, userGroups: ['Analistas'], contactGroups: [], lastSeen: days(180) },
-  { code: 41, name: 'Camila Ferraz', email: 'camila.ferraz@weknow.com.br', active: true, roles: ANALISTA, userGroups: ['Analistas'], contactGroups: ['Diretoria'], lastSeen: days(1) },
-  { code: 22, name: 'Matt Murdock', email: 'matt.murdock@weknow.com.br', active: true, roles: ADMIN, userGroups: ['Administrators'], contactGroups: [], lastSeen: days(0) },
-  { code: 30, name: 'Cláudia Menezes, Faturamento SUS', email: 'claudia.menezes@hsj.com.br', active: true, roles: LEITOR, userGroups: ['Usuarios'], contactGroups: ['Externos', 'Faturamento'], lastSeen: days(7) },
+  { code: 41, name: 'Camila Ferraz', email: 'camila.ferraz@weknow.com.br', active: true, roles: ANALISTA, userGroups: ['Analistas'], contactGroups: ['Diretoria'], lastSeen: days(1), whatsapp: '(47) 99703-1284' },
+  { code: 22, name: 'Matt Murdock', email: 'matt.murdock@weknow.com.br', active: true, roles: ADMIN, userGroups: ['Administrators'], contactGroups: [], lastSeen: days(0), whatsapp: '(47) 99134-2210' },
+  { code: 30, name: 'Cláudia Menezes, Faturamento SUS', email: 'claudia.menezes@hsj.com.br', active: true, roles: LEITOR, userGroups: ['Usuarios'], contactGroups: ['Externos', 'Faturamento'], lastSeen: days(7), whatsapp: '(47) 99812-4410' },
   { code: 44, name: 'Diego Rampelotti', email: 'diego.rampelotti@weknow.com.br', active: true, roles: ANALISTA, userGroups: ['Analistas'], contactGroups: [], lastSeen: days(2) },
   { code: 17, name: 'Eduardo Hoffmann', email: 'eduardo.hoffmann@hsj.com.br', active: false, roles: LEITOR, userGroups: ['Usuarios'], contactGroups: ['Externos'], expiresAt: '2025-06-30', lastSeen: days(320) },
-  { code: 51, name: 'Fernanda Klein', email: 'fernanda.klein@weknow.com.br', active: true, roles: ADMIN, userGroups: ['Administrators'], contactGroups: ['Diretoria'], lastSeen: days(0) },
+  { code: 51, name: 'Fernanda Klein', email: 'fernanda.klein@weknow.com.br', active: true, roles: ADMIN, userGroups: ['Administrators'], contactGroups: ['Diretoria'], lastSeen: days(0), whatsapp: '(47) 98877-0193' },
   { code: 26, name: 'Gabriel Nunes', email: 'gabriel.nunes@hsj.com.br', active: true, roles: LEITOR, userGroups: ['Usuarios'], contactGroups: ['Enfermagem'], lastSeen: days(15) },
   { code: 9, name: 'Helena Prado', email: 'helena.prado@weknow.com.br', active: true, roles: ANALISTA, userGroups: ['Analistas'], contactGroups: [], lastSeen: days(6) },
   { code: 38, name: 'Igor Sampaio', email: 'igor.sampaio@hsj.com.br', active: true, roles: LEITOR, userGroups: ['Usuarios'], contactGroups: ['Externos'], lastSeen: days(45) },
   { code: 20, name: 'Juliana Lima', email: 'juliana.lima@weknow.com.br', active: true, roles: ADMIN, userGroups: ['Administrators'], contactGroups: [], lastSeen: days(1) },
   { code: 47, name: 'Leonardo Bastos, CCIH', email: 'leonardo.bastos@hsj.com.br', active: true, roles: LEITOR, userGroups: ['Usuarios'], contactGroups: ['Externos', 'Enfermagem'], lastSeen: days(30) },
-  { code: 14, name: 'Mariana Souza', email: 'mariana.souza@weknow.com.br', active: true, roles: ANALISTA, userGroups: ['Analistas'], contactGroups: ['Diretoria'], lastSeen: days(0) },
+  { code: 14, name: 'Mariana Souza', email: 'mariana.souza@weknow.com.br', active: true, roles: ANALISTA, userGroups: ['Analistas'], contactGroups: ['Diretoria'], lastSeen: days(0), whatsapp: '(47) 98410-3366' },
   { code: 33, name: 'Nathalia Ribas', email: 'nathalia.ribas@hsj.com.br', active: true, roles: LEITOR, userGroups: ['Usuarios'], contactGroups: ['Faturamento'], lastSeen: days(11) },
   { code: 6, name: 'Rafael Costa', email: 'rafael.costa@weknow.com.br', active: true, roles: ANALISTA, userGroups: ['Analistas'], contactGroups: [], lastSeen: days(3) },
   { code: 52, name: 'Renata Villas', email: 'renata.villas@hsj.com.br', active: true, roles: LEITOR, userGroups: ['Usuarios'], contactGroups: ['Externos'], expiresAt: '2027-03-01' },
   { code: 29, name: 'Thiago Marques', email: 'thiago.marques@weknow.com.br', active: false, roles: LEITOR, userGroups: ['Usuarios'], contactGroups: [], lastSeen: days(240) },
 ]
+
+/* O que o Weknow IA mudou nos cadastros fica guardado no navegador: a conversa
+   diz "pronto", e recarregar a página não pode desmentir. */
+const USER_CHANGES = 'wk-user-changes'
+
+function readUserChanges(): Record<number, Partial<User>> {
+  try {
+    return JSON.parse(localStorage.getItem(USER_CHANGES) ?? '{}')
+  } catch {
+    return {}
+  }
+}
+
+for (const [code, set] of Object.entries(readUserChanges())) {
+  const u = USERS.find((x) => x.code === Number(code))
+  if (u) Object.assign(u, set)
+}
+
+/** Muda um cadastro: a tela de Usuários lê desta lista ao abrir. */
+export function updateUser(code: number, set: Partial<User>) {
+  const u = USERS.find((x) => x.code === code)
+  if (!u) return
+  Object.assign(u, set)
+  try {
+    const all = readUserChanges()
+    localStorage.setItem(USER_CHANGES, JSON.stringify({ ...all, [code]: { ...all[code], ...set } }))
+  } catch {
+    /* sem armazenamento: vale enquanto a página está aberta */
+  }
+}
 
 /* -------------------------------------------------------------------------
    Grupos. As duas listas existem no Weknow como telas separadas, e são: um
