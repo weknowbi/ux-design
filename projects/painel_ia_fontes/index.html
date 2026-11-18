@@ -568,22 +568,13 @@ button.marker:hover, button.marker[aria-expanded="true"] { background: var(--wk-
    folga dentro do item), não na borda da caixa deles. */
 ul.versions + .note { padding-left: 12px; }
 
-/* ─── páginas do dashboard: a barra de baixo, como as páginas do Weknow.
-   Cada página é um painel do MCP com outro formato, para o estudo do
-   visual padrão (projects/painel_padrao). ─── */
-.paginas { flex: none; display: flex; align-items: center; gap: 8px; height: 40px; padding: 0 16px; border-top: 1px solid var(--wk-border); background: var(--wk-surface); }
-.paginas .setas { display: flex; align-items: center; flex: none; }
-.paginas .seta { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border: 0; border-radius: 6px; background: none; color: var(--wk-nav-label); cursor: pointer; }
-.paginas .seta:hover { background: var(--wk-icon-hover); }
-.paginas .seta:disabled { opacity: .4; pointer-events: none; }
-.paginas .abas { flex: 1; min-width: 0; display: flex; align-items: center; gap: 4px; overflow: hidden; }
-.pagina { flex: none; height: 32px; max-width: 240px; padding: 0 12px; border: 0; border-radius: 8px; background: transparent; cursor: pointer;
-  font: 400 14px/1 Inter, system-ui, sans-serif; color: var(--wk-nav-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; transition: background-color .15s, color .15s; }
-.pagina:hover { background: var(--wk-nav-hover, var(--wk-hover)); color: var(--wk-nav-hover-text, var(--wk-text)); }
-.pagina[aria-selected="true"] { background: var(--wk-nav-active); color: var(--wk-nav-active-text, var(--wk-primary)); }
-.paginas .acoes { flex: none; display: flex; align-items: center; gap: 8px; padding-left: 16px; }
-.paginas .acoes .btn.primary { gap: 8px; padding: 0 12px 0 8px; }
-.paginas .acoes .mais { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; color: var(--wk-nav-label); }
+/* ─── exemplos: cada um é um painel do MCP com outro formato, para o
+   estudo do visual padrão (projects/painel_padrao). O dashboard do MCP
+   não tem a barra de abas de baixo do dashboard normal (abas só se a
+   pessoa pedir, e a IA desenha), então a troca entre eles é um controle
+   do protótipo, com o mesmo visual escuro do .demo abaixo. ─── */
+.demo.exemplos { bottom: 16px; min-width: 220px; }
+.exemplos .demo-toggle .atual { color: #fff; }
 
 /* ─── controle do protótipo (não faz parte da interface): escuro de
    propósito, para não ser lido como parte da tela ─── */
@@ -685,7 +676,9 @@ ul.versions + .note { padding-left: 12px; }
   </aside>
 </div>
 
-<nav class="paginas" id="paginas" role="tablist" aria-label="Páginas do dashboard"></nav>
+<!-- Controle do protótipo: não faz parte da interface. Troca entre os
+     exemplos (galeria, testes e o original); fica recolhido no canto. -->
+<nav class="demo exemplos" id="paginas" aria-label="Exemplos do protótipo"></nav>
 
 <!-- Controle do protótipo: não faz parte da interface. Simula as três
      situações de publicação; recolhe num botão e reabre por ele. -->
@@ -1401,27 +1394,16 @@ ul.versions + .note { padding-left: 12px; }
     const r = await fetch(p.arquivo, { cache: 'no-store' }).catch(() => null);
     return r && r.ok ? r.text() : `<!doctype html><body style="font:14px system-ui;padding:24px;color:#64748b">Esta página ainda não existe (${esc(p.arquivo)}).`;
   }
-  /* A barra inferior do dashboard do portal (DashboardBar): setas juntas na
-     frente, as abas como item de navegação (fundo e cor de ativo do menu,
-     raio 8, texto 14) e, à direita, Análise inteligente e o "…". */
-  const ICONE_ANALISE = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true" style="display:block;flex:none"><path fill="currentColor" d="M9.99707 3.00034C10.8957 3.00035 11.7304 3.14596 12.5029 3.43296C12.3496 3.72887 12.2266 4.04365 12.1416 4.37339C11.4805 4.12555 10.767 4.00034 10 4.00034C8.33333 4.00034 6.91667 4.58587 5.75 5.7562C4.58355 6.92664 4 8.34804 4 10.0198C4.00014 11.6916 4.58347 13.1133 5.75 14.2835C6.91659 15.4538 8.33351 16.0384 10 16.0384C11.6665 16.0384 13.0834 15.4538 14.25 14.2835C15.4165 13.1133 15.9998 11.6916 16 10.0198C16 10.0037 15.9983 9.98711 15.998 9.97104C16.1629 9.98935 16.3303 10.0003 16.5 10.0003C16.6687 10.0003 16.8351 9.98914 16.999 9.97104C16.9991 9.9807 17 9.99067 17 10.0003C17 10.8784 16.8474 11.7096 16.543 12.4935C16.2385 13.2774 15.8195 13.9732 15.2861 14.5794L21 20.2923L20.3115 21.0003L14.5977 15.2864C13.9785 15.8198 13.277 16.2388 12.4932 16.5433C11.7092 16.8477 10.8781 17.0003 10 17.0003C8.04596 17.0003 6.39046 16.3226 5.03418 14.9671C3.67808 13.6115 3.00007 11.9564 3 10.0032C3.00002 8.05004 3.67766 6.39409 5.0332 5.03647C6.38886 3.67883 8.04375 3.00034 9.99707 3.00034ZM7.15332 12.597H6.15332V8.53843H7.15332V12.597ZM10.5 12.597H9.5V6.63511H10.5V12.597ZM13.8467 12.597H12.8467V9.50034H13.8467V12.597ZM18.8301 1.09409C18.8581 0.968637 19.1419 0.968637 19.1699 1.09409C19.3509 1.91852 19.5309 3.22556 20.1533 3.848C20.7759 4.47007 22.081 4.6495 22.9053 4.83042C23.0312 4.85805 23.0312 5.14264 22.9053 5.17026C22.081 5.35117 20.7758 5.53061 20.1533 6.15268C19.5309 6.77513 19.3509 8.08117 19.1699 8.90561C19.1423 9.03149 18.8577 9.03149 18.8301 8.90561C18.6491 8.08117 18.4701 6.77513 17.8477 6.15268C17.2253 5.53042 15.9191 5.35119 15.0947 5.17026C14.9688 5.14264 14.9688 4.85805 15.0947 4.83042C15.9191 4.64948 17.2252 4.47026 17.8477 3.848C18.4701 3.22556 18.6491 1.91853 18.8301 1.09409Z"/></svg>';
+  let exemplosAbertos = false;
   function renderPaginas() {
-    const i = PAGINAS.findIndex((p) => p.id === pagina);
+    const atual = PAGINAS.find((p) => p.id === pagina);
     $('#paginas').innerHTML =
-      `<div class="setas"><button class="seta" type="button" data-passo="-1" aria-label="Aba anterior" title="Aba anterior" ${i === 0 ? 'disabled' : ''}><span class="ms">chevron_left</span></button>` +
-      `<button class="seta" type="button" data-passo="1" aria-label="Próxima aba" title="Próxima aba" ${i === PAGINAS.length - 1 ? 'disabled' : ''}><span class="ms">chevron_right</span></button></div>` +
-      '<div class="abas" role="tablist" aria-label="Abas do dashboard">' +
-      PAGINAS.map((p, k) => `<button class="pagina" type="button" role="tab" data-pagina="${p.id}" aria-selected="${k === i}" tabindex="${k === i ? 0 : -1}" title="${esc(p.nota ? `Pedido: ${p.nota}` : p.nome)}">${esc(p.nome)}</button>`).join('') + '</div>' +
-      `<div class="acoes"><button class="btn primary" type="button">${ICONE_ANALISE}Análise inteligente</button><span class="mais" aria-hidden="true"><span class="ms">more_horiz</span></span></div>`;
+      `<div class="demo-opts" id="ex-opts" role="group" aria-label="Exemplos" ${exemplosAbertos ? '' : 'hidden'}>` +
+      PAGINAS.map((p) => `<button type="button" data-pagina="${p.id}" aria-pressed="${p.id === pagina}" title="${esc(p.nota ? `Pedido: ${p.nota}` : p.nome)}">${esc(p.nome)}</button>`).join('') + '</div>' +
+      `<button type="button" class="demo-toggle" id="ex-toggle" aria-expanded="${exemplosAbertos}" aria-controls="ex-opts">` +
+      `<span class="ms s20" aria-hidden="true">science</span><span>Exemplo: <span class="atual">${esc(atual.nome)}</span></span><span class="ms s20 chev" aria-hidden="true">expand_more</span></button>`;
     $('#paginas').querySelectorAll('[data-pagina]').forEach((b) => (b.onclick = () => abrirPagina(b.dataset.pagina)));
-    $('#paginas').querySelectorAll('[data-passo]').forEach((b) => (b.onclick = () => abrirPagina(PAGINAS[i + Number(b.dataset.passo)].id)));
-    $('#paginas .abas').onkeydown = (e) => {
-      const passo = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;
-      if (!passo) return;
-      e.preventDefault();
-      const j = Math.min(PAGINAS.length - 1, Math.max(0, i + passo));
-      abrirPagina(PAGINAS[j].id).then(() => $(`#paginas [data-pagina="${PAGINAS[j].id}"]`)?.focus());
-    };
+    $('#ex-toggle').onclick = () => { exemplosAbertos = !exemplosAbertos; renderPaginas(); $('#ex-toggle').focus(); };
   }
   async function abrirPagina(id) {
     const p = PAGINAS.find((x) => x.id === id);
