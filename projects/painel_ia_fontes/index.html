@@ -567,13 +567,41 @@ button.marker:hover, button.marker[aria-expanded="true"] { background: var(--wk-
    folga dentro do item), não na borda da caixa deles. */
 ul.versions + .note { padding-left: 12px; }
 
-/* ─── exemplos: cada um é um painel do MCP com outro formato, para o
-   estudo do visual padrão (projects/painel_padrao). O dashboard do MCP
-   não tem a barra de abas de baixo do dashboard normal (abas só se a
-   pessoa pedir, e a IA desenha), então a troca entre eles é um controle
-   do protótipo, com o mesmo visual escuro do .demo abaixo. ─── */
-.demo.exemplos { bottom: 16px; min-width: 220px; }
-.exemplos .demo-toggle .atual { color: #fff; }
+/* ─── abas do dashboard do MCP: cada exemplo (galeria, testes, original)
+   é uma aba. O dashboard do MCP não tem a barra de baixo do dashboard
+   normal; abas só existem se a pessoa pedir, e a IA desenha a navegação.
+   Aqui ela é simulada como a IA faria: um botão flutuante com a aba atual
+   que abre a lista, no visual padrão do painel (tokens do example em
+   painel_padrao/json/exemplo.html: cartão, borda, véu e primária, a mesma
+   lista do seletor de filtro). ─── */
+.navabas {
+  --n-fundo: #ffffff; --n-borda: #e6e9ef; --n-hover: #f7f9fc; --n-texto: #1e2633; --n-texto-3: #64748b;
+  --n-primaria: #3366cc; --n-veu: rgba(51, 102, 204, .12);
+  --n-sombra: 0 10px 28px rgba(16, 24, 40, .12), 0 2px 6px rgba(16, 24, 40, .06);
+  position: fixed; left: 16px; bottom: 16px; z-index: 50; min-width: 240px; padding: 4px;
+  display: flex; flex-direction: column; gap: 2px;
+  background: var(--n-fundo); border: 1px solid var(--n-borda); border-radius: 10px; box-shadow: var(--n-sombra);
+  font: 13px/1.2 "Segoe UI Variable Text", "Segoe UI", system-ui, -apple-system, sans-serif; color: var(--n-texto);
+}
+:root[data-theme="dark"] .navabas {
+  --n-fundo: #242527; --n-borda: #323436; --n-hover: #2c2d30; --n-texto: #eff0f0; --n-texto-3: #9a9ea4;
+  --n-primaria: #8ab4f8; --n-veu: rgba(138, 180, 248, .18); --n-sombra: 0 10px 28px rgba(0, 0, 0, .45);
+}
+.navabas button {
+  height: 32px; padding: 0 8px; border: 0; border-radius: 6px; cursor: pointer;
+  display: flex; align-items: center; gap: 8px; width: 100%;
+  background: none; color: inherit; font: inherit; text-align: left; white-space: nowrap;
+}
+.navabas button:hover { background: var(--n-hover); }
+.navabas button:focus-visible { outline: 2px solid var(--n-primaria); outline-offset: -2px; }
+.navabas .ms { color: var(--n-texto-3); }
+.navabas-atual { font-weight: 600; }
+.navabas-atual .chev { margin-left: auto; transition: transform .15s ease; }
+.navabas-atual[aria-expanded="true"] .chev { transform: rotate(180deg); }
+.navabas-lista { display: flex; flex-direction: column; gap: 2px; padding-bottom: 4px; margin-bottom: 2px; border-bottom: 1px solid var(--n-borda); }
+.navabas-lista[hidden] { display: none; }
+.navabas-lista button { padding-left: 36px; }
+.navabas-lista button[aria-current="page"] { background: var(--n-veu); color: var(--n-primaria); font-weight: 600; }
 
 /* ─── controle do protótipo (não faz parte da interface): escuro de
    propósito, para não ser lido como parte da tela ─── */
@@ -675,9 +703,9 @@ ul.versions + .note { padding-left: 12px; }
   </aside>
 </div>
 
-<!-- Controle do protótipo: não faz parte da interface. Troca entre os
-     exemplos (galeria, testes e o original); fica recolhido no canto. -->
-<nav class="demo exemplos" id="paginas" aria-label="Exemplos do protótipo"></nav>
+<!-- Abas do dashboard, como a IA desenharia se a pessoa pedisse abas:
+     cada exemplo (galeria, testes e o original) é uma aba. -->
+<nav class="navabas" id="paginas" aria-label="Abas do dashboard"></nav>
 
 <!-- Controle do protótipo: não faz parte da interface. Simula as três
      situações de publicação; recolhe num botão e reabre por ele. -->
@@ -1393,17 +1421,25 @@ ul.versions + .note { padding-left: 12px; }
     const r = await fetch(p.arquivo, { cache: 'no-store' }).catch(() => null);
     return r && r.ok ? r.text() : `<!doctype html><body style="font:14px system-ui;padding:24px;color:#64748b">Esta página ainda não existe (${esc(p.arquivo)}).`;
   }
-  let exemplosAbertos = false;
+  /* Abas: o botão mostra a aba atual e abre a lista acima dele; escolher
+     uma aba, clicar fora ou Esc fecha a lista. */
+  let abasAbertas = false;
   function renderPaginas() {
     const atual = PAGINAS.find((p) => p.id === pagina);
     $('#paginas').innerHTML =
-      `<div class="demo-opts" id="ex-opts" role="group" aria-label="Exemplos" ${exemplosAbertos ? '' : 'hidden'}>` +
-      PAGINAS.map((p) => `<button type="button" data-pagina="${p.id}" aria-pressed="${p.id === pagina}" title="${esc(p.nota ? `Pedido: ${p.nota}` : p.nome)}">${esc(p.nome)}</button>`).join('') + '</div>' +
-      `<button type="button" class="demo-toggle" id="ex-toggle" aria-expanded="${exemplosAbertos}" aria-controls="ex-opts">` +
-      `<span class="ms s20" aria-hidden="true">science</span><span>Exemplo: <span class="atual">${esc(atual.nome)}</span></span><span class="ms s20 chev" aria-hidden="true">expand_more</span></button>`;
-    $('#paginas').querySelectorAll('[data-pagina]').forEach((b) => (b.onclick = () => abrirPagina(b.dataset.pagina)));
-    $('#ex-toggle').onclick = () => { exemplosAbertos = !exemplosAbertos; renderPaginas(); $('#ex-toggle').focus(); };
+      `<div class="navabas-lista" id="abas-lista" ${abasAbertas ? '' : 'hidden'}>` +
+      PAGINAS.map((p) => `<button type="button" data-pagina="${p.id}" ${p.id === pagina ? 'aria-current="page"' : ''} title="${esc(p.nota ? `Pedido: ${p.nota}` : p.nome)}">${esc(p.nome)}</button>`).join('') + '</div>' +
+      `<button type="button" class="navabas-atual" id="abas-botao" aria-expanded="${abasAbertas}" aria-controls="abas-lista">` +
+      `<span class="ms s20" aria-hidden="true">tab</span><span>${esc(atual.nome)}</span><span class="ms s20 chev" aria-hidden="true">expand_less</span></button>`;
+    $('#paginas').querySelectorAll('[data-pagina]').forEach((b) => (b.onclick = () => { abasAbertas = false; abrirPagina(b.dataset.pagina).then(() => $('#abas-botao').focus()); }));
+    $('#abas-botao').onclick = () => { abasAbertas = !abasAbertas; renderPaginas(); $('#abas-botao').focus(); };
   }
+  document.addEventListener('click', (e) => { if (abasAbertas && !e.composedPath().some((n) => n.id === 'paginas')) { abasAbertas = false; renderPaginas(); } });
+  /* clique dentro do painel (iframe) não chega aqui, mas tira o foco da janela */
+  window.addEventListener('blur', () => setTimeout(() => {
+    if (abasAbertas && document.activeElement?.tagName === 'IFRAME') { abasAbertas = false; renderPaginas(); }
+  }));
+  document.addEventListener('keydown', (e) => { if (abasAbertas && e.key === 'Escape') { abasAbertas = false; renderPaginas(); $('#abas-botao').focus(); } });
   async function abrirPagina(id) {
     const p = PAGINAS.find((x) => x.id === id);
     if (!p || !contents) return;
