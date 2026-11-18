@@ -373,7 +373,6 @@ button { font: inherit; color: inherit; }
 /* Teste: o ícone do botão que abre Dados e Histórico é o desenho de painel
    com o brilho da IA do Weknow (o mesmo do Ask e da Análise inteligente);
    o nome do dashboard fica sem marca antes. */
-#ia-btn svg { display: block; }
 /* A calha da barra de rolagem fica reservada (scrollbar-gutter): abrir uma
    fonte faz a lista passar da altura, e sem isso o conteúdo pulava para o lado. */
 .sources-scroll {
@@ -629,7 +628,7 @@ ul.versions + .note { padding-left: 12px; }
     <div class="status" id="status"></div>
   </nav>
   <label class="search"><span class="ms">search</span><input placeholder="Pesquise por nome ou tag" aria-label="Pesquisar"></label>
-  <button class="icon-btn" type="button" id="ia-btn" title="Dados e histórico" aria-label="Dados e histórico" aria-pressed="false" aria-controls="side"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true"><g stroke="currentColor" stroke-width="1"><rect x="3.5" y="3.5" width="7" height="9" rx="1"/><rect x="13.5" y="3.5" width="7" height="5" rx="1"/><rect x="3.5" y="15.5" width="7" height="5" rx="1"/></g><path d="M17 12L18.2143 14.7857L21 16L18.2143 17.2143L17 20L15.7857 17.2143L13 16L15.7857 14.7857L17 12Z" fill="currentColor" stroke="currentColor" stroke-width="0.8" stroke-miterlimit="6" stroke-linecap="round"/></svg></button>
+  <button class="icon-btn" type="button" id="ia-btn" title="Dados e histórico" aria-label="Dados e histórico" aria-pressed="false" aria-controls="side"><span class="ms" aria-hidden="true">database</span></button>
   <div class="more" id="more">
     <button class="icon-btn" type="button" id="more-btn" title="Mais opções" aria-label="Mais opções" aria-haspopup="menu" aria-expanded="false" aria-controls="more-menu"><span class="ms">more_horiz</span></button>
     <div class="menu" id="more-menu" role="menu" aria-label="Mais opções" hidden>
