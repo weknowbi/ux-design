@@ -1,0 +1,350 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="wk-lib:echarts"></script>
+<style>
+:root {
+  color-scheme: light;
+  --fundo: #f5f7fa; --cartao: #ffffff; --cartao-2: #f7f9fc; --borda: #e6e9ef; --borda-2: #d5dae3; --grade: #eef0f4; --eixo: #d5dae3;
+  --texto: #1e2633; --texto-2: #475569; --texto-3: #64748b; --primaria: #3366cc; --veu-2: rgba(51, 102, 204, .12);
+  --bom: #0e7552; --ruim: #b83a33; --atencao: #a44a06; --apagado: #c3cad5; --tooltip: #ffffff; --esqueleto: #eef1f5;
+  --s1: #2563eb; --s2: #06a0c4; --s3: #7c3aed; --s4: #e11d48; --s5: #c026d3; --s6: #ea580c; --s7: #4f46e5; --s8: #059669;
+  --sombra: 0 0 0 1px rgba(15, 23, 42, .05), 0 1px 3px rgba(15, 23, 42, .06);
+  --sombra-tooltip: 0 10px 28px rgba(16, 24, 40, .12), 0 2px 6px rgba(16, 24, 40, .06);
+  --fonte: "Segoe UI Variable Text", "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, "Helvetica Neue", Roboto, Arial, sans-serif;
+  --fonte-display: "Segoe UI Variable Display", "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, "Helvetica Neue", Roboto, Arial, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+    --fundo: #131314; --cartao: #1c1d1f; --cartao-2: #232426; --borda: #262729; --borda-2: #323436; --grade: #252628; --eixo: #3a3c3f;
+    --texto: #eff0f0; --texto-2: #c4c7ca; --texto-3: #9a9ea4; --primaria: #8ab4f8; --veu-2: rgba(138, 180, 248, .18);
+    --bom: #5dd39e; --ruim: #f28b82; --atencao: #f0b65a; --apagado: #4a4d52; --tooltip: #242527; --esqueleto: #242527;
+    --s1: #3f82f2; --s2: #00a8b8; --s3: #9271f0; --s4: #ec5a7c; --s5: #c45ad3; --s6: #e0702c; --s7: #6f72ec; --s8: #23a679;
+    --sombra: 0 0 0 1px rgba(255, 255, 255, .04); --sombra-tooltip: 0 10px 28px rgba(0, 0, 0, .45);
+  }
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; background: var(--fundo); color: var(--texto); }
+body { padding: 20px 28px 40px; font: 14px/1.45 var(--fonte); }
+@media (max-width: 640px) { body { padding: 18px 16px 32px; } }
+button { font: inherit; color: inherit; }
+.topo { display: flex; justify-content: space-between; align-items: flex-end; gap: 12px 28px; flex-wrap: wrap; margin-bottom: 18px; }
+h1 { margin: 0; font-family: var(--fonte-display); font-size: 24px; font-weight: 600; letter-spacing: -.02em; line-height: 1.2; }
+.sub { margin: 4px 0 0; font-size: 13px; color: var(--texto-3); }
+.barra-filtros { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 10px 14px; }
+.filtro { display: grid; gap: 6px; }
+.filtro > span { font-size: 12px; font-weight: 500; color: var(--texto-3); }
+.seletor { position: relative; }
+.seletor-botao { height: 30px; min-width: 130px; max-width: 220px; display: inline-flex; align-items: center; justify-content: space-between; gap: 10px;
+  padding: 0 10px 0 12px; border: 1px solid var(--borda-2); border-radius: 8px; background: var(--cartao); color: var(--texto); font-size: 13px; cursor: pointer; }
+.seletor-botao span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.seletor-botao::after { content: ""; flex: none; width: 6px; height: 6px; border-right: 1.5px solid var(--texto-3); border-bottom: 1.5px solid var(--texto-3); transform: translateY(-2px) rotate(45deg); }
+.seletor-botao:hover { background: var(--cartao-2); }
+.seletor.ativo .seletor-botao { background: var(--veu-2); border-color: transparent; color: var(--primaria); font-weight: 600; }
+.seletor.ativo .seletor-botao::after { border-color: var(--primaria); }
+.seletor-lista { position: absolute; top: calc(100% + 6px); left: 0; z-index: 40; min-width: 220px; max-height: 300px; overflow: auto; padding: 6px;
+  background: var(--tooltip); border: 1px solid var(--borda); border-radius: 10px; box-shadow: var(--sombra-tooltip); }
+.seletor-lista.larga { min-width: 300px; }
+.opcao { display: flex; align-items: center; gap: 10px; width: 100%; height: 32px; padding: 0 8px; border: 0; border-radius: 6px; background: none; font-size: 13px; text-align: left; cursor: pointer; }
+.opcao:hover { background: var(--cartao-2); }
+.opcao::before { content: ""; flex: none; box-sizing: border-box; width: 15px; height: 15px; border-radius: 4px; border: 1.5px solid var(--borda-2); }
+.opcao[aria-selected="true"]::before { border-color: var(--primaria); background: var(--primaria); box-shadow: inset 0 0 0 3px var(--tooltip); }
+.opcao.todos { margin-bottom: 4px; box-shadow: 0 1px 0 var(--grade); border-radius: 6px 6px 0 0; }
+.opcao.mes::before { display: none; }
+.opcao.mes { height: 28px; }
+.opcao.mes[aria-selected="true"] { background: var(--veu-2); color: var(--primaria); font-weight: 600; }
+.atalhos { display: flex; flex-wrap: wrap; gap: 4px 6px; padding: 0 0 6px; margin-bottom: 6px; box-shadow: 0 1px 0 var(--grade); }
+.atalhos button { height: 26px; padding: 0 10px; border: 1px solid var(--borda-2); border-radius: 13px; background: none; font-size: 12px; cursor: pointer; }
+.atalhos button:hover { background: var(--cartao-2); }
+.colunas { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.colunas h3 { margin: 0 0 4px 8px; font-size: 12px; font-weight: 500; color: var(--texto-3); }
+.limpar { height: 30px; margin-left: 2px; border: 0; background: none; color: var(--primaria); font-size: 13px; font-weight: 500; cursor: pointer; }
+.limpar[hidden] { display: none; }
+.grade { display: grid; gap: 16px; grid-template-columns: repeat(12, minmax(0, 1fr)); }
+.c12 { grid-column: 1 / -1; }
+.c4 { grid-column: span 4; }
+.c5 { grid-column: span 5; }
+.c7 { grid-column: span 7; }
+@media (max-width: 1000px) { .c4, .c5, .c7 { grid-column: 1 / -1; } }
+.cartao { background: var(--cartao); border: 0; border-radius: 14px; box-shadow: var(--sombra); padding: 20px 22px 22px; min-width: 0; display: flex; flex-direction: column; }
+.cartao h2 { margin: 0; font-size: 14px; font-weight: 600; }
+.desc { margin: 3px 0 18px; font-size: 12.5px; color: var(--texto-3); }
+.cartao.tabela { padding: 20px 0 0; overflow: hidden; }
+.cartao.tabela h2, .cartao.tabela .desc { padding: 0 22px; }
+.rotulo { font-size: 13px; font-weight: 500; color: var(--texto-2); }
+.valor { display: block; margin-top: 8px; font-family: var(--fonte-display); font-size: 28px; line-height: 1.15; font-weight: 600; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+.valor small { font-size: 14px; font-weight: 500; color: var(--texto-3); letter-spacing: 0; margin-left: 4px; }
+.nota { margin-top: 6px; font-size: 12.5px; color: var(--texto-3); }
+.aviso { margin: 12px 22px 0; font-size: 12.5px; color: var(--atencao); }
+.aviso[hidden] { display: none; }
+.caixa { position: relative; flex: 1; display: flex; flex-direction: column; min-height: 0; }
+.grafico { flex: 1; min-height: 380px; }
+.estado { display: none; position: absolute; inset: 0; margin: 0; align-items: center; justify-content: center; text-align: center; padding: 0 16px;
+  color: var(--texto-3); font-size: 13px; border: 1px dashed var(--borda-2); border-radius: 10px; }
+.caixa.sem-dados .estado { display: flex; }
+.caixa.sem-dados .grafico, .caixa.sem-dados .rolagem { visibility: hidden; }
+.caixa.tab .estado { inset: 8px 22px 22px; }
+.rolagem { overflow: auto; max-height: 520px; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th { position: sticky; top: 0; z-index: 2; background: var(--cartao); padding: 10px 12px; font-size: 12px; font-weight: 500; color: var(--texto-3); text-align: right; white-space: nowrap; cursor: pointer; user-select: none; box-shadow: 0 1px 0 var(--grade); }
+th:first-child, td:first-child { text-align: left; padding-left: 22px; }
+th:last-child, td:last-child { padding-right: 22px; }
+th:hover { color: var(--texto); }
+th[aria-sort="ascending"]::after { content: " \2191"; }
+th[aria-sort="descending"]::after { content: " \2193"; }
+td { padding: 12px; border-bottom: 1px solid var(--grade); text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+td:first-child { font-weight: 500; white-space: normal; min-width: 150px; }
+tbody tr:hover { background: var(--cartao-2); }
+tbody tr:last-child td { border-bottom: 0; }
+td small { color: var(--texto-3); font-size: 12px; margin-left: 3px; }
+.num-barra { display: inline-flex; align-items: center; gap: 10px; justify-content: flex-end; }
+.barra { flex: none; width: 96px; height: 8px; border-radius: 4px; background: var(--grade); overflow: hidden; }
+.barra i { display: block; height: 100%; background: var(--s1); border-radius: 4px; }
+.selo { display: inline-flex; align-items: center; gap: 6px; }
+.selo::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--apagado); }
+.selo.alta::before { background: var(--atencao); }
+.selo.alta { color: var(--atencao); }
+.tt { font: 12px/1.4 var(--fonte); color: var(--texto); min-width: 170px; }
+.tt-t { color: var(--texto-3); margin-bottom: 6px; }
+.tt-l { display: grid; grid-template-columns: 14px 1fr auto; gap: 8px; align-items: center; }
+.tt-l i { width: 9px; height: 9px; border-radius: 50%; }
+.tt-l span { color: var(--texto-3); }
+.tt-l b { font-weight: 600; font-variant-numeric: tabular-nums; }
+/* Estados da moldura */
+.valor[data-dash-source-state="loading"] { color: transparent; background: var(--esqueleto); border-radius: 8px; width: 60%; }
+.caixa[data-dash-source-state="loading"]::after { content: ""; position: absolute; inset: 0; border-radius: 10px; background: var(--esqueleto); }
+[data-dash-source-state="refreshing"] { opacity: .55; }
+</style></head>
+<body>
+<header class="topo">
+  <div><h1>Convênios: volume e permanência</h1><p class="sub" id="recorte">Quem mais traz atendimentos e pacientes, e quanto tempo eles ficam internados</p></div>
+  <section class="barra-filtros" aria-label="Filtros">
+    <div class="filtro" data-source="opt_meses" data-fetchpriority="high"><span>Período</span><div class="seletor" id="f-periodo"></div></div>
+    <div class="filtro" data-source="opt_tipos" data-fetchpriority="high"><span>Tipo de atendimento</span><div class="seletor" id="f-tipos"></div></div>
+    <div class="filtro" data-source="opt_conv" data-fetchpriority="high"><span>Tipo de convênio</span><div class="seletor" id="f-convtipos"></div></div>
+    <div class="filtro" data-source="opt_carater" data-fetchpriority="high"><span>Caráter/Clínica</span><div class="seletor" id="f-carater"></div></div>
+    <div class="filtro" data-source="opt_sexo" data-fetchpriority="high"><span>Sexo</span><div class="seletor" id="f-sexos"></div></div>
+    <button class="limpar" id="limpar" type="button" hidden>Limpar filtros</button>
+  </section>
+</header>
+
+<div class="grade">
+  <article class="cartao c4">
+    <div class="rotulo">Atendimentos</div>
+    <span class="valor" id="k-atend" data-source="kpis" data-field="MD_QT_TOTAL_ATENDIMENTO" data-row="0"></span>
+    <div class="nota">em todos os convênios do recorte</div>
+  </article>
+  <article class="cartao c4">
+    <div class="rotulo">Pacientes</div>
+    <span class="valor" id="k-pac" data-source="kpis" data-field="MD_QT_PACIENTE" data-row="0"></span>
+    <div class="nota">pacientes distintos no recorte</div>
+  </article>
+  <article class="cartao c4">
+    <div class="rotulo">Permanência média</div>
+    <span class="valor" id="k-perm" data-source="kpis" data-field="MD_QT_MEDIA_DIAS_PERMANENCIA" data-row="0"></span>
+    <div class="nota">referência para comparar cada convênio</div>
+  </article>
+
+  <article class="cartao c5">
+    <h2>Volume e permanência por convênio</h2>
+    <p class="desc">Quanto mais à direita, mais atendimentos; quanto mais alto, mais dias de internação. O tamanho da bolha é o número de pacientes.</p>
+    <div class="caixa" data-source="top_conv" id="caixa-graf"><div class="grafico" id="grafico"></div><p class="estado"></p></div>
+  </article>
+
+  <article class="cartao tabela c7">
+    <h2>Convênio por convênio</h2>
+    <p class="desc">Clique no título de uma coluna para ordenar. O ponto laranja marca permanência acima da média geral.</p>
+    <div class="caixa tab" id="caixa-tab" data-source="top_conv" style="flex:none"><div class="rolagem" id="tabela"></div><p class="estado"></p></div>
+    <p class="aviso" id="aviso" hidden></p>
+    <div style="height:18px"></div>
+  </article>
+</div>
+
+<script>
+const nf = (o) => new Intl.NumberFormat(weknow.locale, o);
+const inteiro = nf({ maximumFractionDigits: 0 });
+const media = nf({ minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+// Nomes: tira espaços das pontas, vazio vira "Não informado", caixa-alta vira iniciais maiúsculas
+function nome(s) {
+  const t = String(s == null ? '' : s).replace(/\s+/g, ' ').trim();
+  if (!t) return 'Não informado';
+  if (t === t.toUpperCase() && t.length > 3 && /[A-ZÀ-Ú]/.test(t)) return t.toLowerCase().replace(/(^|[\s\-\/(])([a-zà-ú])/g, (m, a, b) => a + b.toUpperCase());
+  return t;
+}
+function mesRotulo(v) {
+  const a = Math.floor(v / 100), m = v % 100;
+  const mes = new Date(Date.UTC(a, m - 1, 1)).toLocaleDateString(weknow.locale, { month: 'short', timeZone: 'UTC' }).replace('.', '');
+  return mes + '/' + String(a).slice(-2);
+}
+
+let grafico, aberto = null;
+let ordem = { campo: 'MD_QT_TOTAL_ATENDIMENTO', dir: -1 };
+document.getElementById('limpar').onclick = () => { aberto = null; weknow.resetParams(); };
+document.addEventListener('click', () => { if (aberto) { aberto = null; filtros(); } });
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && aberto) { aberto = null; filtros(); } });
+
+// Filtro de lista: "Todos" + caixas de marcar
+function filtroLista(id, ds, campo, param, todosParam, todosRotulo) {
+  const dados = weknow.data(ds), p = weknow.params();
+  const todos = p[todosParam] || !p[param].length, marcadas = todos ? [] : p[param];
+  const rot = (v) => nome(v);
+  const valor = todos ? todosRotulo : marcadas.length === 1 ? rot(marcadas[0]) : `${rot(marcadas[0])} +${marcadas.length - 1}`;
+  const el = document.getElementById('f-' + id);
+  const abre = aberto === id;
+  el.classList.toggle('ativo', !todos);
+  el.innerHTML = `<button type="button" class="seletor-botao" aria-haspopup="listbox" aria-expanded="${abre}"><span>${esc(valor)}</span></button>` +
+    (abre ? '<div class="seletor-lista" role="listbox" aria-multiselectable="true">' +
+      `<button type="button" class="opcao todos" role="option" data-todos aria-selected="${todos}">${esc(todosRotulo)}</button>` +
+      dados.data.map((l, i) => `<button type="button" class="opcao" role="option" data-i="${i}" aria-selected="${marcadas.includes(l[campo])}">${esc(rot(l[campo]))}</button>`).join('') + '</div>' : '');
+  el.querySelector('.seletor-botao').onclick = (e) => { e.stopPropagation(); aberto = abre ? null : id; filtros(); };
+  if (!abre) return;
+  el.querySelector('.seletor-lista').onclick = (e) => e.stopPropagation();
+  el.querySelectorAll('.opcao').forEach((b) => (b.onclick = () => {
+    if (b.hasAttribute('data-todos')) return weknow.setParams({ [param]: [], [todosParam]: true });
+    const v = dados.data[+b.dataset.i][campo];
+    const novas = marcadas.includes(v) ? marcadas.filter((x) => x !== v) : [...marcadas, v];
+    weknow.setParams({ [param]: novas, [todosParam]: novas.length === 0 });
+  }));
+}
+
+// Filtro de período: um botão só, com atalhos e duas colunas de meses
+function filtroPeriodo() {
+  const dados = weknow.data('opt_meses'), p = weknow.params();
+  const meses = dados.data.map((l) => l.DT_ATENDIMENTO_yearMonth).sort((a, b) => a - b);
+  const el = document.getElementById('f-periodo');
+  const abre = aberto === 'periodo';
+  const [de, ate] = p.periodo;
+  const todo = !meses.length || (de <= meses[0] && ate >= meses[meses.length - 1]);
+  const valor = todo ? 'Todo o período' : `${mesRotulo(de)} – ${mesRotulo(ate)}`;
+  el.classList.toggle('ativo', !todo);
+  const col = (tipo) => meses.map((m) => `<button type="button" class="opcao mes" data-${tipo}="${m}" aria-selected="${(tipo === 'de' ? de : ate) === m}">${esc(mesRotulo(m))}</button>`).join('');
+  el.innerHTML = `<button type="button" class="seletor-botao" aria-haspopup="listbox" aria-expanded="${abre}"><span>${esc(valor)}</span></button>` +
+    (abre ? '<div class="seletor-lista larga"><div class="atalhos"><button type="button" data-atalho="todo">Todo o período</button><button type="button" data-atalho="12">Últimos 12 meses</button><button type="button" data-atalho="6">Últimos 6 meses</button></div>' +
+      `<div class="colunas"><div><h3>De</h3>${col('de')}</div><div><h3>Até</h3>${col('ate')}</div></div></div>` : '');
+  el.querySelector('.seletor-botao').onclick = (e) => { e.stopPropagation(); aberto = abre ? null : 'periodo'; filtros(); };
+  if (!abre) return;
+  el.querySelector('.seletor-lista').onclick = (e) => e.stopPropagation();
+  el.querySelectorAll('[data-atalho]').forEach((b) => (b.onclick = () => {
+    const a = b.dataset.atalho;
+    if (a === 'todo') weknow.setParams({ periodo: null });
+    else weknow.setParams({ periodo: [meses[Math.max(0, meses.length - Number(a))], meses[meses.length - 1]] });
+  }));
+  el.querySelectorAll('[data-de]').forEach((b) => (b.onclick = () => { const v = +b.dataset.de; weknow.setParams({ periodo: [v, Math.max(v, ate)] }); }));
+  el.querySelectorAll('[data-ate]').forEach((b) => (b.onclick = () => { const v = +b.dataset.ate; weknow.setParams({ periodo: [Math.min(v, de), v] }); }));
+}
+
+function filtros() {
+  filtroPeriodo();
+  filtroLista('tipos', 'opt_tipos', 'DS_TP_ATENDIMENTO', 'tipos', 'tipos_todos', 'Todos');
+  filtroLista('convtipos', 'opt_conv', 'DS_TIPO_CONVENIO', 'convtipos', 'convtipos_todos', 'Todos');
+  filtroLista('carater', 'opt_carater', 'DS_CARATER_ATENDIMENTO', 'carater', 'carater_todos', 'Todos');
+  filtroLista('sexos', 'opt_sexo', 'DS_SEXO', 'sexos', 'sexos_todos', 'Todos');
+  const p = weknow.params();
+  const filtrado = p.periodo[0] > 200001 || p.periodo[1] < 209912 || ['tipos', 'convtipos', 'carater', 'sexos'].some((k) => !p[k + '_todos'] && p[k].length);
+  document.getElementById('limpar').hidden = !filtrado;
+}
+
+function estado(caixa, dados, vazio) {
+  const aviso = dados.status === 'empty' ? vazio : dados.status === 'error' ? 'Não foi possível carregar estes dados.' : '';
+  caixa.querySelector('.estado').textContent = aviso;
+  caixa.classList.toggle('sem-dados', !!aviso);
+}
+
+function tabela(linhas, mediaGeral) {
+  const ordenadas = [...linhas].sort((a, b) => {
+    const x = a[ordem.campo], y = b[ordem.campo];
+    return (typeof x === 'string' ? x.localeCompare(y, weknow.locale) : x - y) * ordem.dir;
+  });
+  const maxAt = Math.max(...linhas.map((l) => l.MD_QT_TOTAL_ATENDIMENTO));
+  const cab = [['NO_CONVENIO', 'Convênio'], ['MD_QT_TOTAL_ATENDIMENTO', 'Atendimentos'], ['MD_QT_PACIENTE', 'Pacientes'], ['MD_QT_MEDIA_DIAS_PERMANENCIA', 'Permanência média']];
+  document.getElementById('tabela').innerHTML =
+    '<table data-source="top_conv" data-row-key="NO_CONVENIO"><thead><tr>' +
+    cab.map(([f, t]) => `<th data-field="${f}" aria-sort="${ordem.campo === f ? (ordem.dir > 0 ? 'ascending' : 'descending') : 'none'}">${t}</th>`).join('') +
+    '</tr></thead><tbody>' +
+    ordenadas.map((l) => {
+      const alta = mediaGeral != null && l.MD_QT_MEDIA_DIAS_PERMANENCIA > mediaGeral;
+      return `<tr data-key="${esc(l.NO_CONVENIO)}"><td>${esc(nome(l.NO_CONVENIO))}</td>` +
+        `<td><span class="num-barra"><span class="barra"><i style="width:${(l.MD_QT_TOTAL_ATENDIMENTO / maxAt * 100).toFixed(1)}%"></i></span>${inteiro.format(l.MD_QT_TOTAL_ATENDIMENTO)}</span></td>` +
+        `<td>${inteiro.format(l.MD_QT_PACIENTE)}</td>` +
+        `<td><span class="selo${alta ? ' alta' : ''}"${alta ? ' title="Acima da permanência média geral"' : ''}>${media.format(l.MD_QT_MEDIA_DIAS_PERMANENCIA)}<small>dias</small></span></td></tr>`;
+    }).join('') + '</tbody></table>';
+  document.querySelectorAll('#tabela th').forEach((th) => (th.onclick = () => {
+    const f = th.dataset.field;
+    ordem = ordem.campo === f ? { campo: f, dir: -ordem.dir } : { campo: f, dir: f === 'NO_CONVENIO' ? 1 : -1 };
+    tabela(linhas, mediaGeral);
+  }));
+
+}
+
+weknow.onData(() => {
+  const css = getComputedStyle(document.documentElement);
+  const cor = (n) => css.getPropertyValue(n).trim();
+  filtros();
+
+  // Indicadores gerais do recorte
+  const k = weknow.data('kpis');
+  const kl = k.status === 'ok' ? k.data[0] : null;
+  const poe = (id, f, unidade) => {
+    const el = document.getElementById(id);
+    if (k.status === 'loading') return;
+    el.innerHTML = kl ? f(kl) + (unidade ? `<small>${unidade}</small>` : '') : '—';
+  };
+  poe('k-atend', (l) => inteiro.format(l.MD_QT_TOTAL_ATENDIMENTO));
+  poe('k-pac', (l) => inteiro.format(l.MD_QT_PACIENTE));
+  poe('k-perm', (l) => media.format(l.MD_QT_MEDIA_DIAS_PERMANENCIA), 'dias');
+  const mediaGeral = kl ? kl.MD_QT_MEDIA_DIAS_PERMANENCIA : null;
+
+  const conv = weknow.data('top_conv');
+  const vazio = 'Sem atendimentos para os filtros escolhidos.';
+  const cg = document.getElementById('caixa-graf'), ct = document.getElementById('caixa-tab');
+  estado(cg, conv, vazio); estado(ct, conv, vazio);
+  const aviso = document.getElementById('aviso');
+  aviso.hidden = !(conv.status === 'ok' && conv.meta && conv.meta.truncated);
+  if (!aviso.hidden) aviso.textContent = `Mostrando só os ${inteiro.format(conv.data.length)} convênios com mais atendimentos; há outros fora desta lista.`;
+  if (conv.status !== 'ok') { document.getElementById('tabela').innerHTML = ''; return; }
+
+  const linhas = conv.data;
+
+  tabela(linhas, mediaGeral);
+
+  // Bolhas: atendimentos x permanência, tamanho = pacientes
+  const maxPac = Math.max(...linhas.map((l) => l.MD_QT_PACIENTE));
+  const maiores = new Set([...linhas].sort((a, b) => b.MD_QT_TOTAL_ATENDIMENTO - a.MD_QT_TOTAL_ATENDIMENTO).slice(0, 5).map((l) => l.NO_CONVENIO));
+  const compacto = nf({ notation: 'compact', maximumFractionDigits: 1 });
+  const s1 = cor('--s1');
+  grafico = grafico || echarts.init(document.getElementById('grafico'), null, { renderer: 'canvas' });
+  grafico.setOption({
+    animation: false,
+    textStyle: { fontFamily: cor('--fonte') },
+    grid: { left: 8, right: 24, top: 24, bottom: 28, containLabel: true },
+    xAxis: { type: 'value', name: 'Atendimentos', nameLocation: 'middle', nameGap: 30, nameTextStyle: { color: cor('--texto-3'), fontSize: 11 },
+      axisLine: { lineStyle: { color: cor('--eixo') } }, axisTick: { show: false }, splitLine: { show: false },
+      axisLabel: { color: cor('--texto-3'), fontSize: 11, formatter: (v) => compacto.format(v) } },
+    yAxis: { type: 'value', name: 'Permanência média (dias)', nameTextStyle: { color: cor('--texto-3'), fontSize: 11, align: 'left' }, min: 0, splitNumber: 4,
+      axisLine: { show: false }, axisTick: { show: false }, splitLine: { lineStyle: { color: cor('--grade') } },
+      axisLabel: { color: cor('--texto-3'), fontSize: 11, formatter: (v) => nf({ maximumFractionDigits: 1 }).format(v) } },
+    tooltip: { trigger: 'item', confine: true, backgroundColor: cor('--tooltip'), borderColor: cor('--borda'), borderWidth: 1, padding: [10, 12],
+      extraCssText: `border-radius: 10px; box-shadow: ${cor('--sombra-tooltip')};`,
+      formatter: (p) => `<div class="tt"><div class="tt-t">${esc(p.data.nome)}</div>` +
+        `<div class="tt-l"><i style="background:${s1}"></i><span>Atendimentos</span><b>${inteiro.format(p.value[0])}</b></div>` +
+        `<div class="tt-l"><i style="background:${s1}"></i><span>Pacientes</span><b>${inteiro.format(p.data.pac)}</b></div>` +
+        `<div class="tt-l"><i style="background:${s1}"></i><span>Permanência</span><b>${media.format(p.value[1])} dias</b></div></div>` },
+    series: [{
+      type: 'scatter',
+      data: linhas.map((l) => ({ value: [l.MD_QT_TOTAL_ATENDIMENTO, l.MD_QT_MEDIA_DIAS_PERMANENCIA], nome: nome(l.NO_CONVENIO), pac: l.MD_QT_PACIENTE,
+        symbolSize: 10 + 34 * Math.sqrt(l.MD_QT_PACIENTE / maxPac),
+        label: maiores.has(l.NO_CONVENIO) ? { show: true, position: 'top', distance: 4, color: cor('--texto-2'), fontSize: 11, formatter: () => nome(l.NO_CONVENIO).split(' - ')[0] } : { show: false } })),
+      itemStyle: { color: s1 + '47', borderColor: s1, borderWidth: 1.5 },
+      emphasis: { scale: false, itemStyle: { color: s1 + '80', borderColor: s1, borderWidth: 2 } },
+      markLine: mediaGeral == null ? undefined : { silent: true, symbol: 'none', animation: false,
+        label: { show: true, position: 'insideEndTop', color: cor('--texto-3'), fontSize: 11, formatter: 'média geral' },
+        lineStyle: { type: 'dashed', color: cor('--texto-3'), width: 1.5 }, data: [{ yAxis: mediaGeral }] },
+    }],
+  }, true);
+  grafico.resize();
+});
+</script>
+</body></html>

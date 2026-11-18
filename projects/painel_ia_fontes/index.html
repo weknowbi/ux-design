@@ -1,0 +1,1464 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Indicadores gerais de atendimento</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..24,200..400,0..1,0&display=block" rel="stylesheet">
+<style>
+/* Tokens do design system (portal/src/index.css, tema claro). */
+:root {
+  --wk-primary: #3366cc;
+  --wk-primary-hover: #2e5bb8;
+  --wk-tint: #dbeafe;
+  --wk-tint-soft: #eff6ff;
+  --wk-tint-hover: #bfdbfe;
+  --wk-text: #363e49;
+  --wk-text-secondary: #475569;
+  --wk-text-muted: #8c98a8;
+  --wk-surface: #ffffff;
+  --wk-surface-subtle: #f8fafc;
+  --wk-hover-strong: #f1f5f9;
+  --wk-chip-bg: #edf0f3;
+  --wk-chip-bg-hover: #e3e8ed;
+  --wk-search-pill: #e3e7ee;
+  --wk-search-pill-light: #edf0f3;
+  --wk-nav-active: #e4e9f1;
+  --wk-nav-label: #8c98a8;
+  --wk-nav-text: #475569;
+  --wk-menu-hover: #f1f5f9;
+  --wk-border-strong: #e2e8f0;
+  --wk-border: #dee2e6;
+  --wk-row-divider: #eef1f5;
+  --wk-icon-hover: rgba(51, 102, 204, 0.08);
+  --wk-btn-ghost-hover: #eef3fb;
+  --wk-danger: #b91c1c;
+  --wk-shadow-menu: 0 3px 10px rgba(15, 23, 42, 0.1);
+  --wk-logo-ink: #1e1e26;
+  --wk-scrollbar: #c7c7c7;
+  --wk-placeholder-soft: rgba(71, 85, 105, 0.75);
+  --wk-canvas: #f3f6fc;
+  --wk-toast-bg: #323232;
+  --wk-toast-text: #ffffff;
+  --wk-btn-on-primary: #ffffff;
+  --wk-btn-primary-shadow: 0 4px 14px rgba(51, 102, 204, 0.38);
+  --wk-btn-outlined-shadow: 0 2px 8px rgba(51, 102, 204, 0.2);
+  --wk-btn-focus-ring: 0 0 0 3px rgba(51, 102, 204, 0.35);
+  --wk-btn-off-primary-bg: rgba(51, 102, 204, 0.15);
+  --wk-btn-off-primary-fg: rgba(51, 102, 204, 0.4);
+  --wk-btn-off-secondary-bg: rgba(51, 102, 204, 0.07);
+  --wk-btn-off-fg: rgba(51, 102, 204, 0.35);
+  --side-shadow: -3px 0 10px rgba(15, 23, 42, 0.1);
+  --marker-hover-fg: #1d4ed8; /* --wk-primary-deep */
+  color-scheme: light;
+  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+/* Tema escuro do sistema (design_system/public/tokens.json, themes.dark). */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --wk-primary: #8ab4f8;
+  --wk-primary-hover: #a4c4fa;
+  --wk-tint: #1e2d45;
+  --wk-tint-soft: #22293a;
+  --wk-tint-hover: #243450;
+  --wk-text: #eff0f0;
+  --wk-text-secondary: #d3d4d5;
+  --wk-text-muted: #b0b2b5;
+  --wk-surface: #131314;
+  --wk-surface-subtle: #1a1b1c;
+  --wk-hover-strong: #27292a;
+  --wk-chip-bg: #2d2e30;
+  --wk-chip-bg-hover: #37393d;
+  --wk-search-pill: #282a2c;
+  --wk-search-pill-light: #202122;
+  --wk-nav-active: rgba(138, 180, 248, 0.12);
+  --wk-nav-label: #b0b2b5;
+  --wk-nav-text: #d3d4d5;
+  --wk-menu-hover: rgba(138, 180, 248, 0.08);
+  --wk-border: #2c323c;
+  --wk-border-strong: #1d1d20;
+  --wk-field-border: #37393d;
+  --wk-row-divider: #222427;
+  --wk-icon-hover: rgba(138, 180, 248, 0.08);
+  --wk-btn-ghost-hover: #26282a;
+  --wk-danger: #ab4444;
+  --wk-shadow-menu: 0 8px 24px rgba(0, 0, 0, 0.5);
+  --wk-logo-ink: #eff0f0;
+  --wk-scrollbar: #444746;
+  --wk-placeholder-soft: rgba(211, 212, 213, 0.75);
+  --wk-canvas: #1a1b1c;
+  --wk-toast-bg: #e8eaed;
+  --wk-toast-text: #1f2023;
+  --wk-btn-on-primary: #0d1b2a;
+  --wk-btn-primary-shadow: 0 4px 14px rgba(91, 143, 217, 0.4);
+  --wk-btn-outlined-shadow: none;
+  --wk-btn-focus-ring: 0 0 0 3px rgba(77, 132, 226, 0.4);
+  --wk-btn-off-primary-bg: rgba(138, 180, 248, 0.2);
+  --wk-btn-off-primary-fg: rgba(138, 180, 248, 0.4);
+  --wk-btn-off-secondary-bg: rgba(138, 180, 248, 0.07);
+  --wk-btn-off-fg: rgba(138, 180, 248, 0.3);
+  --side-shadow: -8px 0 24px rgba(0, 0, 0, 0.5);
+  --marker-hover-fg: #a4c4fa; /* --wk-primary-hover: no escuro já dá 7:1 */
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; }
+body {
+  font-family: 'Inter', sans-serif;
+  color: var(--wk-text);
+  background: var(--wk-surface);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+button { font: inherit; color: inherit; }
+/* Ícone do sistema (Icon): Material Symbols Outlined, wght 200, GRAD 0,
+   opsz 24 em todos os tamanhos, cor --wk-nav-label. */
+.ms {
+  font-family: 'Material Symbols Outlined';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;
+  line-height: 1;
+  width: 1em;
+  height: 1em;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  overflow: hidden;
+  white-space: nowrap;
+  font-feature-settings: 'liga';
+  font-variation-settings: 'FILL' 0, 'wght' 200, 'GRAD' 0, 'opsz' 24;
+  color: var(--wk-nav-label);
+  user-select: none;
+}
+.ms.s20 { font-size: 20px; }
+.ms.s18 { font-size: 18px; }
+.ms.s16 { font-size: 16px; }
+/* Foco de teclado: o anel do Btn do sistema (--wk-btn-focus-ring), só no
+   :focus-visible. Antes era um contorno de 2px na primária, mais duro que o
+   do sistema. */
+:focus { outline: none; }
+:focus-visible { outline: none; box-shadow: var(--wk-btn-focus-ring); }
+
+/* ─── barra de cima: a do dashboard do protótipo "Criação de dashboard com
+   IA no web" (weknow_analises/src/screens/DashboardScreen.tsx), medida no
+   Weknow web: 56, branca, sem fio, px 12, gap 8 ─── */
+.topbar {
+  flex: none;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px;
+  background: var(--wk-surface);
+  min-width: 0;
+}
+/* IconBtn do sistema: 32 × 32, raio 6, símbolo de 24 no cinza de ícone. */
+.icon-btn {
+  width: 32px; height: 32px;
+  flex: none;
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: 0; border: 0; border-radius: 6px; background: transparent; cursor: pointer;
+  color: var(--wk-nav-label);
+  transition: background-color .12s ease;
+}
+.icon-btn:hover { background-color: var(--wk-icon-hover); }
+.icon-btn .ms { color: inherit; }
+/* IconBtn ativo (painel aberto): o símbolo vai na primária, como no sistema. */
+.icon-btn[aria-pressed="true"] { color: var(--wk-primary); background-color: var(--wk-nav-active); }
+.logo-btn { flex: none; padding: 0 4px; border: 0; background: transparent; cursor: pointer; display: inline-flex; }
+.logo { display: block; }
+/* Caminho: casa › … › pasta › dashboard, Inter 15/1.2 em --wk-text-secondary;
+   o atual muda só o peso. As pastas de cima recolhem no "…". */
+.crumbs {
+  flex: 1 1 auto; min-width: 0;
+  display: flex; align-items: center; gap: 6px;
+  padding-left: 20px;
+  font-size: 15px; line-height: 1.2; color: var(--wk-text-secondary);
+}
+.crumb {
+  flex: 0 1000 auto; min-width: 40px; max-width: 280px;
+  padding: 4px 6px; border: 0; border-radius: 6px; background: transparent; cursor: pointer;
+  font-size: 15px; line-height: 1.2; color: var(--wk-text-secondary);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  transition: background-color .12s ease;
+}
+.crumb:hover { background-color: var(--wk-icon-hover); }
+/* A pasta cede primeiro (fator 1000 contra 1); quando ela chega aos 40, o
+   flex passa o resto para o nome. */
+.crumb-current {
+  flex: 0 1 auto; min-width: 48px;
+  font-weight: 600; color: var(--wk-text-secondary);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+/* Busca: 280 × 36, raio 200, --wk-search-pill-light, ícone de 24, texto 16. */
+.search {
+  flex: none; width: 280px; height: 36px;
+  display: flex; align-items: center; gap: 8px;
+  padding: 0 12px 0 16px;
+  border-radius: 200px; background: var(--wk-search-pill-light);
+}
+.search input {
+  flex: 1; min-width: 0; border: 0; outline: none; background: transparent;
+  font: 16px 'Inter', sans-serif; color: var(--wk-text);
+}
+.search input::placeholder { color: var(--wk-placeholder-soft); }
+/* Abaixo de 1200 a barra não comporta busca, caminho, situação e Publicar:
+   a busca recolhe para a pílula só com o ícone (36 × 36), e o caminho fica
+   com o espaço. */
+@media (max-width: 1199px) {
+  .search { width: 36px; padding: 0; justify-content: center; cursor: pointer; }
+  .search input { display: none; }
+}
+.avatar { width: 32px; height: 32px; border-radius: 50%; overflow: hidden; flex: none; display: block; }
+.avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+/* Btn sm do sistema, fantasma: 32 de altura, px 12, 13/20, raio 6, gap 6,
+   ícone de 20. Na barra o ícone vai no cinza e no peso dos IconBtn
+   (wght 200), como a barra do "Criar com IA" faz. */
+.btn {
+  height: 32px; flex: none;
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 0 12px; border: 1px solid transparent; border-radius: 6px;
+  background: transparent; color: var(--wk-text-secondary);
+  font-size: 13px; line-height: 20px; white-space: nowrap; cursor: pointer;
+  transition: background .15s ease, color .15s ease;
+}
+.btn:hover { background: var(--wk-btn-ghost-hover); }
+/* Ícone à esquerda: o glifo do Material Symbols tem 2px de recuo dentro da
+   caixa (o mesmo glyphInset que o sistema mede para o logo do menu). Com 12
+   dos dois lados, a esquerda parecia 14 e a direita 12; tirando os 2 do lado
+   do ícone, as duas margens ficam iguais na tela. */
+.btn:has(> .ms:first-child) { padding-left: 10px; }
+.btn .ms { color: var(--wk-nav-label); }
+/* Btn com ícone fora da barra: o ícone do botão é peso 400 e herda a cor. */
+.btn.inherit .ms { color: currentColor; font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+/* Pressionado (painel aberto): fundo do item ativo do menu. O texto vai no
+   azul do hover porque a primária sobre esse fundo dá 4,4:1. */
+.btn[aria-pressed="true"] { background: var(--wk-nav-active); color: var(--wk-primary-hover); }
+.btn[aria-pressed="true"] .ms { color: var(--wk-primary-hover); }
+
+/* ─── "Mais opções": o Dropdown do sistema (design_system/src/lib/Menu.tsx)
+   com os itens do Weknow web, na ordem dele.
+   painel    --wk-surface, fio --wk-border, raio 8, --wk-shadow-menu, folga 4,
+             4 abaixo do gatilho
+   item      MenuAction: 36, pl 8 pr 16, gap 8, raio 6, hover --wk-menu-hover;
+             ícone de 20 em --wk-nav-label, texto 14 em --wk-nav-text
+   tema      ThemeRow: 40, px 8, palette 24, sol · switch 36 × 20 · lua
+   gatilho   aberto, fica com o fundo do hover (o Reticencias do sistema) ─── */
+.more { position: relative; flex: none; display: flex; }
+.icon-btn[aria-expanded="true"] { background-color: var(--wk-icon-hover); }
+.menu {
+  position: absolute; z-index: 30; top: 100%; right: 0; margin-top: 4px;
+  min-width: 260px; padding: 4px;
+  background: var(--wk-surface); border: 1px solid var(--wk-border); border-radius: 8px;
+  box-shadow: var(--wk-shadow-menu);
+}
+.menu[hidden] { display: none; }
+.menu-item {
+  width: 100%; height: 36px;
+  display: flex; align-items: center; gap: 8px;
+  padding: 0 16px 0 8px; border: 0; border-radius: 6px; background: transparent; cursor: pointer;
+  font-size: 14px; line-height: 20px; color: var(--wk-nav-text); text-align: left; white-space: nowrap;
+  transition: background-color .12s ease;
+}
+.menu-item:hover, .menu-item[aria-expanded="true"] { background: var(--wk-menu-hover); }
+.menu-item .ms { font-size: 20px; flex: none; }
+.menu-item .grow { flex: 1; }
+/* Com seta de submenu, a seta encosta onde o texto terminaria: pr 8. */
+.menu-item.has-sub { padding-right: 8px; }
+.menu-sep { height: 1px; margin: 4px 0; background: var(--wk-border); }
+/* Submenu: abre do lado de dentro da tela (o "…" mora na borda direita),
+   alinhado ao item que o abriu, como no web. */
+.sub { position: relative; }
+.sub .menu { top: -5px; right: calc(100% + 8px); margin-top: 0; min-width: 240px; }
+.theme-row { height: 40px; display: flex; align-items: center; gap: 8px; padding: 0 8px; }
+.theme-row > .label { flex: 1; font-size: 14px; line-height: 1.5; color: var(--wk-nav-text); }
+.theme-switch { display: inline-flex; align-items: center; gap: 8px; }
+.theme-switch .ms.on { color: var(--wk-primary); font-variation-settings: 'FILL' 1, 'wght' 200, 'GRAD' 0, 'opsz' 24; }
+.switch {
+  position: relative; flex: none; width: 36px; height: 20px; padding: 0; border: 0; border-radius: 9999px;
+  background: var(--wk-border-strong); cursor: pointer; transition: background-color .15s ease;
+}
+.switch[aria-checked="true"] { background: var(--wk-primary); }
+.switch::after {
+  content: ''; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 50%;
+  background: #fff; transition: left .15s ease;
+}
+.switch[aria-checked="true"]::after { left: 18px; }
+
+/* ─── situação do painel, ao lado do nome ─── */
+.status { position: relative; flex: none; display: flex; align-items: center; margin-left: 2px; }
+/* Medidas do chip de tabela do sistema (TABLE_CHIP: 22, px 8, 12/500, raio
+   total), mas no fundo do item ativo do menu (--wk-nav-active) e no texto
+   principal: o --wk-hover-strong sumia no branco da barra. Só informa a
+   situação: sem ação, é um <span>, como manda a regra do chip. */
+.marker {
+  height: 22px;
+  display: inline-flex; align-items: center;
+  padding: 0 8px; border-radius: 9999px;
+  background: var(--wk-nav-active); color: var(--wk-text);
+  font-size: 12px; line-height: 16px; font-weight: 500;
+  white-space: nowrap;
+}
+
+/* ─── corpo: página do painel e, ao lado, a origem dos números ─── */
+/* Sem fio na barra: como no dashboard de referência, 1px do fundo da tela
+   separa a barra da folha. */
+.body { flex: 1; min-height: 0; display: flex; padding-top: 1px; background: var(--wk-canvas); }
+.page { flex: 1; min-width: 0; position: relative; background: var(--wk-canvas); }
+.page iframe { position: absolute; inset: 0; display: block; width: 100%; height: 100%; border: 0; }
+.page .missing {
+  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  padding: 24px; text-align: center; font-size: 14px; line-height: 20px; color: var(--wk-text-secondary);
+}
+
+/* Entra da direita para a esquerda só com transform, que a placa de vídeo
+   faz sem recalcular a página: animar a largura obrigava o dashboard (e os
+   gráficos) a se refazer a cada quadro, e travava. Enquanto desliza, o
+   painel flutua por cima da borda da página (.float); ao chegar, volta para
+   o fluxo e a página se ajusta uma vez só. Ao fechar, o inverso: a página
+   alarga por baixo e o painel sai deslizando. 160ms desacelerando ao abrir,
+   120ms acelerando ao fechar. Sem animação para quem pede menos movimento. */
+.body { position: relative; }
+.sources {
+  flex: none; width: 400px; min-height: 0;
+  display: flex; flex-direction: column;
+  background: var(--wk-surface); border-left: 1px solid var(--wk-border);
+  transition: transform .16s cubic-bezier(.2, 0, 0, 1);
+}
+/* Por cima da página, a sombra separa o painel do dashboard: a do menu do
+   sistema (--wk-shadow-menu), virada para a esquerda. O clip-path corta o
+   que ela espalharia para cima (sobre a barra) e para baixo: sobra só o
+   lado do dashboard. */
+.sources.float { position: absolute; top: 1px; right: 0; bottom: 0; z-index: 5; will-change: transform; box-shadow: var(--side-shadow); clip-path: inset(0 0 0 -24px); }
+.sources.shut { transform: translateX(100%); transition-duration: .12s; transition-timing-function: cubic-bezier(.4, 0, 1, 1); }
+.sources[hidden] { display: none; }
+@media (prefers-reduced-motion: reduce) { .sources { transition: none; } }
+/* Cabeçalho: as abas no lugar do título, e o fechar (IconBtn do sistema).
+   Abas como as do diálogo de dados do protótipo de análises: 14, px 12,
+   secundário; a escolhida em --wk-text 600 com o traço de 3 na primária,
+   recuado 8 de cada lado. O rótulo em negrito invisível reserva a largura,
+   para a aba não mudar de tamanho ao ser escolhida. */
+.sources-head {
+  flex: none; height: 48px;
+  display: flex; align-items: center; gap: 8px;
+  padding: 0 12px 0 8px; border-bottom: 1px solid var(--wk-border);
+}
+.tabs { position: relative; flex: 1; min-width: 0; align-self: stretch; display: flex; gap: 4px; }
+.tab {
+  position: relative; display: inline-flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 0 12px; border: 0; background: transparent; cursor: pointer;
+  font-size: 14px; line-height: 20px; font-weight: 400; color: var(--wk-text-secondary);
+  transition: color .12s ease;
+}
+.tab::before { content: attr(data-label); font-weight: 600; height: 0; overflow: hidden; visibility: hidden; }
+.tab:hover { color: var(--wk-text); }
+.tab[aria-selected="true"] { color: var(--wk-text); font-weight: 600; }
+/* Um traço só, que desliza até a aba escolhida (transform e largura), em
+   vez de um traço por aba que pisca de uma para a outra. */
+.tab-ink {
+  position: absolute; left: 0; bottom: -1px; height: 3px; width: 0; border-radius: 9999px;
+  background: var(--wk-primary); transform-origin: 0 0;
+  transition: transform .22s cubic-bezier(.2, 0, 0, 1), width .22s cubic-bezier(.2, 0, 0, 1);
+}
+.tab-ink.instant { transition: none; }
+@media (prefers-reduced-motion: reduce) { .tab-ink { transition: none; } }
+.tab:focus-visible { box-shadow: inset var(--wk-btn-focus-ring); border-radius: 6px; }
+/* Teste: o ícone do botão que abre Dados e Histórico é o desenho de painel
+   com o brilho da IA do Weknow (o mesmo do Ask e da Análise inteligente);
+   o nome do dashboard fica sem marca antes. */
+#ia-btn svg { display: block; }
+/* A calha da barra de rolagem fica reservada (scrollbar-gutter): abrir uma
+   fonte faz a lista passar da altura, e sem isso o conteúdo pulava para o lado. */
+.sources-scroll {
+  flex: 1; min-height: 0; overflow-y: auto; scrollbar-gutter: stable;
+  padding: 12px 12px 24px 20px;
+  scrollbar-width: thin; scrollbar-color: color-mix(in srgb, var(--wk-text-muted) 45%, transparent) transparent;
+}
+.hint { margin: 0 0 16px; font-size: 13px; line-height: 18px; color: var(--wk-text-secondary); }
+
+dl.facts {
+  display: grid; grid-template-columns: minmax(84px, max-content) 1fr;
+  column-gap: 12px; row-gap: 4px; margin: 0;
+  font-size: 12px; line-height: 16px;
+}
+dl.facts dt { color: var(--wk-text-secondary); }
+dl.facts dd { margin: 0; color: var(--wk-text); min-width: 0; overflow-wrap: anywhere; }
+dl.facts dd .line + .line { margin-top: 2px; }
+
+.list-head {
+  display: flex; align-items: center;
+  height: 24px; margin: 4px 0;
+  font-size: 12px; line-height: 16px; color: var(--wk-text-secondary);
+}
+
+ul.list { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--wk-row-divider); }
+li.src { border-bottom: 1px solid var(--wk-row-divider); transition: background .6s ease; }
+li.src.flash { background: var(--wk-tint-soft); transition: none; }
+.src-row {
+  width: 100%; min-height: 40px;
+  display: flex; align-items: center; gap: 6px;
+  padding: 8px 4px 8px 0; border: 0; background: transparent; cursor: pointer; text-align: left;
+  border-radius: 6px;
+}
+.src-row:hover .src-title { color: var(--wk-primary); }
+.src-row .chev { transition: transform .15s ease; transform: rotate(-90deg); }
+.src-row[aria-expanded="true"] .chev { transform: rotate(0deg); }
+.src-title {
+  flex: 1; min-width: 0;
+  font-size: 13px; line-height: 20px; font-weight: 500; color: var(--wk-text);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  transition: color .15s ease;
+}
+.src-meta { flex: none; font-size: 12px; line-height: 16px; color: var(--wk-text-secondary); display: inline-flex; align-items: center; gap: 4px; }
+.src-meta.error { color: var(--wk-danger); }
+.src-meta .spin { animation: spin 1s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+/* Chip de tabela do sistema (TABLE_CHIP). */
+.tag {
+  flex: none; display: inline-flex; align-items: center; height: 22px; padding: 0 8px;
+  border-radius: 9999px; background: var(--wk-hover-strong);
+  font-size: 12px; line-height: 16px; font-weight: 500; color: var(--wk-text-secondary);
+}
+
+/* Sem recuo sob a seta: com ele o conteúdo ficava 47 da borda esquerda e 22
+   da direita, parecendo empurrado, e as tabelas rolavam de lado. */
+.src-body { padding: 0 0 16px; display: flex; flex-direction: column; gap: 12px; }
+.src-desc { margin: 0; font-size: 13px; line-height: 18px; color: var(--wk-text-secondary); }
+code.id {
+  font-family: var(--mono); font-size: 12px; line-height: 16px;
+  padding: 0 4px; border-radius: 4px; background: var(--wk-hover-strong); color: var(--wk-text-secondary);
+}
+pre.formula {
+  margin: 0; padding: 8px 10px; overflow-x: auto;
+  font-family: var(--mono); font-size: 12px; line-height: 18px; color: var(--wk-text);
+  background: var(--wk-surface-subtle); border: 1px solid var(--wk-border); border-radius: 8px;
+  white-space: pre-wrap; overflow-wrap: anywhere;
+}
+.preview {
+  max-height: 264px; overflow: auto;
+  border: 1px solid var(--wk-border); border-radius: 8px;
+  scrollbar-width: thin; scrollbar-color: color-mix(in srgb, var(--wk-text-muted) 45%, transparent) transparent;
+}
+.preview table { border-collapse: separate; border-spacing: 0; width: 100%; font-size: 12px; line-height: 16px; }
+.preview th {
+  position: sticky; top: 0; z-index: 1;
+  padding: 6px 10px; text-align: left; white-space: nowrap;
+  font-weight: 600; color: var(--wk-text-secondary);
+  background: var(--wk-surface-subtle); border-bottom: 1px solid var(--wk-border);
+}
+.preview td { padding: 6px 10px; white-space: nowrap; color: var(--wk-text); border-top: 1px solid var(--wk-row-divider); }
+.preview tr:first-child td { border-top: 0; }
+.preview .num { text-align: right; font-variant-numeric: tabular-nums; }
+.preview th.hl-col { color: var(--wk-primary); }
+.preview tr.hl-row td { background: var(--wk-tint-soft); }
+.preview td.hl-cell { background: var(--wk-tint); font-weight: 600; }
+.foot { margin: -4px 0 0; font-size: 12px; line-height: 16px; color: var(--wk-text-secondary); }
+
+/* ─── páginas: uma, ou duas lado a lado na comparação ─── */
+.page { display: flex; }
+.pane { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; position: relative; }
+.pane + .pane { border-left: 1px solid var(--wk-border); }
+.pane-frame { flex: 1; min-height: 0; position: relative; }
+.pane-head {
+  flex: none; height: 40px; display: flex; align-items: center; gap: 8px;
+  padding: 0 8px 0 16px; background: var(--wk-surface); border-bottom: 1px solid var(--wk-border);
+  font-size: 13px; line-height: 20px; color: var(--wk-text-secondary);
+}
+.pane-head b { font-weight: 600; color: var(--wk-text); }
+.pane-head .grow { flex: 1; }
+
+/* ─── versões ─── */
+/* Itens soltos, sem fio entre eles: 8 de intervalo e raio 8, como os itens
+   de menu do sistema. Duas linhas fechado: quando (13/500) e a situação ao
+   lado, e o pedido numa linha só. Aberto, o pedido aparece inteiro.
+   aberto     --wk-surface-subtle, com o título na primária (cor sozinha não
+              indica estado: muda o fundo e o texto). O --wk-nav-active do
+              menu pesava demais, e o --wk-hover-strong apagava o "Visualizar"
+              (secundário, fundo --wk-tint).
+   hover      o mesmo --wk-surface-subtle (teste: o aberto se distingue pela
+              hora na primária, pela seta virada e pelo pedido inteiro). */
+ul.versions { list-style: none; margin: 0 0 16px; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+/* Aberto: o mesmo --wk-surface-subtle do hover, sem contorno. */
+li.ver { border-radius: 8px; transition: background-color .12s ease; }
+li.ver.open { background: var(--wk-surface-subtle); }
+li.ver.open .ver-when { color: var(--wk-primary); }
+.ver-row {
+  width: 100%; display: flex; flex-direction: column; gap: 2px;
+  padding: 8px 8px 8px 12px; margin: 0; border: 0; border-radius: 8px; background: transparent;
+  cursor: pointer; text-align: left; transition: background-color .12s ease;
+}
+li.ver:not(.open) .ver-row:hover { background: var(--wk-surface-subtle); }
+.ver-top { display: flex; align-items: center; gap: 8px; min-width: 0; height: 20px; }
+.ver-when { font-size: 13px; line-height: 20px; font-weight: 500; color: var(--wk-text); white-space: nowrap; }
+.ver-eye { color: var(--wk-primary); margin-left: -2px; }
+.ver-state { font-size: 12px; line-height: 16px; color: var(--wk-text-secondary); white-space: nowrap; }
+.ver-top .chev { margin-left: auto; transition: transform .15s ease; }
+.ver-row:hover .chev { color: var(--wk-text-secondary); }
+.ver-row[aria-expanded="true"] .chev { transform: rotate(90deg); }
+.ver-ask {
+  font-size: 13px; line-height: 18px; color: var(--wk-text-secondary);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 24px;
+}
+li.ver.open .ver-ask { white-space: normal; overflow: visible; color: var(--wk-text); padding-right: 0; }
+.ver-from { font-size: 12px; line-height: 16px; color: var(--wk-text-secondary); }
+li.ver.open .ver-ask + .ver-from { margin-top: 4px; }
+.ver-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 4px 12px 12px; }
+/* Btn sm do sistema, pela tabela de variantes: o primário é a ação que o
+   item existe para receber ("Publicar", um por vez, porque só um
+   item abre); o secundário vai ao lado dele ("Visualizar"); o fantasma é o
+   "Cancelar", como no rodapé do modal. Secundário: --wk-tint com texto na
+   primária, hover --wk-tint-hover. Primário: hover no --wk-primary-hover
+   com a sombra do primário. */
+.btn.outlined { border-color: var(--wk-primary); color: var(--wk-primary); }
+.btn.outlined:hover { background: var(--wk-primary); color: var(--wk-btn-on-primary); box-shadow: var(--wk-btn-outlined-shadow); }
+/* O texto vai no --wk-primary-hover: a primária sobre o --wk-tint dá 4,4:1,
+   abaixo dos 4,5 de texto de 13. */
+.btn.secondary { background: var(--wk-tint); color: var(--wk-primary-hover); }
+.btn.secondary:hover { background: var(--wk-tint-hover); }
+/* Fantasma dentro do item aberto: o hover do sistema (--wk-btn-ghost-hover)
+   sumia sobre o --wk-surface-subtle. No hover ele ganha o fundo e o texto do
+   secundário (--wk-tint, --wk-primary-hover): fica azul sem precisar de fio. */
+li.ver.open .btn.ghost:hover { background: var(--wk-tint); color: var(--wk-primary-hover); }
+.btn.primary { background: var(--wk-primary); color: var(--wk-btn-on-primary); }
+.btn[hidden] { display: none; }
+/* Primário desabilitado do sistema (--wk-btn-off-primary-bg/-fg). */
+/* Secundário desabilitado do sistema (--wk-btn-off-secondary-bg, --wk-btn-off-fg). */
+.btn.secondary:disabled { background: var(--wk-btn-off-secondary-bg); color: var(--wk-btn-off-fg); cursor: not-allowed; }
+.btn.primary:disabled { background: var(--wk-btn-off-primary-bg); color: var(--wk-btn-off-primary-fg); box-shadow: none; cursor: not-allowed; }
+/* Chip da situação com ação: pela regra do chip, com ação ele vira um
+   <button> com o mesmo desenho e realce no hover. Hover e aberto: --wk-tint
+   com o texto no --wk-primary-hover (o azul que diz "dá para clicar"). */
+/* Sem cara de chip: parado é só o texto na primária, para parecer clicável
+   desde o começo; o hover continua o mesmo (fundo --wk-tint). */
+/* "Não publicado": sempre no fundo do botão secundário do sistema
+   (--wk-tint) com o texto em --wk-primary-hover (5,2:1). No hover e aberto,
+   o mesmo passo do secundário: o fundo vai para --wk-tint-hover; o texto
+   escurece um tom para não cair abaixo de 4,5:1. */
+button.marker { border: 0; cursor: pointer; font-family: inherit; background: var(--wk-tint); color: var(--wk-primary-hover); transition: background-color .12s ease, color .12s ease; }
+button.marker:hover, button.marker[aria-expanded="true"] { background: var(--wk-tint-hover); color: var(--marker-hover-fg); }
+/* Cartão do rascunho: abre 6 abaixo do chip, alinhado a ele, no desenho do
+   painel de menu do sistema (--wk-surface, fio --wk-border, raio 8,
+   --wk-shadow-menu). Uma ponte invisível cobre o vão de 6, para o ponteiro
+   não fechar o cartão no caminho do chip até o botão. */
+.draft-card {
+  position: absolute; z-index: 40; top: calc(100% + 6px); left: 0; width: 300px;
+  padding: 12px; background: var(--wk-surface); border: 1px solid var(--wk-border); border-radius: 8px;
+  box-shadow: var(--wk-shadow-menu); cursor: default;
+  font-size: 13px; line-height: 18px; font-weight: 400; color: var(--wk-text-secondary); white-space: normal;
+}
+.draft-card::before { content: ''; position: absolute; left: 0; right: 0; top: -8px; height: 8px; }
+.draft-card[hidden] { display: none; }
+/* Entra como os menus: surge e desce 4px, 120ms. */
+.draft-card:not([hidden]) { animation: card-in .12s ease-out; }
+@keyframes card-in { from { opacity: 0; transform: translateY(-4px); } }
+@media (prefers-reduced-motion: reduce) { .draft-card:not([hidden]) { animation: none; } }
+.draft-card p { margin: 0; }
+.draft-card p + p { margin-top: 6px; color: var(--wk-text); }
+.draft-card .btn { margin-top: 12px; }
+.btn.primary:hover { background: var(--wk-primary-hover); box-shadow: var(--wk-btn-primary-shadow); }
+.note { margin: 0; font-size: 12px; line-height: 16px; color: var(--wk-text-secondary); }
+/* Na lista de versões a nota começa onde o texto dos itens começa (12 de
+   folga dentro do item), não na borda da caixa deles. */
+ul.versions + .note { padding-left: 12px; }
+
+/* ─── páginas do dashboard: a barra de baixo, como as páginas do Weknow.
+   Cada página é um painel do MCP com outro formato, para o estudo do
+   visual padrão (projects/painel_padrao). ─── */
+.paginas { flex: none; display: flex; align-items: center; gap: 8px; height: 40px; padding: 0 16px; border-top: 1px solid var(--wk-border); background: var(--wk-surface); }
+.paginas .setas { display: flex; align-items: center; flex: none; }
+.paginas .seta { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border: 0; border-radius: 6px; background: none; color: var(--wk-nav-label); cursor: pointer; }
+.paginas .seta:hover { background: var(--wk-icon-hover); }
+.paginas .seta:disabled { opacity: .4; pointer-events: none; }
+.paginas .abas { flex: 1; min-width: 0; display: flex; align-items: center; gap: 4px; overflow: hidden; }
+.pagina { flex: none; height: 32px; max-width: 240px; padding: 0 12px; border: 0; border-radius: 8px; background: transparent; cursor: pointer;
+  font: 400 14px/1 Inter, system-ui, sans-serif; color: var(--wk-nav-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; transition: background-color .15s, color .15s; }
+.pagina:hover { background: var(--wk-nav-hover, var(--wk-hover)); color: var(--wk-nav-hover-text, var(--wk-text)); }
+.pagina[aria-selected="true"] { background: var(--wk-nav-active); color: var(--wk-nav-active-text, var(--wk-primary)); }
+.paginas .acoes { flex: none; display: flex; align-items: center; gap: 8px; padding-left: 16px; }
+.paginas .acoes .btn.primary { gap: 8px; padding: 0 12px 0 8px; }
+.paginas .acoes .mais { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; color: var(--wk-nav-label); }
+
+/* ─── controle do protótipo (não faz parte da interface): escuro de
+   propósito, para não ser lido como parte da tela ─── */
+.demo {
+  position: fixed; left: 16px; bottom: 60px; z-index: 50;
+  display: flex; flex-direction: column; align-items: stretch; gap: 2px; padding: 4px;
+  background: #1f2937; color: #e5e7eb; border-radius: 10px;
+  font-size: 12px; line-height: 16px; box-shadow: 0 6px 20px rgba(0,0,0,.25);
+}
+.demo button {
+  height: 32px; padding: 0 10px; border: 0; border-radius: 7px; cursor: pointer;
+  display: flex; align-items: center; gap: 8px;
+  background: transparent; color: #e5e7eb; font-size: 12px; text-align: left;
+}
+.demo button:hover { background: #2b3544; }
+.demo .ms { color: #9ca3af; }
+.demo-toggle { font-weight: 600; }
+.demo-toggle .chev { margin-left: auto; transition: transform .15s ease; }
+.demo-toggle[aria-expanded="false"] .chev { transform: rotate(180deg); }
+.demo[hidden] { display: none; }
+.demo-opts { display: flex; flex-direction: column; gap: 2px; }
+.demo-opts[hidden] { display: none; }
+.demo-opts button { padding-left: 38px; }
+.demo-opts button[aria-pressed="true"] { background: #374151; color: #fff; }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <button class="icon-btn" type="button" title="Voltar" aria-label="Voltar"><span class="ms">chevron_left</span></button>
+  <button class="logo-btn" type="button" aria-label="Portal"><svg class="logo" width="93" height="28" viewBox="68 14 93 28" fill="none" role="img" aria-label="Weknow">
+    <g fill="var(--wk-logo-ink)">
+      <path d="M98.6145 34.5396L96.677 26.6106L94.7395 34.539H91.2491L87.5857 21.8889H91.1906L93.1281 30.1365L95.4123 21.8889H97.9445L100.229 30.1365L102.244 21.8889H105.77L102.106 34.5405H98.6145V34.5396Z"/>
+      <path d="M109.687 24.9236C112.43 24.9236 114.427 26.9148 114.427 30.0255V30.6518H107.827C108 31.5051 108.805 32.2829 110.186 32.2829C111.007 32.2816 111.804 32.0077 112.45 31.5051L113.696 33.3265C112.776 34.1421 111.241 34.5408 109.821 34.5408C106.963 34.5408 104.757 32.7011 104.757 29.7228C104.757 27.0675 106.79 24.9239 109.688 24.9239L109.687 24.9236ZM107.788 28.7552H111.605C111.528 28.1103 111.049 27.181 109.687 27.181C109.228 27.1601 108.779 27.3104 108.427 27.602C108.075 27.8936 107.847 28.305 107.788 28.7552Z"/>
+      <path d="M121.273 34.5396L119.239 31.2975L118.357 32.3409V34.5414H115.403V21.8889H118.357V29.0392L121.177 24.8958H124.744L121.33 29.5506L124.918 34.5387L121.273 34.5396Z"/>
+      <path d="M131.669 34.5393V28.9579C131.669 27.8379 131.075 27.4406 130.154 27.4406C129.804 27.4382 129.458 27.5178 129.145 27.6727C128.832 27.8277 128.56 28.0538 128.352 28.3324V34.5396H125.398V24.8964H128.351V26.2092C128.757 25.7707 129.252 25.4236 129.805 25.1913C130.358 24.959 130.955 24.847 131.555 24.8628C133.665 24.8628 134.625 26.0771 134.625 27.7651V34.5414H131.672L131.669 34.5393Z"/>
+      <path d="M135.678 29.7225C135.678 27.1427 137.578 24.9236 140.723 24.9236C143.868 24.9236 145.786 27.1427 145.786 29.7225C145.786 32.3023 143.908 34.5406 140.723 34.5406C137.538 34.5406 135.678 32.3023 135.678 29.7225ZM142.757 29.7225C142.757 28.5082 142.028 27.5034 140.724 27.5034C139.42 27.5034 138.728 28.5091 138.728 29.7225C138.728 30.9359 139.438 31.9607 140.724 31.9607C142.009 31.9607 142.757 30.9551 142.757 29.7225Z"/>
+      <path d="M155.072 34.5396L153.326 28.8683L151.6 34.5396H148.416L145.673 24.8955H148.704L150.201 30.9927L152.023 24.8955H154.651L156.473 30.9927L157.95 24.8955H161L158.258 34.5396H155.073H155.072Z"/>
+    </g>
+    <path d="M73.2484 22.051L77.1156 25.8749L72.5575 30.3819L68.6902 26.558C68.5073 26.377 68.4045 26.1316 68.4044 25.8756C68.4044 25.6197 68.5071 25.3742 68.69 25.1932L71.8678 22.051C72.0509 21.87 72.2992 21.7684 72.5581 21.7684C72.817 21.7684 73.0653 21.87 73.2484 22.051Z" fill="#3366cc"/>
+    <path d="M82.3644 22.0516L85.5413 25.1929C85.7243 25.374 85.8271 25.6195 85.8271 25.8755C85.8271 26.1315 85.7243 26.377 85.5413 26.558L81.6741 30.3819L77.1165 25.8755L80.9838 22.0516C81.1669 21.8706 81.4152 21.769 81.6741 21.769C81.933 21.769 82.1812 21.8706 82.3644 22.0516Z" fill="#5adbdb"/>
+    <path d="M77.1157 25.8761L81.6732 30.3826L77.806 34.2065C77.6229 34.3874 77.3746 34.4891 77.1157 34.4891C76.8568 34.4891 76.6086 34.3874 76.4254 34.2065L72.5582 30.3826L77.1157 25.8761Z" fill="#30a7e2"/>
+  </svg></button>
+  <nav class="crumbs" aria-label="Caminho">
+    <button class="icon-btn" type="button" title="Portal" aria-label="Portal"><span class="ms">home</span></button>
+    <span class="ms" aria-hidden="true">chevron_right</span>
+    <button class="icon-btn" type="button" title="Pastas" aria-label="Pastas"><span class="ms">more_horiz</span></button>
+    <span class="ms" aria-hidden="true">chevron_right</span>
+    <button class="crumb" type="button">Indicadores gerais de atendimento</button>
+    <span class="ms" aria-hidden="true">chevron_right</span>
+    <span class="crumb-current" id="crumb-title">Atendimentos em geral — Painel analítico</span>
+    <div class="status" id="status"></div>
+  </nav>
+  <label class="search"><span class="ms">search</span><input placeholder="Pesquise por nome ou tag" aria-label="Pesquisar"></label>
+  <button class="icon-btn" type="button" id="ia-btn" title="Dados e histórico" aria-label="Dados e histórico" aria-pressed="false" aria-controls="side"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true"><g stroke="currentColor" stroke-width="1"><rect x="3.5" y="3.5" width="7" height="9" rx="1"/><rect x="13.5" y="3.5" width="7" height="5" rx="1"/><rect x="3.5" y="15.5" width="7" height="5" rx="1"/></g><path d="M17 12L18.2143 14.7857L21 16L18.2143 17.2143L17 20L15.7857 17.2143L13 16L15.7857 14.7857L17 12Z" fill="currentColor" stroke="currentColor" stroke-width="0.8" stroke-miterlimit="6" stroke-linecap="round"/></svg></button>
+  <div class="more" id="more">
+    <button class="icon-btn" type="button" id="more-btn" title="Mais opções" aria-label="Mais opções" aria-haspopup="menu" aria-expanded="false" aria-controls="more-menu"><span class="ms">more_horiz</span></button>
+    <div class="menu" id="more-menu" role="menu" aria-label="Mais opções" hidden>
+      <button class="menu-item" type="button" role="menuitem" data-close><span class="ms" aria-hidden="true">update</span>Atualizar dados do dashboard</button>
+      <div class="sub">
+        <button class="menu-item has-sub" type="button" role="menuitem" aria-haspopup="menu" aria-expanded="false"><span class="ms" aria-hidden="true">share</span>Compartilhar<span class="grow"></span><span class="ms" aria-hidden="true">chevron_right</span></button>
+        <div class="menu" role="menu" aria-label="Compartilhar" hidden>
+          <button class="menu-item" type="button" role="menuitem" data-close><span class="ms" aria-hidden="true">print</span>Imprimir</button>
+          <button class="menu-item" type="button" role="menuitem" data-close><span class="ms" aria-hidden="true">download</span>Baixar como imagem</button>
+          <button class="menu-item" type="button" role="menuitem" data-close><span class="ms" aria-hidden="true">mail</span>Enviar como imagem por e-mail</button>
+        </div>
+      </div>
+      <div class="sub">
+        <button class="menu-item has-sub" type="button" role="menuitem" aria-haspopup="menu" aria-expanded="false"><span class="ms" aria-hidden="true">support_agent</span>Ajuda<span class="grow"></span><span class="ms" aria-hidden="true">chevron_right</span></button>
+        <div class="menu" role="menu" aria-label="Ajuda" hidden>
+          <button class="menu-item" type="button" role="menuitem" data-close><span class="ms" aria-hidden="true">support_agent</span>Suporte</button>
+          <button class="menu-item" type="button" role="menuitem" data-close><span class="ms" aria-hidden="true">description</span>Acessar WeDocs</button>
+          <button class="menu-item" type="button" role="menuitem" data-close><span class="ms" aria-hidden="true">book_ribbon</span>Central de conhecimento</button>
+        </div>
+      </div>
+      <div class="menu-sep" role="separator"></div>
+      <div class="theme-row">
+        <span class="ms" aria-hidden="true">palette</span><span class="label">Tema</span>
+        <span class="theme-switch"><span class="ms on" aria-hidden="true" id="sun">light_mode</span><button class="switch" type="button" role="switch" aria-checked="false" aria-label="Tema escuro" id="theme-switch"></button><span class="ms" aria-hidden="true" id="moon">dark_mode</span></span>
+      </div>
+    </div>
+  </div>
+  <button class="icon-btn" type="button" title="Expandir" aria-label="Expandir"><span class="ms">expand_content</span></button>
+  <span class="avatar" aria-hidden="true"><img src="avatar.jpg" alt=""></span>
+</header>
+
+<div class="body">
+  <div class="page" id="page"></div>
+  <aside class="sources" id="side" hidden aria-label="Dados e histórico">
+    <div class="sources-head">
+      <div class="tabs" role="tablist" aria-label="Dados e histórico">
+        <button class="tab" type="button" role="tab" id="tab-sources" data-tab="sources" data-label="Dados" aria-selected="true" aria-controls="side-scroll">Dados</button>
+        <button class="tab" type="button" role="tab" id="tab-versions" data-tab="versions" data-label="Histórico" aria-selected="false" aria-controls="side-scroll" tabindex="-1">Histórico</button>
+        <span class="tab-ink" id="tab-ink" aria-hidden="true"></span>
+      </div>
+      <button class="icon-btn" type="button" id="side-close" title="Fechar" aria-label="Fechar"><span class="ms">close</span></button>
+    </div>
+    <div class="sources-scroll" id="side-scroll" role="tabpanel" aria-labelledby="tab-sources"></div>
+  </aside>
+</div>
+
+<nav class="paginas" id="paginas" role="tablist" aria-label="Páginas do dashboard"></nav>
+
+<!-- Controle do protótipo: não faz parte da interface. Simula as três
+     situações de publicação; recolhe num botão e reabre por ele. -->
+<div class="demo" id="demo" style="display:none">
+  <button type="button" class="demo-toggle" id="demo-toggle" aria-expanded="false" aria-controls="demo-opts">
+    <span class="ms s20" aria-hidden="true">science</span>Simular situação do painel<span class="ms s20 chev" aria-hidden="true">expand_more</span>
+  </button>
+  <div class="demo-opts" id="demo-opts" role="group" aria-label="Situação do painel" hidden>
+    <button type="button" data-scene="nunca">Nunca publicado</button>
+    <button type="button" data-scene="rascunho">Publicado, com rascunho em edição</button>
+    <button type="button" data-scene="publicado">Publicado, sem rascunho</button>
+  </div>
+</div>
+
+<script>
+(() => {
+  'use strict';
+
+  const $ = (s, r = document) => r.querySelector(s);
+  const esc = (v) => String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+  const nf = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 2 });
+  const df = new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
+  const fmtDate = (v) => { const d = new Date(v); return isNaN(d) ? String(v ?? '') : df.format(d).replace(',', ''); };
+  const dm = new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+  const fmtShort = (v) => dm.format(new Date(v)).replace(',', '');
+
+  /* ─── dados copiados do Weknow ─── */
+  let contents = null;            // aiPanel + metadados do painel
+  let results = {};               // resposta do ExecuteDataset, por conjunto
+  let pageTitle = '';
+
+  /* ─── versões ───
+     Só a versão atual é real (o HTML que o MCP gravou). As anteriores são
+     simuladas escondendo do mesmo HTML as seções que o pedido seguinte
+     acrescentou; os pedidos são exemplos. */
+  const versions = [
+    { n: 1, at: '2026-11-11T16:27:00', ask: 'Crie um painel analítico de atendimentos em geral, com filtros de período, tipo de atendimento, convênio, caráter e sexo, os indicadores principais e gráficos por tipo, convênio e caráter.', hide: ['piramide', 'top_conv'], by: 'Admin' },
+    { n: 2, at: '2026-11-12T09:15:00', ask: 'Acrescente uma pirâmide etária por faixa ANS e sexo.', hide: ['top_conv'], by: 'Admin' },
+    { n: 3, at: '2026-11-12T10:41:00', ask: 'Inclua um ranking dos 15 convênios com mais atendimentos, com pacientes e permanência média.', hide: [], by: 'Admin' },
+  ];
+  let published = 1;              // número da versão publicada, ou null
+  let viewing = 3;                // a versão na página
+  let comparing = null;           // a versão na metade direita, ou null
+  const latest = () => versions[versions.length - 1].n;
+  const byN = (n) => versions.find((v) => v.n === n);
+
+  /* ─── o painel lateral: "Dados" ou "Versões" ─── */
+  let side = null;                // 'sources' | 'versions' | null
+  let lastTab = 'sources';       // a aba que o botão reabre
+  let theme = 'light';           // tema da interface e do dashboard
+  try { if (localStorage.getItem('wk-theme') === 'dark') theme = 'dark'; } catch (_) { /* sem armazenamento */ }
+  const open = new Set();         // fontes abertas
+  let highlight = null;           // {source, field, row} do último clique num número
+  let selected = null;            // versão aberta na lista, com as ações
+
+  /* ─── molduras: uma por versão na página ─── */
+  const frames = [];              // [{el, version, views, calcs, params}]
+  let primary = null;             // a da esquerda (a versão vista)
+
+  function versionHtml(v) {
+    const css = v.hide.map((ds) => `.cartao:has([data-source="${ds}"]){display:none!important}`).join('');
+    const html = contents.html || '';
+    return css ? html.replace(/<\/head>/i, `<style>${css}</style></head>`) : html;
+  }
+  const versionDatasets = (v) => (contents?.datasets || []).filter((d) => !v.hide.includes(d.name));
+
+  function makeFrame(v, host) {
+    const f = { version: v.n, views: {}, calcs: {}, params: Object.fromEntries((contents.params || []).map((p) => [p.name, p.default])) };
+    f.el = document.createElement('iframe');
+    /* No Weknow é só allow-scripts (origem opaca). O navegador do app Claude
+       recusa moldura de origem opaca em localhost, então o protótipo abre
+       mão do isolamento; o protocolo é o mesmo. */
+    f.el.setAttribute('sandbox', 'allow-scripts allow-same-origin');
+    f.el.setAttribute('title', `${pageTitle} · Versão ${v.n}`);
+    f.el.src = 'assets/artifact-frame/index.html';
+    host.appendChild(f.el);
+    frames.push(f);
+    return f;
+  }
+
+  function versionLabel(n) {
+    if (n === published) return 'Publicada';
+    if (n === latest()) return 'Não publicado';
+    return '';
+  }
+  const chipHtml = (n) => { const l = versionLabel(n); return l ? `<span class="tag">${esc(l)}</span>` : ''; };
+
+  /* Monta a página: uma moldura, ou duas lado a lado na comparação. */
+  function renderPage() {
+    frames.length = 0;
+    const page = $('#page');
+    page.innerHTML = '';
+    const panes = comparing ? [viewing, comparing] : [viewing];
+    panes.forEach((n, i) => {
+      const pane = document.createElement('div');
+      pane.className = 'pane';
+      if (comparing) {
+        pane.innerHTML = `<div class="pane-head"><b>Versão ${n}</b>${chipHtml(n)}<span>${esc(fmtShort(byN(n).at))}</span><span class="grow"></span>` +
+          (i === 1 ? `<button class="icon-btn" type="button" data-stop-compare title="Sair da comparação" aria-label="Sair da comparação"><span class="ms">close</span></button>` : '') + `</div>`;
+      }
+      const host = document.createElement('div');
+      host.className = 'pane-frame';
+      pane.appendChild(host);
+      page.appendChild(pane);
+      const f = makeFrame(byN(n), host);
+      if (i === 0) primary = f;
+    });
+    page.querySelectorAll('[data-stop-compare]').forEach((b) => (b.onclick = () => setCompare(null)));
+  }
+
+  /* Cartão do rascunho: abre com o mouse em cima do chip (300ms, para não
+     disparar de raspão), no foco do teclado e no clique (que o deixa preso
+     aberto); fecha ao sair, com Esc, com clique fora ou no dashboard. */
+  let draftTimer = 0, draftPinned = false;
+  function setDraft(on) {
+    const card = $('#draft-card'), chip = $('#marker');
+    if (!card) return;
+    card.hidden = !on; chip.setAttribute('aria-expanded', String(on));
+    if (!on) draftPinned = false;
+  }
+  function wireDraft() {
+    const wrap = $('#status'), chip = $('#marker');
+    wrap.onmouseenter = () => { clearTimeout(draftTimer); draftTimer = setTimeout(() => setDraft(true), 300); };
+    wrap.onmouseleave = () => { clearTimeout(draftTimer); if (!draftPinned) draftTimer = setTimeout(() => setDraft(false), 200); };
+    chip.onclick = () => { clearTimeout(draftTimer); draftPinned = !draftPinned || $('#draft-card').hidden; setDraft(draftPinned); };
+    chip.onfocus = () => { if (chip.matches(':focus-visible')) setDraft(true); };
+    $('#pub-btn').onclick = () => { draftPinned = false; publish(viewing); };
+  }
+  document.addEventListener('mousedown', (e) => { if (!$('#status').contains(e.target)) setDraft(false); });
+  window.addEventListener('keydown', (e) => { const c = $('#draft-card'); if (e.key === 'Escape' && c && !c.hidden) { setDraft(false); $('#marker').focus(); } });
+
+  /* ─── ao lado do nome: o chip da situação, que abre o cartão de publicar ─── */
+  /* O chip só aparece quando a tela não mostra a versão publicada: o normal
+     (publicado) não precisa de aviso. */
+  function renderStatus() {
+    const isPub = viewing === published;
+    const label = isPub ? '' : viewing === latest() ? 'Não publicado' : 'Versão anterior';
+    /* O chip abre um cartão com a frase que o produto já usa para cada
+       situação, o efeito de publicar e o botão. */
+    /* Texto do rascunho: o que o usuário definiu, literal. */
+    const why = label === 'Não publicado' ? 'Você está visualizando um rascunho. Somente quem edita o painel pode vê-lo.'
+      : 'Você está visualizando uma versão anterior. Somente quem edita o painel pode vê-la.';
+    $('#status').innerHTML = label
+      ? `<button class="marker" type="button" id="marker" aria-haspopup="dialog" aria-expanded="false" aria-controls="draft-card">${esc(label)}</button>` +
+        `<div class="draft-card" id="draft-card" role="dialog" aria-label="${esc(label)}" hidden><p>${esc(why)}</p><p>Ao publicar, esta versão ficará visível para todos com acesso ao painel.</p>` +
+        `<button class="btn primary" type="button" id="pub-btn">Publicar</button></div>`
+      : '';
+    if (label) wireDraft();
+    const scene = !published ? 'nunca' : published === latest() && isPub ? 'publicado' : published !== latest() && viewing === latest() ? 'rascunho' : '';
+    document.querySelectorAll('#demo [data-scene]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.scene === scene)));
+  }
+
+  /* Abre ou fecha o painel deslizando (veja .sources.float). O fim da
+     transição tem reserva no relógio: sem animação não há transitionend. */
+  let slideEnd = null;
+  function slide(el, open) {
+    const wasOpen = !el.hidden && !el.classList.contains('shut');
+    if (open === wasOpen) return;
+    if (slideEnd) { slideEnd(); slideEnd = null; }
+    el.classList.add('float');
+    if (open) { el.classList.add('shut'); el.hidden = false; }
+    void el.offsetWidth;
+    el.classList.toggle('shut', !open);
+    let t;
+    const end = () => {
+      clearTimeout(t); el.removeEventListener('transitionend', end); slideEnd = null;
+      /* Ao chegar, o painel volta para o fluxo e o dashboard se ajusta à
+         largura que sobra (uma vez só, no fim do movimento). */
+      el.classList.remove('float');
+      if (!open) { el.hidden = true; el.classList.remove('shut'); }
+    };
+    el.addEventListener('transitionend', end);
+    t = setTimeout(end, 240);
+    slideEnd = end;
+  }
+
+  /* Traço das abas: vai para baixo da aba escolhida, recuado 8 de cada lado. */
+  function placeInk(animate) {
+    const ink = $('#tab-ink'), tab = $('#tab-' + lastTab);
+    if (!tab.offsetWidth) return;
+    ink.classList.toggle('instant', !animate);
+    ink.style.width = (tab.offsetWidth - 16) + 'px';
+    ink.style.transform = `translateX(${tab.offsetLeft + 8}px)`;
+  }
+  /* Conteúdo da aba nova: entra esmaecendo e deslizando 12px no sentido da
+     troca (Histórico fica à direita de Dados). */
+  const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)');
+  function enterTab(dir) {
+    if (reduceMotion.matches) return;
+    $('#side-scroll').animate(
+      [{ opacity: 0, transform: `translateX(${dir * 12}px)` }, { opacity: 1, transform: 'none' }],
+      { duration: 200, easing: 'cubic-bezier(.2, 0, 0, 1)' });
+  }
+
+  function setSide(s) {
+    const prev = side;
+    side = s;
+    const el = $('#side');
+    slide(el, !!s);
+    if (s) lastTab = s;
+    $('#ia-btn').setAttribute('aria-pressed', String(!!s));
+    document.querySelectorAll('#side .tab').forEach((t) => {
+      const on = t.dataset.tab === lastTab;
+      t.setAttribute('aria-selected', String(on));
+      t.tabIndex = on ? 0 : -1;
+    });
+    $('#side-scroll').setAttribute('aria-labelledby', 'tab-' + lastTab);
+    if (s !== 'sources') highlight = null;
+    /* O histórico abre com a versão da página já aberta. */
+    selected = s === 'versions' ? viewing : null;
+    if (s) {   /* fechando, o painel sai com o conteúdo que tinha */
+      $('#side-scroll').scrollTop = 0;
+    }
+    renderStatus();
+    renderSide();
+    if (s) {
+      const switched = prev && prev !== s;
+      placeInk(switched);
+      if (switched) enterTab(s === 'versions' ? 1 : -1);
+    }
+  }
+  /* Um botão só abre o painel, na última aba usada; as abas trocam o
+     conteúdo com o painel aberto. Setas andam pelas abas. */
+  $('#ia-btn').onclick = () => setSide(side ? null : lastTab);
+  document.querySelectorAll('#side .tab').forEach((t) => (t.onclick = () => { if (side !== t.dataset.tab) setSide(t.dataset.tab); }));
+  $('#side .tabs').addEventListener('keydown', (e) => {
+    if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+    e.preventDefault();
+    const next = lastTab === 'sources' ? 'versions' : 'sources';
+    setSide(next); $('#tab-' + next).focus();
+  });
+  $('#side-close').onclick = () => { setSide(null); $('#ia-btn').focus(); };
+
+  /* ─── "Mais opções": abre e fecha como o Dropdown do sistema (clique fora,
+     Esc, clique numa moldura, escolher um item). O submenu abre no hover e
+     no clique, como no web. ─── */
+  const moreBtn = $('#more-btn'), moreMenu = $('#more-menu');
+  const subs = [...moreMenu.querySelectorAll('.sub')];
+  function closeSubs(except) {
+    subs.forEach((s) => { if (s === except) return; s.querySelector('.menu').hidden = true; s.firstElementChild.setAttribute('aria-expanded', 'false'); });
+  }
+  function openSub(s) { closeSubs(s); s.querySelector('.menu').hidden = false; s.firstElementChild.setAttribute('aria-expanded', 'true'); }
+  function setMenu(open) {
+    moreMenu.hidden = !open;
+    moreBtn.setAttribute('aria-expanded', String(open));
+    if (!open) closeSubs();
+  }
+  moreBtn.onclick = () => setMenu(moreMenu.hidden);
+  subs.forEach((s) => {
+    s.addEventListener('mouseenter', () => openSub(s));
+    s.firstElementChild.onclick = () => openSub(s);
+  });
+  moreMenu.querySelectorAll(':scope > .menu-item').forEach((b) => b.addEventListener('mouseenter', () => closeSubs()));
+  moreMenu.querySelectorAll('[data-close]').forEach((b) => b.addEventListener('click', () => setMenu(false)));
+  /* O protótipo não tem o tema escuro: o switch só troca de lado. */
+  /* Tema: o switch do menu troca a interface (data-theme na raiz, com os
+     tokens escuros do sistema) e o dashboard, que recebe o tema no render e
+     o frame.js aplica às regras prefers-color-scheme da página. Fica
+     guardado neste navegador. */
+  function applyTheme(t, rerender) {
+    theme = t;
+    document.documentElement.dataset.theme = t;
+    const dark = t === 'dark';
+    $('#theme-switch').setAttribute('aria-checked', String(dark));
+    $('#sun').classList.toggle('on', !dark); $('#moon').classList.toggle('on', dark);
+    try { localStorage.setItem('wk-theme', t); } catch (_) { /* sem armazenamento: vale só nesta visita */ }
+    if (rerender && contents) renderPage();
+  }
+  $('#theme-switch').onclick = () => applyTheme(theme === 'dark' ? 'light' : 'dark', true);
+  applyTheme(theme, false);
+  document.addEventListener('mousedown', (e) => { if (!moreMenu.hidden && !$('#more').contains(e.target)) setMenu(false); });
+  window.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !moreMenu.hidden) { setMenu(false); moreBtn.focus(); } });
+  window.addEventListener('blur', () => setTimeout(() => {
+    if (!(document.activeElement instanceof HTMLIFrameElement)) return;
+    setMenu(false);
+    /* clique no dashboard (moldura) também fecha o cartão do rascunho */
+    setDraft(false);
+  }));
+
+  function renderSide() {
+    if (side === 'sources') renderSources();
+    else if (side === 'versions') renderVersions();
+  }
+
+  /* ─── versões: alternar, comparar e restaurar ─── */
+  function setViewing(n) {
+    if (n === viewing) return;
+    viewing = n;
+    if (comparing === n) comparing = null;
+    highlight = null;
+    renderPage(); renderStatus(); renderSide();
+  }
+  function setCompare(n) {
+    comparing = n;
+    renderPage(); renderSide();
+  }
+  /* Visualizar é provisório: a página mostra a versão escolhida, e
+     "Cancelar" volta para a que estava antes (base). */
+  let base = null;                // versão na página antes de visualizar outra
+  function preview(n) {
+    if (base === null) base = viewing;
+    if (n === base) { cancelPreview(); return; }
+    setViewing(n);
+  }
+  function cancelPreview() {
+    const back = base;
+    base = null;
+    if (back !== null && back !== viewing) setViewing(back); else renderSide();
+  }
+  /* Publicar não cria cópia: a versão fica onde está na lista e ganha o
+     "Publicada" ao lado. Se era a que estava sendo visualizada, a
+     visualização deixa de ser provisória (não há mais o que cancelar). */
+  function publish(n) {
+    published = n;
+    if (base !== null && viewing === n) base = null;
+    renderStatus(); renderSide();
+  }
+
+  /* Quando foi feita: "Hoje, 10:41", "Ontem, 16:27", "10 nov., 08:02". É a
+     hora que identifica a versão, não um número. */
+  const hm = new Intl.DateTimeFormat('pt-BR', { hour: '2-digit', minute: '2-digit' });
+  const dmon = new Intl.DateTimeFormat('pt-BR', { day: 'numeric', month: 'short' });
+  const dmy = new Intl.DateTimeFormat('pt-BR', { day: 'numeric', month: 'short', year: 'numeric' });
+  function fmtWhen(v) {
+    const d = new Date(v), now = new Date();
+    const day = (x) => new Date(x.getFullYear(), x.getMonth(), x.getDate()).getTime();
+    const diff = Math.round((day(now) - day(d)) / 864e5);
+    const date = diff === 0 ? 'Hoje' : diff === 1 ? 'Ontem' : (d.getFullYear() === now.getFullYear() ? dmon : dmy).format(d).replace(/ de /g, ' ');
+    return `${date}, ${hm.format(d)}`;
+  }
+  /* No histórico só a publicada leva rótulo; a que está na tela leva o olho. */
+  const verState = (n) => (n === published ? 'Publicada' : '');
+
+  /* ─── histórico: a linha mostra quando e o pedido (uma linha só); abrir
+     mostra o pedido inteiro e as ações:
+       outra versão               Visualizar · Publicar
+       a que está sendo vista     Publicar · Cancelar
+       a que está em uso          Publicar (se ainda não é a publicada) ─── */
+  /* Abrir e fechar um item do histórico, no mesmo movimento das fontes:
+     cada item muda da altura antiga para a nova (o que abre cresce, o que
+     fecha encolhe, juntos), o conteúdo novo surge e a seta gira. 180ms
+     quando algo abre, 140ms quando só fecha. */
+  let verAnims = [];
+  function toggleVersion(n) {
+    const scroll = $('#side-scroll');
+    const was = selected;
+    const before = new Map([...scroll.querySelectorAll('li.ver')].map((li) => [li.querySelector('[data-ver]').dataset.ver, li.offsetHeight]));
+    selected = selected === n ? null : n;
+    verAnims.forEach((a) => a.cancel()); verAnims = [];
+    renderVersions();
+    if (reduceMotion.matches) return;
+    const ms = selected !== null ? 180 : 140;
+    const opt = { duration: ms, easing: 'cubic-bezier(.2, 0, 0, 1)' };
+    scroll.querySelectorAll('li.ver').forEach((li) => {
+      const row = li.querySelector('[data-ver]'), v = +row.dataset.ver;
+      const from = before.get(row.dataset.ver), to = li.offsetHeight;
+      if (from != null && from !== to) {
+        li.style.overflow = 'hidden';
+        const a = li.animate([{ height: from + 'px' }, { height: to + 'px' }], opt);
+        a.onfinish = () => { li.style.overflow = ''; };
+        verAnims.push(a);
+      }
+      const chev = li.querySelector('.chev');
+      if (v === selected && v !== was) {
+        verAnims.push(chev.animate([{ transform: 'rotate(0deg)' }, { transform: 'rotate(90deg)' }], opt));
+        li.querySelectorAll('.ver-from, .ver-actions').forEach((el) => verAnims.push(el.animate([{ opacity: 0 }, { opacity: 1 }], opt)));
+      } else if (v === was && v !== selected) {
+        verAnims.push(chev.animate([{ transform: 'rotate(90deg)' }, { transform: 'rotate(0deg)' }], opt));
+      }
+    });
+  }
+
+  function renderVersions() {
+    const scroll = $('#side-scroll');
+    const keep = scroll.scrollTop;
+    scroll.innerHTML =
+      `<ul class="versions">` +
+      [...versions].reverse().map((v) => {
+        const isOpen = v.n === selected;
+        const isViewed = v.n === viewing;
+        const state = verState(v.n);
+        const inUse = base === null ? v.n === viewing : v.n === base;
+        const pubBtn = v.n !== published ? `<button class="btn primary" type="button" data-act="publish" data-n="${v.n}">Publicar</button>` : '';
+        const body = inUse ? pubBtn
+          : isViewed ? pubBtn + `<button class="btn ghost" type="button" data-act="cancel">Cancelar</button>`
+          : `<button class="btn secondary" type="button" data-act="view" data-n="${v.n}">Visualizar</button>` + pubBtn;
+        return `<li class="ver${isOpen ? ' open' : ''}">` +
+          `<button class="ver-row" type="button" data-ver="${v.n}" aria-expanded="${isOpen}">` +
+          `<span class="ver-top"><span class="ver-when">${esc(fmtWhen(v.at))}</span>` +
+          (isViewed ? `<span class="ms s18 ver-eye" role="img" aria-label="Em visualização" title="Em visualização">visibility</span>` : '') +
+          (state ? `<span class="ver-state">${esc(state)}</span>` : '') +
+          `<span class="ms s20 chev" aria-hidden="true">chevron_right</span></span>` +
+          `<span class="ver-ask">${esc(v.ask)}</span>` +
+          /* Aberto, o item diz quem fez a alteração; só o autor. */
+          (isOpen && v.by ? `<span class="ver-from">Alterado por ${esc(v.by)}</span>` : '') +
+          (v.copyOf ? `<span class="ver-from">Cópia da versão de ${esc(fmtWhen(v.copyOf).replace(/^[A-Z]/, (c) => c.toLowerCase()))}</span>` : '') +
+          `</button>` +
+          (isOpen && body ? `<div class="ver-actions">${body}</div>` : '') +
+          `</li>`;
+      }).join('') +
+      `</ul>` +
+      `<p class="note">As versões anteriores são preservadas.</p>`;
+    scroll.scrollTop = keep;
+    scroll.querySelectorAll('[data-ver]').forEach((b) => (b.onclick = () => toggleVersion(+b.dataset.ver)));
+    scroll.querySelectorAll('[data-act]').forEach((b) => (b.onclick = () => {
+      const n = +b.dataset.n;
+      if (b.dataset.act === 'view') preview(n);
+      else if (b.dataset.act === 'publish') publish(n);
+      else if (b.dataset.act === 'cancel') cancelPreview();
+    }));
+  }
+
+  /* ─── origem dos dados (da versão na esquerda) ─── */
+  function shortTitle(t) { const p = String(t || '').split('.'); return p[p.length - 1]; }
+  function describeFilter(f, params) {
+    const v = params[f.param];
+    if (f.allParam && params[f.allParam] === true) return `${f.title}: todos`;
+    if (f.operator === 10 && Array.isArray(v)) return `${f.title} entre ${v[0]} e ${v[1]}`;
+    if (Array.isArray(v)) return `${f.title}: ${v.length ? v.join(', ') : 'todos'}`;
+    return `${f.title}: ${v ?? ''}`;
+  }
+  const lines = (arr) => arr.map((x) => `<div class="line">${esc(x)}</div>`).join('');
+
+  function statusMeta(item) {
+    const v = item.kind === 'dataset' ? primary?.views[item.id] : item.def;
+    if (!v) return `<span class="src-meta">Não lido pela página</span>`;
+    if (v.status === 'loading') return `<span class="src-meta"><span class="ms s16 spin" aria-hidden="true">progress_activity</span>Carregando</span>`;
+    if (v.status === 'error') return `<span class="src-meta error">Erro</span>`;
+    if (v.status === 'empty') return `<span class="src-meta">Sem dados</span>`;
+    const n = item.kind === 'dataset' ? v.rowCount : (v.rowCount ?? v.data?.length ?? 0);
+    return `<span class="src-meta">${nf.format(n)} ${n === 1 ? 'linha' : 'linhas'}</span>`;
+  }
+
+  function previewTable(item, cols, rows, measureNames) {
+    if (!rows.length) return '';
+    const hl = highlight && highlight.source === item.id ? highlight : null;
+    const head = cols.map((c) => {
+      const isNum = measureNames.has(c.name) || rows.some((r) => typeof r[c.name] === 'number' && !/yearMonth|^DT_/i.test(c.name));
+      c.isNum = isNum;
+      return `<th class="${isNum ? 'num' : ''} ${hl && hl.field === c.name ? 'hl-col' : ''}" title="${esc(c.name)}">${esc(c.label)}</th>`;
+    }).join('');
+    const body = rows.slice(0, 50).map((r, i) => {
+      const rowHl = hl && hl.row === i;
+      return `<tr class="${rowHl ? 'hl-row' : ''}">` + cols.map((c) => {
+        const raw = r[c.name];
+        const text = raw == null ? '' : c.isNum && typeof raw === 'number' ? nf.format(raw) : String(raw);
+        return `<td class="${c.isNum ? 'num' : ''} ${rowHl && hl.field === c.name ? 'hl-cell' : ''}">${esc(text)}</td>`;
+      }).join('') + `</tr>`;
+    }).join('');
+    return `<div class="preview"><table><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table></div>`;
+  }
+
+  function datasetBody(item) {
+    const d = item.def, v = primary?.views[item.id];
+    const facts = [
+      ['Conjunto', `<code class="id">${esc(d.name)}</code>`],
+      ['Metadado', esc(d.metadataTitle)],
+      d.dimensions?.length && ['Dimensões', lines(d.dimensions.map((x) => x.title || x.completeName))],
+      d.measures?.length && ['Medidas', lines(d.measures.map((x) => x.title || x.completeName))],
+      d.fixedFilters?.length && ['Filtros fixos', lines(d.fixedFilters.map((f) => f.description || `${f.title}`))],
+      d.paramFilters?.length && ['Filtros da página', lines(d.paramFilters.map((f) => describeFilter(f, primary.params)))],
+      v?.dataInfo && ['Dados de', esc(`${({ 2: 'Cache', 3: 'Offline' })[v.dataInfo.source] || 'Online'}, ${fmtDate(v.dataInfo.dateTime)}`)],
+      v?.status === 'error' && ['Erro', esc(v.message)],
+    ].filter(Boolean);
+    let html = d.description ? `<p class="src-desc">${esc(d.description)}</p>` : '';
+    html += `<dl class="facts">${facts.map(([k, val]) => `<dt>${k}</dt><dd>${val}</dd>`).join('')}</dl>`;
+    if (v?.data?.length) {
+      const titles = {};
+      [...(d.dimensions || []), ...(d.measures || [])].forEach((x) => (titles[x.completeName] = shortTitle(x.title)));
+      const cols = (v.columns?.length ? v.columns : Object.keys(v.data[0]).map((name) => ({ name }))).map((c) => ({ name: c.name, label: titles[c.name] || c.title || c.name }));
+      html += previewTable(item, cols, v.data, new Set((d.measures || []).map((m) => m.completeName)));
+      if (v.truncated) html += `<p class="foot">Cortado no limite de ${nf.format(v.rowsLimit)} linhas (${nf.format(v.rowCount)} no total)</p>`;
+      else if (v.data.length > 50) html += `<p class="foot">Prévia das primeiras 50 de ${nf.format(v.data.length)} linhas</p>`;
+    }
+    return html;
+  }
+
+  function calcBody(item) {
+    const c = item.def;
+    const inputTitles = (c.inputs || []).map((id) => { const d = (contents?.datasets || []).find((x) => x.name === id); return d ? d.title || d.name : primary?.calcs[id]?.title || id; });
+    const facts = [
+      ['Cálculo', `<code class="id">${esc(c.id)}</code>`],
+      inputTitles.length && ['Entradas', lines(inputTitles)],
+      c.status === 'error' && ['Erro', esc(c.message)],
+    ].filter(Boolean);
+    let html = c.description ? `<p class="src-desc">${esc(c.description)}</p>` : '';
+    html += `<dl class="facts">${facts.map(([k, val]) => `<dt>${k}</dt><dd>${val}</dd>`).join('')}</dl>`;
+    if (c.fn) html += `<div><div class="foot" style="margin:0 0 4px">Fórmula</div><pre class="formula">${esc(c.fn)}</pre></div>`;
+    const data = c.data || [];
+    if (data.length) {
+      const names = (c.columns?.length ? c.columns : Object.keys(data[0])).map((x) => (typeof x === 'string' ? x : x.name));
+      html += previewTable(item, names.map((name) => ({ name, label: name })), data, new Set());
+      if (data.length > 50) html += `<p class="foot">Prévia das primeiras 50 de ${nf.format(data.length)} linhas</p>`;
+    }
+    return html;
+  }
+
+  function renderSources() {
+    const scroll = $('#side-scroll');
+    const keep = scroll.scrollTop;
+    if (!contents || !primary) { scroll.innerHTML = `<p class="hint">Os dados deste painel ainda não foram carregados.</p>`; return; }
+    const v = byN(primary.version);
+    const items = [
+      ...versionDatasets(v).map((d) => ({ kind: 'dataset', id: d.name, def: d })),
+      ...Object.values(primary.calcs).map((c) => ({ kind: 'calc', id: c.id, def: c })),
+    ];
+    /* Só a contagem em cima da lista: a ficha (origem, autor, versão) e o
+       "Expandir tudo" saíram; não ajudavam a achar de onde vem um número. */
+    scroll.innerHTML =
+      `<div class="list-head"><span>${items.length} fontes</span></div>` +
+      `<ul class="list">` +
+      items.map((item) => {
+        const isOpen = open.has(item.id);
+        const title = item.kind === 'dataset' ? item.def.title || item.def.name : item.def.title || item.def.id;
+        return `<li class="src" data-source-item="${esc(item.id)}">` +
+          `<button class="src-row" type="button" aria-expanded="${isOpen}" aria-controls="src-${esc(item.id)}" data-toggle="${esc(item.id)}">` +
+          `<span class="ms s20 chev" aria-hidden="true">expand_more</span>` +
+          `<span class="src-title" title="${esc(title)}">${esc(title)}</span>` +
+          (item.kind === 'calc' ? `<span class="tag">Cálculo</span>` : '') +
+          statusMeta(item) +
+          `</button>` +
+          (isOpen ? `<div class="src-body" id="src-${esc(item.id)}">${item.kind === 'dataset' ? datasetBody(item) : calcBody(item)}</div>` : '') +
+          `</li>`;
+      }).join('') +
+      `</ul>`;
+    scroll.scrollTop = keep;
+
+    scroll.querySelectorAll('[data-toggle]').forEach((b) => (b.onclick = () => toggleSource(b)));
+  }
+
+  /* Abrir e fechar uma fonte: o conteúdo cresce da altura 0 até a dele e
+     surge (180ms); ao fechar, encolhe e some (140ms) e só então sai da
+     lista. A seta gira junto. Sem movimento quando o sistema pede. */
+  let srcAnim = null;
+  function toggleSource(b) {
+    const id = b.dataset.toggle;
+    const slide = (el, from, to, ms, done) => {
+      srcAnim?.cancel();
+      el.style.overflow = 'hidden';
+      srcAnim = el.animate(
+        [{ height: from + 'px', opacity: from ? 1 : 0, paddingBottom: from ? '16px' : '0px' },
+         { height: to + 'px', opacity: to ? 1 : 0, paddingBottom: to ? '16px' : '0px' }],
+        { duration: ms, easing: 'cubic-bezier(.2, 0, 0, 1)' });
+      srcAnim.onfinish = () => { srcAnim = null; el.style.overflow = ''; done?.(); };
+    };
+    if (open.has(id)) {
+      const body = b.nextElementSibling;
+      if (reduceMotion.matches || !body) { open.delete(id); renderSources(); return; }
+      b.setAttribute('aria-expanded', 'false');   // a seta gira pela transição do CSS
+      slide(body, body.offsetHeight, 0, 140, () => { open.delete(id); renderSources(); });
+      return;
+    }
+    open.add(id);
+    renderSources();
+    if (reduceMotion.matches) return;
+    const row = [...document.querySelectorAll('[data-toggle]')].find((x) => x.dataset.toggle === id);
+    const body = row?.nextElementSibling;
+    if (!body) return;
+    row.querySelector('.chev').animate([{ transform: 'rotate(-90deg)' }, { transform: 'rotate(0deg)' }], { duration: 150, easing: 'ease' });
+    slide(body, 0, body.offsetHeight, 180);
+  }
+
+  /* Clique num número da página: abre a fonte, rola até ela e marca a linha. */
+  function focusSource(h) {
+    highlight = h;
+    open.add(h.source);
+    renderSources();
+    const li = [...document.querySelectorAll('[data-source-item]')].find((x) => x.dataset.sourceItem === h.source);
+    if (!li) return;
+    li.scrollIntoView({ block: 'start', behavior: 'smooth' });
+    li.classList.add('flash');
+    requestAnimationFrame(() => requestAnimationFrame(() => li.classList.remove('flash')));
+    /* A célula pode estar abaixo, dentro da prévia, ou fora da vista na horizontal. */
+    const cell = li.querySelector('td.hl-cell') || li.querySelector('tr.hl-row');
+    if (cell) setTimeout(() => cell.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'smooth' }), 400);
+  }
+
+  /* ─── protocolo 2 do frame do Weknow, por moldura ─── */
+  function toResponse(raw, def) {
+    const fields = raw?.schema?.fields || [];
+    const columns = fields.map((f) => ({ name: f.name, title: f.title || f.name, type: f.type, ...(f.role ? { role: f.role } : {}) }));
+    const data = (raw?.data || []).map((row) => {
+      const o = {};
+      fields.forEach((f) => {
+        let v = row[f.name];
+        if (v != null && (f.type === 'integer' || f.type === 'number') && typeof v !== 'number') { const n = Number(v); v = isFinite(n) && String(v).trim() !== '' ? n : null; }
+        o[f.name] = v ?? null;
+      });
+      return o;
+    });
+    if (raw?.error) return { status: 'error', data: [], columns: [], meta: null, message: raw.errorMessage?.text || raw.error };
+    return {
+      status: data.length ? 'ok' : 'empty', data, columns,
+      meta: { title: def?.title || def?.name || '', description: def?.description || '', metadataId: def?.metadataId || 0, metadataTitle: def?.metadataTitle || '', rowCount: typeof raw?.rowCount === 'number' ? raw.rowCount : data.length, truncated: raw?.truncated === true, rowsLimit: raw?.rowsLimit || def?.rowsLimit || 0, dataInfo: raw?.dataInfo || null },
+      message: '',
+    };
+  }
+  const refreshSources = (f) => { if (f === primary && side === 'sources') renderSources(); };
+
+  window.addEventListener('message', (e) => {
+    const f = frames.find((x) => x.el.contentWindow === e.source);
+    if (!f) return;
+    const post = (msg) => f.el.contentWindow?.postMessage({ wk: 2, ...msg }, '*');
+    const m = e.data || {};
+    switch (m.type) {
+      case 'frame-ready':
+        post({
+          type: 'render', html: versionHtml(byN(f.version)), params: contents.params || [],
+          datasets: (contents.datasets || []).map((d) => ({ name: d.name, title: d.title || d.name, params: [...new Set((d.paramFilters || []).flatMap((x) => [x.param, x.allParam]).filter(Boolean))] })),
+          libsBaseUrl: new URL('assets/artifact-libs/', document.baseURI).href, locale: 'pt-BR', theme,
+        });
+        break;
+      case 'data-request': {
+        const def = (contents.datasets || []).find((d) => d.name === m.name);
+        f.views[m.name] = { ...(f.views[m.name] || {}), status: f.views[m.name]?.status === 'ok' ? 'ok' : 'loading' };
+        refreshSources(f);
+        /* Os dados foram copiados com os filtros padrão: com outro filtro, a resposta é a mesma. */
+        setTimeout(() => {
+          const r = results[m.name] ? toResponse(results[m.name], def) : { status: 'error', data: [], columns: [], meta: null, message: 'Conjunto não copiado' };
+          post({ type: 'data-response', name: m.name, id: m.id, ...r });
+          f.views[m.name] = { status: r.status, data: r.data, columns: r.columns, rowCount: r.meta?.rowCount || 0, truncated: r.meta?.truncated === true, rowsLimit: r.meta?.rowsLimit || 0, dataInfo: r.meta?.dataInfo || null, message: r.message };
+          refreshSources(f);
+        }, 120);
+        break;
+      }
+      case 'params-changed': f.params = { ...f.params, ...(m.params || {}) }; refreshSources(f); break;
+      case 'calc': f.calcs[m.id] = { id: m.id, title: m.title, description: m.description, inputs: m.inputs || [], fn: m.fn, status: m.status, message: m.message, data: m.data || [], columns: m.columns || [], rowCount: m.rowCount }; refreshSources(f); break;
+      case 'calc-error': if (f.calcs[m.id]) { f.calcs[m.id].status = 'error'; f.calcs[m.id].message = m.message; refreshSources(f); } break;
+      case 'rendered': break;
+      /* Clique num componente (número, célula de tabela, gráfico, filtro):
+         só aponta a fonte quando os Dados já estão abertos. Com os Dados
+         fechados, nada acontece, e passar o mouse não mostra dica. */
+      case 'mark-click': {
+        if (f !== primary) break;
+        if (side === 'sources') focusSource({ source: m.source, field: m.field, row: m.row });
+        break;
+      }
+      case 'error': case 'csp-violation': console.warn('Painel de IA:', m); break;
+    }
+  });
+
+  /* ─── pista nos números (desligada): o hover com "Ver nos dados" não
+     existe no Weknow; o clique só aponta a fonte com os Dados abertos.
+     Fica aqui sem uso, caso a ideia volte. ─── */
+  const NUMBER = 'span[data-field][data-source], table[data-source] td';
+  function addNumberCue(f) {
+    const doc = f.el.contentDocument;
+    if (!doc || !doc.head || doc.getElementById('wk-cue')) return;
+    const css = getComputedStyle(document.documentElement);
+    const tok = (n) => css.getPropertyValue(n).trim();
+    const st = doc.createElement('style');
+    st.id = 'wk-cue';
+    st.textContent = `${NUMBER} { cursor: pointer; border-radius: 4px; transition: background-color .12s ease; }
+      ${NUMBER.split(', ').map((x) => x + ':hover').join(', ')} { background: ${tok('--wk-icon-hover')}; }
+      .wk-cue-tip { position: fixed; z-index: 2147483647; pointer-events: none; padding: 6px 10px; border-radius: 6px;
+        font: 12px/16px Inter, system-ui, sans-serif; background: ${tok('--wk-toast-bg')}; color: ${tok('--wk-toast-text')}; box-shadow: ${tok('--wk-shadow-menu')}; }
+      .wk-cue-tip[hidden] { display: none; }`;
+    doc.head.appendChild(st);
+    const tip = doc.createElement('div');
+    tip.className = 'wk-cue-tip'; tip.setAttribute('role', 'tooltip'); tip.textContent = 'Ver nos dados'; tip.hidden = true;
+    doc.body.appendChild(tip);
+    let t = 0;
+    const hide = () => { clearTimeout(t); tip.hidden = true; };
+    doc.addEventListener('mouseover', (e) => {
+      const el = e.target.closest ? e.target.closest(NUMBER) : null;
+      clearTimeout(t);
+      if (!el) { tip.hidden = true; return; }
+      t = setTimeout(() => {
+        const r = el.getBoundingClientRect();
+        tip.hidden = false;
+        tip.style.left = Math.max(8, Math.min(r.left, doc.documentElement.clientWidth - tip.offsetWidth - 8)) + 'px';
+        tip.style.top = (r.bottom + 6) + 'px';
+      }, 400);
+    });
+    doc.addEventListener('mouseleave', hide);
+    doc.addEventListener('scroll', hide, true);
+    doc.addEventListener('click', hide, true);
+  }
+
+  /* ─── controle do protótipo ─── */
+  /* Cada situação põe na tela a versão mais recente e escolhe qual está
+     publicada: nenhuma, a de ontem (o rascunho de hoje em edição) ou a
+     própria mais recente (sem rascunho). */
+  document.querySelectorAll('#demo [data-scene]').forEach((b) => (b.onclick = () => {
+    const sc = b.dataset.scene;
+    published = sc === 'nunca' ? null : sc === 'publicado' ? latest() : versions[0].n;
+    base = null; comparing = null;
+    if (viewing !== latest()) setViewing(latest());
+    renderStatus(); renderSide();
+  }));
+  $('#demo-toggle').onclick = () => {
+    const opts = $('#demo-opts'), on = opts.hidden;
+    opts.hidden = !on;
+    $('#demo-toggle').setAttribute('aria-expanded', String(on));
+  };
+
+  /* Páginas: o mesmo painel (mesmos conjuntos e parâmetros) em formatos
+     diferentes, todos no visual padrão do JSON de instruções; o teste cego
+     foi escrito por uma IA que só leu o JSON e os conjuntos; o original é o
+     HTML que veio do Weknow. ?visual=<id> abre direto numa página. */
+  const PAGINAS = [
+    { id: 'galeria', nome: 'Galeria', nota: '', arquivo: 'dados/painel-galeria.html' },
+    /* Testes: uma IA sem contexto leu só o JSON de instruções (painel_padrao/json/instrucoes-painel.json) e o pedido; a nota é o pedido e aparece ao parar o mouse na aba. */
+    { id: 'teste1', nome: 'Teste 1: Convênios', nota: 'Semana que vem vou sentar com os convênios pra renegociar contrato. Preciso ver, convênio por convênio, quantos atendimentos e pacientes cada um traz e quanto tempo os pacientes de cada um ficam internados, pra saber com quem conversar primeiro.', arquivo: 'dados/teste-1.html' },
+    { id: 'teste2', nome: 'Teste 2: Perfil', nota: 'Quero entender o perfil de quem a gente atende: idade, sexo e se chegam por urgência ou de forma eletiva. É pra apresentar pra diretoria.', arquivo: 'dados/teste-2.html' },
+    { id: 'teste3', nome: 'Teste 3: Planejamento', nota: 'Estou preparando o planejamento do ano que vem. Quero ver como os atendimentos e os pacientes evoluíram mês a mês nesses dois anos, se tem época do ano com mais movimento, e se a permanência acompanhou isso.', arquivo: 'dados/teste-3.html' },
+    { id: 'teste4', nome: 'Teste 4: Visual do usuário', nota: 'Feito do zero só a partir da imagem de referência (preto e verde, cartões com luz, sem filtros), fora do JSON de instruções.', arquivo: 'dados/teste-4.html' },
+    { id: 'original', nome: 'Original', nota: '', arquivo: null },
+  ];
+  let pagina = PAGINAS[0].id;
+  let htmlOriginal = '';
+  async function lerPagina(p) {
+    const r = await fetch(p.arquivo, { cache: 'no-store' }).catch(() => null);
+    return r && r.ok ? r.text() : `<!doctype html><body style="font:14px system-ui;padding:24px;color:#64748b">Esta página ainda não existe (${esc(p.arquivo)}).</body>`;
+  }
+  /* A barra inferior do dashboard do portal (DashboardBar): setas juntas na
+     frente, as abas como item de navegação (fundo e cor de ativo do menu,
+     raio 8, texto 14) e, à direita, Análise inteligente e o "…". */
+  const ICONE_ANALISE = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true" style="display:block;flex:none"><path fill="currentColor" d="M9.99707 3.00034C10.8957 3.00035 11.7304 3.14596 12.5029 3.43296C12.3496 3.72887 12.2266 4.04365 12.1416 4.37339C11.4805 4.12555 10.767 4.00034 10 4.00034C8.33333 4.00034 6.91667 4.58587 5.75 5.7562C4.58355 6.92664 4 8.34804 4 10.0198C4.00014 11.6916 4.58347 13.1133 5.75 14.2835C6.91659 15.4538 8.33351 16.0384 10 16.0384C11.6665 16.0384 13.0834 15.4538 14.25 14.2835C15.4165 13.1133 15.9998 11.6916 16 10.0198C16 10.0037 15.9983 9.98711 15.998 9.97104C16.1629 9.98935 16.3303 10.0003 16.5 10.0003C16.6687 10.0003 16.8351 9.98914 16.999 9.97104C16.9991 9.9807 17 9.99067 17 10.0003C17 10.8784 16.8474 11.7096 16.543 12.4935C16.2385 13.2774 15.8195 13.9732 15.2861 14.5794L21 20.2923L20.3115 21.0003L14.5977 15.2864C13.9785 15.8198 13.277 16.2388 12.4932 16.5433C11.7092 16.8477 10.8781 17.0003 10 17.0003C8.04596 17.0003 6.39046 16.3226 5.03418 14.9671C3.67808 13.6115 3.00007 11.9564 3 10.0032C3.00002 8.05004 3.67766 6.39409 5.0332 5.03647C6.38886 3.67883 8.04375 3.00034 9.99707 3.00034ZM7.15332 12.597H6.15332V8.53843H7.15332V12.597ZM10.5 12.597H9.5V6.63511H10.5V12.597ZM13.8467 12.597H12.8467V9.50034H13.8467V12.597ZM18.8301 1.09409C18.8581 0.968637 19.1419 0.968637 19.1699 1.09409C19.3509 1.91852 19.5309 3.22556 20.1533 3.848C20.7759 4.47007 22.081 4.6495 22.9053 4.83042C23.0312 4.85805 23.0312 5.14264 22.9053 5.17026C22.081 5.35117 20.7758 5.53061 20.1533 6.15268C19.5309 6.77513 19.3509 8.08117 19.1699 8.90561C19.1423 9.03149 18.8577 9.03149 18.8301 8.90561C18.6491 8.08117 18.4701 6.77513 17.8477 6.15268C17.2253 5.53042 15.9191 5.35119 15.0947 5.17026C14.9688 5.14264 14.9688 4.85805 15.0947 4.83042C15.9191 4.64948 17.2252 4.47026 17.8477 3.848C18.4701 3.22556 18.6491 1.91853 18.8301 1.09409Z"/></svg>';
+  function renderPaginas() {
+    const i = PAGINAS.findIndex((p) => p.id === pagina);
+    $('#paginas').innerHTML =
+      `<div class="setas"><button class="seta" type="button" data-passo="-1" aria-label="Aba anterior" title="Aba anterior" ${i === 0 ? 'disabled' : ''}><span class="ms">chevron_left</span></button>` +
+      `<button class="seta" type="button" data-passo="1" aria-label="Próxima aba" title="Próxima aba" ${i === PAGINAS.length - 1 ? 'disabled' : ''}><span class="ms">chevron_right</span></button></div>` +
+      '<div class="abas" role="tablist" aria-label="Abas do dashboard">' +
+      PAGINAS.map((p, k) => `<button class="pagina" type="button" role="tab" data-pagina="${p.id}" aria-selected="${k === i}" tabindex="${k === i ? 0 : -1}" title="${esc(p.nota ? `Pedido: ${p.nota}` : p.nome)}">${esc(p.nome)}</button>`).join('') + '</div>' +
+      `<div class="acoes"><button class="btn primary" type="button">${ICONE_ANALISE}Análise inteligente</button><span class="mais" aria-hidden="true"><span class="ms">more_horiz</span></span></div>`;
+    $('#paginas').querySelectorAll('[data-pagina]').forEach((b) => (b.onclick = () => abrirPagina(b.dataset.pagina)));
+    $('#paginas').querySelectorAll('[data-passo]').forEach((b) => (b.onclick = () => abrirPagina(PAGINAS[i + Number(b.dataset.passo)].id)));
+    $('#paginas .abas').onkeydown = (e) => {
+      const passo = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;
+      if (!passo) return;
+      e.preventDefault();
+      const j = Math.min(PAGINAS.length - 1, Math.max(0, i + passo));
+      abrirPagina(PAGINAS[j].id).then(() => $(`#paginas [data-pagina="${PAGINAS[j].id}"]`)?.focus());
+    };
+  }
+  async function abrirPagina(id) {
+    const p = PAGINAS.find((x) => x.id === id);
+    if (!p || !contents) return;
+    pagina = id;
+    contents = { ...contents, html: p.arquivo ? await lerPagina(p) : htmlOriginal };
+    const u = new URL(location.href); u.searchParams.set('visual', id); history.replaceState(null, '', u);
+    renderPaginas();
+    renderPage();
+  }
+
+  async function boot() {
+    try {
+      const r = await fetch('dados/painel.json', { cache: 'no-store' });
+      if (!r.ok) throw new Error(r.status);
+      const j = await r.json();
+      contents = j.contents.aiPanel;
+      results = j.results || {};
+      htmlOriginal = contents.html;
+      const pedida = new URLSearchParams(location.search).get('visual');
+      pagina = PAGINAS.some((x) => x.id === pedida) ? pedida : PAGINAS[0].id;
+      const p = PAGINAS.find((x) => x.id === pagina);
+      if (p.arquivo) contents = { ...contents, html: await lerPagina(p) };
+      renderPaginas();
+      pageTitle = j.contents.description || 'Painel';
+      $('#crumb-title').textContent = pageTitle;
+      document.title = pageTitle;
+      const bg = j.contents.style?.['background-color'];
+      if (bg) $('#page').style.background = bg.length === 9 ? bg.slice(0, 7) : bg;
+      renderPage();
+    } catch (err) {
+      $('#page').innerHTML = `<div class="missing">Faltam os dados do dashboard (dados/painel.json).</div>`;
+    }
+    renderStatus();
+  }
+  boot();
+})();
+</script>
+</body>
+</html>

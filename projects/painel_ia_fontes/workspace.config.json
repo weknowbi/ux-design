@@ -1,0 +1,6 @@
+{
+  "name": "Dashboard MCP",
+  "description": "Visual padrão dos dashboards criados pelo MCP: galeria de componentes, testes feitos por uma IA só com o JSON de instruções (o pedido aparece ao parar o mouse na aba) e o original do Weknow",
+  "devCommand": "npm run dev",
+  "port": 5188
+}

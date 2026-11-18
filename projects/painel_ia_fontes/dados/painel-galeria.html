@@ -1,0 +1,630 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="wk-lib:echarts"></script>
+<style>
+/* Galeria: 12 tipos de gráfico do ECharts no visual padrão, com os dados do
+   painel. Serve para ver cada tipo no mesmo acabamento (paleta validada,
+   linhas finas, formas por série, tooltip, estados) e para tirar as regras. */
+:root {
+  color-scheme: light;
+  --fundo: #f5f7fa; --cartao: #ffffff; --cartao-2: #f7f9fc; --borda: #e6e9ef; --borda-2: #d5dae3;
+  --grade: #eef0f4; --eixo: #d5dae3; --texto: #1e2633; --texto-2: #475569; --texto-3: #64748b;
+  --primaria: #3366cc; --bom: #0e7552; --ruim: #b83a33;
+  --s1: #2563eb; --s2: #06a0c4; --s3: #7c3aed; --s4: #e11d48; --s5: #c026d3; --s6: #ea580c; --s7: #4f46e5; --s8: #059669;
+  --apagado: #c3cad5; --calor-0: #eef3fd;
+  --tooltip: #ffffff; --sombra: 0 0 0 1px rgba(15, 23, 42, 0.05), 0 1px 3px rgba(15, 23, 42, 0.06);
+  --sombra-tooltip: 0 10px 28px rgba(16, 24, 40, 0.12), 0 2px 6px rgba(16, 24, 40, 0.06); --esqueleto: #eef1f5;
+  --fonte: "Segoe UI Variable Text", "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, "Helvetica Neue", Roboto, Arial, sans-serif;
+  --fonte-display: "Segoe UI Variable Display", "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, "Helvetica Neue", Roboto, Arial, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+    --fundo: #131314; --cartao: #1c1d1f; --cartao-2: #202122; --borda: #262729; --borda-2: #323436;
+    --grade: #252628; --eixo: #3a3c3f; --texto: #eff0f0; --texto-2: #c4c7ca; --texto-3: #9a9ea4;
+    --primaria: #8ab4f8; --bom: #5dd39e; --ruim: #f28b82;
+    --s1: #3f82f2; --s2: #00a8b8; --s3: #9271f0; --s4: #ec5a7c; --s5: #c45ad3; --s6: #e0702c; --s7: #6f72ec; --s8: #23a679;
+    --apagado: #4a4d52; --calor-0: #222833;
+    --tooltip: #242527; --sombra: 0 0 0 1px rgba(255, 255, 255, 0.04); --sombra-tooltip: 0 10px 28px rgba(0, 0, 0, 0.45); --esqueleto: #242527;
+  }
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; background: var(--fundo); color: var(--texto); }
+body { font: 14px/1.45 var(--fonte); -webkit-font-smoothing: antialiased; padding: 28px 32px 48px; }
+h1 { margin: 0; font-family: var(--fonte-display); font-size: 24px; font-weight: 600; letter-spacing: -0.02em; line-height: 1.2; }
+.sub { margin: 6px 0 26px; color: var(--texto-3); font-size: 13px; }
+.grade { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+@media (max-width: 1000px) { .grade { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 640px) { body { padding: 18px 16px 32px; } }
+.cartao { background: var(--cartao); border: 0; border-radius: 14px; box-shadow: var(--sombra); padding: 20px 22px 22px; min-width: 0; }
+.cartao-topo { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px 16px; flex-wrap: wrap; margin-bottom: 16px; }
+.cartao h2 { margin: 0; font-size: 14px; font-weight: 600; }
+.tipo { display: inline-block; margin-right: 8px; padding: 1px 7px; border-radius: 5px; background: var(--cartao-2); border: 1px solid var(--borda); color: var(--texto-3); font-size: 11px; font-weight: 500; vertical-align: 1px; }
+.desc { margin: 4px 0 0; color: var(--texto-3); font-size: 12.5px; }
+.legenda { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 12px; color: var(--texto-2); }
+.legenda span { display: inline-flex; align-items: center; gap: 7px; }
+.caixa { position: relative; }
+.grafico { width: 100%; height: 280px; }
+.estado { display: none; position: absolute; inset: 0; margin: 0; align-items: center; justify-content: center; color: var(--texto-3); font-size: 13px; border: 1px dashed var(--borda-2); border-radius: 10px; }
+.caixa.sem-dados .estado { display: flex; }
+.caixa.sem-dados > :not(.estado) { visibility: hidden; }
+.escala { display: inline-flex; align-items: center; gap: 8px; font-size: 12px; color: var(--texto-3); }
+.escala i { width: 96px; height: 8px; border-radius: 4px; }
+.centro { position: absolute; left: 0; right: 0; text-align: center; pointer-events: none; }
+.centro b { display: block; font-family: var(--fonte-display); font-size: 30px; font-weight: 600; letter-spacing: -0.02em; }
+.centro span { font-size: 12px; color: var(--texto-3); }
+/* Formas por série (assinatura visual) */
+.forma { display: inline-block; flex: none; width: 9px; height: 9px; background: currentColor; }
+.f1 { border-radius: 50%; } .f2 { border-radius: 2.5px; } .f3 { width: 8px; height: 8px; border-radius: 1.5px; transform: rotate(45deg); margin: 0 1px; }
+.f4 { width: 10px; height: 10px; clip-path: polygon(50% 4%, 100% 92%, 0 92%); }
+.f5 { width: 10px; height: 10px; clip-path: polygon(25% 6%, 75% 6%, 100% 50%, 75% 94%, 25% 94%, 0 50%); } .f6 { width: 11px; height: 5px; border-radius: 2.5px; }
+.chave { position: relative; display: inline-block; flex: none; width: 22px; height: 10px; }
+.chave::before { content: ""; position: absolute; left: 0; right: 0; top: 4px; height: 2px; border-radius: 1px; background: currentColor; }
+.chave .forma { position: absolute; left: 50%; top: 50%; margin: 0; transform: translate(-50%, -50%); box-shadow: 0 0 0 2px var(--cartao); }
+/* Tooltip */
+.tt { font: 12px/1.4 var(--fonte); color: var(--texto); min-width: 160px; }
+.tt-t { color: var(--texto-3); margin-bottom: 6px; }
+.tt-l { display: grid; grid-template-columns: 14px 1fr auto; gap: 8px; align-items: center; }
+.tt-l + .tt-l { margin-top: 4px; }
+.tt-l span { color: var(--texto-3); }
+.tt-l b { font-weight: 600; font-variant-numeric: tabular-nums; color: var(--texto); }
+/* Indicadores */
+/* Indicadores como nas outras páginas: cada um é um cartão branco com rótulo, valor, nota e desenho */
+.secao { grid-column: 1 / -1; min-width: 0; }
+.secao > .cartao-topo { padding: 0 2px; margin-bottom: 12px; }
+.secao h2 { margin: 0; font-size: 14px; font-weight: 600; }
+.secao .desc { margin-bottom: 0; }
+.tiles { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
+.tile { display: flex; flex-direction: column; padding: 18px 20px; border-radius: 14px; background: var(--cartao); box-shadow: var(--sombra); min-width: 0; }
+.tile > span { display: block; font-size: 13px; color: var(--texto-2); font-weight: 500; }
+.tile b { display: block; margin-top: 10px; font-family: var(--fonte-display); font-size: 28px; line-height: 1.1; font-weight: 600; letter-spacing: -0.02em; white-space: nowrap; }
+.tile b small { font-size: 14px; font-weight: 500; color: var(--texto-3); margin-left: 4px; letter-spacing: 0; }
+.tile .nota { margin-top: 6px; color: var(--texto-3); font-size: 12.5px; }
+.tile .spark { margin-top: auto; padding-top: 14px; height: 50px; }
+@media (max-width: 1100px) { .tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+/* Tabela */
+.rolagem { overflow: auto; max-height: 300px; margin: 0 -22px -22px; }
+table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 13px; font-variant-numeric: tabular-nums; }
+th { position: sticky; top: 0; text-align: left; font-weight: 500; font-size: 12px; color: var(--texto-3); padding: 0 14px 10px; border-bottom: 1px solid var(--borda); background: var(--cartao); white-space: nowrap; }
+td { padding: 11px 14px; border-bottom: 1px solid var(--grade); white-space: nowrap; }
+th:first-child, td:first-child { padding-left: 22px; } th:last-child, td:last-child { padding-right: 22px; }
+tbody tr:hover td { background: var(--cartao-2); }
+.n { text-align: right; } td.pos { width: 1%; color: var(--texto-3); padding-right: 0; } td.nome { font-weight: 500; }
+.cb { display: flex; align-items: center; gap: 12px; justify-content: flex-end; }
+.cb i { display: block; width: 96px; height: 8px; }
+.cb i::before { content: ""; display: block; height: 100%; width: var(--w); min-width: 2px; border-radius: 0 4px 4px 0; background: var(--s1); }
+/* Barra segmentada */
+.total { font-family: var(--fonte-display); font-size: 24px; font-weight: 600; letter-spacing: -0.02em; }
+.total small { font-family: var(--fonte); font-size: 12.5px; font-weight: 400; color: var(--texto-3); margin-left: 6px; letter-spacing: 0; }
+.segmentos { display: flex; gap: 2px; height: 10px; margin: 12px 0 16px; }
+.segmentos i { display: block; min-width: 2px; }
+.segmentos i:first-child { border-radius: 5px 0 0 5px; } .segmentos i:last-child { border-radius: 0 5px 5px 0; }
+.lista { list-style: none; margin: 0; padding: 0; }
+.lista li { display: grid; grid-template-columns: 12px minmax(0, 1fr) auto 56px; gap: 12px; align-items: center; padding: 9px 0; font-size: 13px; border-top: 1px solid var(--grade); }
+.lista li:first-child { border-top: 0; }
+.lista .v { text-align: right; font-weight: 600; font-variant-numeric: tabular-nums; }
+.lista .p { text-align: right; color: var(--texto-3); font-variant-numeric: tabular-nums; }
+/* Pequenos múltiplos */
+.multiplos { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.multiplos h3 { margin: 0 0 2px; font-size: 12.5px; font-weight: 500; color: var(--texto-2); }
+.multiplos b { font-family: var(--fonte-display); font-size: 18px; font-weight: 600; }
+.multiplos .grafico { height: 120px; }
+.caixa[data-dash-source-state="loading"] > * { opacity: 0; }
+.caixa[data-dash-source-state="loading"]::after { content: ""; position: absolute; inset: 0; border-radius: 10px; background: var(--esqueleto); }
+[data-dash-source-state="refreshing"] { opacity: 0.55; }
+</style></head>
+<body>
+<h1>Galeria de gráficos</h1>
+<p class="sub" id="sub">Os mesmos dados do painel em 17 componentes, no visual padrão</p>
+
+<section class="grade">
+  <div class="secao"><div class="cartao-topo"><div><h2><span class="tipo">Indicadores</span>Números do período</h2><p class="desc">Um cartão por número: rótulo, valor, nota curta e o desenho embaixo, na cor da série</p></div></div>
+    <div class="caixa" data-source="kpis"><div class="tiles" id="tiles"></div><p class="estado"></p></div></div>
+  <article class="cartao"><div class="cartao-topo"><div><h2><span class="tipo">Linha</span>Atendimentos e pacientes por mês</h2><p class="desc">Várias séries: só linha, sem área sobreposta</p></div>
+    <div class="legenda"><span><b class="forma f1" style="color: var(--s1)"></b>Atendimentos</span><span><b class="forma f2" style="color: var(--s2)"></b>Pacientes</span></div></div>
+    <div class="caixa" data-source="tendencia"><div class="grafico" id="g1"></div><p class="estado"></p></div></article>
+
+  <article class="cartao"><div class="cartao-topo"><div><h2><span class="tipo">Área</span>Permanência média por mês</h2><p class="desc">Uma série: linha com um tom chapado embaixo</p></div></div>
+    <div class="caixa" data-source="tendencia"><div class="grafico" id="g2"></div><p class="estado"></p></div></article>
+
+  <article class="cartao"><div class="cartao-topo"><div><h2><span class="tipo">Áreas sobrepostas</span>Três séries, cada uma com a sua área</h2><p class="desc">Séries de exemplo; cada área a 12% da cor, uma por cima da outra</p></div>
+    <div class="legenda"><span><b class="forma f1" style="color: var(--s1)"></b>Série 1</span><span><b class="forma f2" style="color: var(--s2)"></b>Série 2</span><span><b class="forma f3" style="color: var(--s3)"></b>Série 3</span></div></div>
+    <div class="caixa" data-source="tendencia"><div class="grafico" id="g2b"></div><p class="estado"></p></div></article>
+
+  <article class="cartao"><div class="cartao-topo"><div><h2><span class="tipo">Áreas empilhadas</span>Três séries somadas</h2><p class="desc">Séries de exemplo; cada faixa é uma série, a de cima é o total</p></div>
+    <div class="legenda"><span><b class="forma f1" style="color: var(--s1)"></b>Série 1</span><span><b class="forma f2" style="color: var(--s2)"></b>Série 2</span><span><b class="forma f3" style="color: var(--s3)"></b>Série 3</span></div></div>
+    <div class="caixa" data-source="tendencia"><div class="grafico" id="g2c"></div><p class="estado"></p></div></article>
+
+  <article class="cartao"><div class="cartao-topo"><div><h2><span class="tipo">Colunas</span>Atendimentos por mês</h2><p class="desc">Uma cor; o valor só no maior mês</p></div></div>
+    <div class="caixa" data-source="tendencia"><div class="grafico" id="g3"></div><p class="estado"></p></div></article>
+
+  <article class="cartao"><div class="cartao-topo"><div><h2><span class="tipo">Colunas agrupadas</span>Atendimentos por faixa etária e sexo</h2><p class="desc">Duas séries lado a lado, com 2px de folga</p></div>
+    <div class="legenda"><span><b class="forma f1" style="color: var(--s1)"></b>Masculino</span><span><b class="forma f2" style="color: var(--s2)"></b>Feminino</span></div></div>
+    <div class="caixa" data-source="piramide"><div class="grafico" id="g4"></div><p class="estado"></p></div></article>
+
+  <article class="cartao"><div class="cartao-topo"><div><h2><span class="tipo">Barras 100%</span>Sexo em cada faixa etária</h2><p class="desc">Participação, somando 100% em cada barra</p></div>
+    <div class="legenda"><span><b class="forma f1" style="color: var(--s1)"></b>Masculino</span><span><b class="forma f2" style="color: var(--s2)"></b>Feminino</span></div></div>
+    <div class="caixa" data-source="piramide_pct"><div class="grafico" id="g5"></div><p class="estado"></p></div></article>
+
+  <article class="cartao"><div class="cartao-topo"><div><h2><span class="tipo">Barras horizontais</span>Os 10 convênios com mais atendimentos</h2><p class="desc">Ranking, do maior para o menor, valor na ponta</p></div></div>
+    <div class="caixa" data-source="top_conv"><div class="grafico" id="g6"></div><p class="estado"></p></div></article>
+
+  <article class="cartao"><div class="cartao-topo"><div><h2><span class="tipo">Rosca</span>Atendimentos por tipo</h2><p class="desc">Até 5 partes: as 4 maiores e "Outros"</p></div>
+    <div class="legenda" id="lg7"></div></div>
+    <div class="caixa" data-source="tipo_top"><div class="grafico" id="g7"></div>
+      <div class="centro" id="c7" style="top: 50%; transform: translateY(-50%)"><b id="v7" data-source="tipo_total" data-field="TOTAL" data-row="0"></b><span>atendimentos</span></div><p class="estado"></p></div></article>
+
+  <article class="cartao"><div class="cartao-topo"><div><h2><span class="tipo">Bolhas</span>Convênios: volume × permanência</h2><p class="desc">O tamanho é o número de pacientes</p></div></div>
+    <div class="caixa" data-source="top_conv"><div class="grafico" id="g8"></div><p class="estado"></p></div></article>
+
+  <article class="cartao"><div class="cartao-topo"><div><h2><span class="tipo">Mapa de calor</span>Atendimentos por ano e mês</h2><p class="desc">Uma cor, de clara a escura</p></div>
+    <div class="escala" id="esc9"></div></div>
+    <div class="caixa" data-source="tendencia"><div class="grafico" id="g9" style="height: 200px"></div><p class="estado"></p></div></article>
+
+  <article class="cartao"><div class="cartao-topo"><div><h2><span class="tipo">Medidor</span>Internação no total de atendimentos</h2><p class="desc">Uma proporção contra o todo</p></div></div>
+    <div class="caixa" data-source="internacao_parte"><div class="grafico" id="g10" style="height: 200px"></div>
+      <div class="centro" style="top: 92px"><b id="v10" data-source="internacao_parte" data-field="PCT" data-row="0"></b><span id="n10"></span></div><p class="estado"></p></div></article>
+
+  <article class="cartao"><div class="cartao-topo"><div><h2><span class="tipo">Treemap</span>Atendimentos por caráter / clínica</h2><p class="desc">A área de cada bloco é a parte dele no total</p></div></div>
+    <div class="caixa" data-source="por_carater"><div class="grafico" id="g11"></div><p class="estado"></p></div></article>
+
+  <article class="cartao"><div class="cartao-topo"><div><h2><span class="tipo">Cascata</span>Variação de atendimentos nos últimos 12 meses</h2><p class="desc">Do primeiro ao último mês, o quanto cada mês somou ou tirou</p></div>
+    <div class="legenda"><span><b class="forma f1" style="color: var(--s1)"></b>Aumento</span><span><b class="forma f2" style="color: var(--s2)"></b>Queda</span><span><b class="forma f6" style="color: var(--texto-3)"></b>Início e fim</span></div></div>
+    <div class="caixa" data-source="cascata"><div class="grafico" id="g12"></div><p class="estado"></p></div></article>
+  <article class="cartao" style="grid-column: 1 / -1"><div class="cartao-topo"><div><h2><span class="tipo">Tabela</span>Ranking de convênios</h2><p class="desc">Números à direita, barra na medida principal, cabeçalho preso e rolagem por dentro</p></div></div>
+    <div class="caixa" data-source="top_conv"><div class="rolagem"><table data-source="top_conv" data-row-key="NO_CONVENIO">
+      <thead><tr><th aria-label="Posição"></th><th data-field="NO_CONVENIO">Convênio</th><th class="n" data-field="MD_QT_TOTAL_ATENDIMENTO">Atendimentos</th><th class="n" data-field="MD_QT_PACIENTE">Pacientes</th><th class="n" data-field="MD_QT_MEDIA_DIAS_PERMANENCIA">Permanência média</th></tr></thead>
+      <tbody id="t13"></tbody></table></div><p class="estado"></p></div></article>
+
+  <article class="cartao"><div class="cartao-topo"><div><h2><span class="tipo">Barra segmentada</span>Atendimentos por tipo de convênio</h2><p class="desc">Parte do todo com os números ao lado: no lugar da rosca quando uma parte domina</p></div></div>
+    <div class="caixa" data-source="por_convtipo"><div class="total"><span id="tot14" data-source="tipo_total" data-field="TOTAL" data-row="0"></span><small>atendimentos</small></div><div class="segmentos" id="seg14"></div><ul class="lista" id="l14"></ul><p class="estado"></p></div></article>
+
+  <article class="cartao"><div class="cartao-topo"><div><h2><span class="tipo">Pirâmide</span>Atendimentos por faixa etária e sexo</h2><p class="desc">Barras para os dois lados a partir do zero</p></div>
+    <div class="legenda"><span><b class="forma f1" style="color: var(--s1)"></b>Masculino</span><span><b class="forma f2" style="color: var(--s2)"></b>Feminino</span></div></div>
+    <div class="caixa" data-source="piramide"><div class="grafico" id="g15" style="height: 320px"></div><p class="estado"></p></div></article>
+
+  <article class="cartao" style="grid-column: 1 / -1"><div class="cartao-topo"><div><h2><span class="tipo">Pequenos múltiplos</span>Três medidas, cada uma na sua escala</h2><p class="desc">No lugar de um gráfico com dois eixos: o mesmo eixo de tempo, um gráfico por medida</p></div></div>
+    <div class="caixa" data-source="tendencia"><div class="multiplos">
+      <div><h3>Atendimentos</h3><b id="m16a" data-source="kpis" data-field="MD_QT_TOTAL_ATENDIMENTO" data-row="0"></b><div class="grafico" id="g16a"></div></div>
+      <div><h3>Pacientes</h3><b id="m16b" data-source="kpis" data-field="MD_QT_PACIENTE" data-row="0"></b><div class="grafico" id="g16b"></div></div>
+      <div><h3>Permanência média (dias)</h3><b id="m16c" data-source="kpis" data-field="MD_QT_MEDIA_DIAS_PERMANENCIA" data-row="0"></b><div class="grafico" id="g16c"></div></div>
+    </div><p class="estado"></p></div></article>
+</section>
+
+<script>
+/* ============ Cálculos ============ */
+weknow.calc('piramide_pct', {
+  title: 'Sexo por faixa etária',
+  description: 'Atendimentos de cada sexo em cada faixa etária e a parte de cada um na faixa.',
+  inputs: ['piramide'],
+  fn: (piramide) => {
+    const idade = (s) => { const m = String(s || '').match(/\d+/); return m ? Number(m[0]) : 999; };
+    const faixas = [...new Set(piramide.map((l) => l.DS_FAIXA_ETARIA_ANS))].sort((a, b) => idade(a) - idade(b));
+    return faixas.map((f) => {
+      const soma = (sexo) => piramide.filter((l) => l.DS_FAIXA_ETARIA_ANS === f && String(l.DS_SEXO || '').trim().toUpperCase() === sexo)
+        .reduce((s, l) => s + (Number(l.MD_QT_TOTAL_ATENDIMENTO) || 0), 0);
+      const m = soma('MASCULINO'), fe = soma('FEMININO'), t = m + fe;
+      return { DS_FAIXA_ETARIA_ANS: f, MASCULINO: m, FEMININO: fe, PCT_MASCULINO: t ? m / t : 0, PCT_FEMININO: t ? fe / t : 0 };
+    });
+  },
+});
+weknow.calc('tipo_top', {
+  title: 'Tipos de atendimento (4 maiores e outros)',
+  description: 'Os 4 tipos com mais atendimentos e a soma dos demais em "Outros", com a parte de cada um.',
+  inputs: ['por_tipo'],
+  fn: (por_tipo) => {
+    const linhas = [...por_tipo].map((l) => ({ nome: l.DS_TP_ATENDIMENTO, v: Number(l.MD_QT_TOTAL_ATENDIMENTO) || 0 })).sort((a, b) => b.v - a.v);
+    const total = linhas.reduce((s, l) => s + l.v, 0);
+    const topo = linhas.slice(0, 4), resto = linhas.slice(4).reduce((s, l) => s + l.v, 0);
+    const out = topo.map((l) => ({ DS_TP_ATENDIMENTO: l.nome, MD_QT_TOTAL_ATENDIMENTO: l.v, PCT: total ? l.v / total : 0 }));
+    if (resto > 0) out.push({ DS_TP_ATENDIMENTO: 'Outros', MD_QT_TOTAL_ATENDIMENTO: resto, PCT: total ? resto / total : 0 });
+    return out;
+  },
+});
+weknow.calc('tipo_total', {
+  title: 'Total de atendimentos por tipo',
+  description: 'Soma dos atendimentos de todos os tipos.',
+  inputs: ['por_tipo'],
+  fn: (por_tipo) => (por_tipo.length ? [{ TOTAL: por_tipo.reduce((s, l) => s + (Number(l.MD_QT_TOTAL_ATENDIMENTO) || 0), 0) }] : []),
+});
+weknow.calc('internacao_parte', {
+  title: 'Participação da internação',
+  description: 'Atendimentos de internação sobre o total de atendimentos.',
+  inputs: ['por_tipo'],
+  fn: (por_tipo) => {
+    const total = por_tipo.reduce((s, l) => s + (Number(l.MD_QT_TOTAL_ATENDIMENTO) || 0), 0);
+    const int = por_tipo.filter((l) => String(l.DS_TP_ATENDIMENTO || '').trim().toUpperCase() === 'INTERNAÇÃO').reduce((s, l) => s + (Number(l.MD_QT_TOTAL_ATENDIMENTO) || 0), 0);
+    return total ? [{ PCT: int / total, INTERNACAO: int, TOTAL: total }] : [];
+  },
+});
+weknow.calc('cascata', {
+  title: 'Variação mês a mês',
+  description: 'Nos últimos 12 meses: o primeiro mês, a diferença de cada mês para o anterior e o último mês.',
+  inputs: ['tendencia'],
+  fn: (tendencia) => {
+    const m = [...tendencia].sort((a, b) => a.DT_ATENDIMENTO_yearMonth - b.DT_ATENDIMENTO_yearMonth).slice(-12);
+    if (m.length < 2) return [];
+    const v = (l) => Number(l.MD_QT_TOTAL_ATENDIMENTO) || 0;
+    const out = [{ MES: m[0].DT_ATENDIMENTO_yearMonth, TIPO: 'inicio', VALOR: v(m[0]) }];
+    for (let i = 1; i < m.length; i++) out.push({ MES: m[i].DT_ATENDIMENTO_yearMonth, TIPO: 'variacao', VALOR: v(m[i]) - v(m[i - 1]) });
+    out.push({ MES: m[m.length - 1].DT_ATENDIMENTO_yearMonth, TIPO: 'fim', VALOR: v(m[m.length - 1]) });
+    return out;
+  },
+});
+
+/* ============ Formatação e tema ============ */
+const L = weknow.locale || 'pt-BR';
+const NF = {};
+const nf = (k, o) => NF[k] || (NF[k] = new Intl.NumberFormat(L, o));
+const fmt = {
+  int: (v) => nf('i', { maximumFractionDigits: 0 }).format(v),
+  dec1: (v) => nf('d1', { minimumFractionDigits: 1, maximumFractionDigits: 1 }).format(v),
+  dec2: (v) => nf('d2', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(v),
+  pct: (v) => nf('p1', { style: 'percent', minimumFractionDigits: 1, maximumFractionDigits: 1 }).format(v),
+  pct0: (v) => nf('p0', { style: 'percent', maximumFractionDigits: 0 }).format(v),
+  sinal: (v) => (v > 0 ? '+' : '') + nf('i', { maximumFractionDigits: 0 }).format(v),
+  eixo: (max) => (Math.abs(max) >= 10000 ? (v) => nf('c', { notation: 'compact', maximumFractionDigits: 1 }).format(v) : (v) => nf('i', { maximumFractionDigits: 0 }).format(v)),
+};
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const titulo = (s) => (String(s ?? '').trim() || '(não informado)').toLocaleLowerCase(L)
+  .replace(/(^|[\s(/])\p{L}/gu, (c) => c.toLocaleUpperCase(L)).replace(/ (A|E|Ou|De|Da|Do|Das|Dos) /g, (m) => m.toLocaleLowerCase(L));
+const ym = (v) => ({ ano: Math.floor(Number(v) / 100), mes: Number(v) % 100 });
+const mesCurto = (v) => { const { ano, mes } = ym(v); return new Date(ano, mes - 1, 1).toLocaleDateString(L, { month: 'short' }).replace('.', ''); };
+const mesAno = (v) => mesCurto(v) + '/' + String(ym(v).ano).slice(2);
+const mesLongo = (v) => { const { ano, mes } = ym(v); return new Date(ano, mes - 1, 1).toLocaleDateString(L, { month: 'long', year: 'numeric' }); };
+const rotuloMes = (v, i) => (i === 0 || ym(v).mes === 1 ? mesAno(v) : mesCurto(v));
+const faixaCurta = (s) => String(s || '').trim().toLocaleLowerCase(L).replace(/ a /, '–').replace(/ anos?/, '').replace(/\s*ou mais/, '+');
+
+let t;
+function tema() {
+  const css = getComputedStyle(document.documentElement);
+  const v = (n) => css.getPropertyValue(n).trim();
+  return { fonte: v('--fonte'), texto: v('--texto'), texto2: v('--texto-2'), texto3: v('--texto-3'), cartao: v('--cartao'), borda: v('--borda'), eixo: v('--eixo'),
+    grade: v('--grade'), tooltip: v('--tooltip'), apagado: v('--apagado'), calor0: v('--calor-0'), sombraTooltip: v('--sombra-tooltip'),
+    s: [1, 2, 3, 4, 5, 6, 7, 8].map((i) => v('--s' + i)) };
+}
+const alfa = (hex, a) => { const n = parseInt(hex.replace('#', ''), 16); return `rgba(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}, ${a})`; };
+const SIMBOLOS = ['circle', 'roundRect', 'diamond', 'triangle', 'path://M5,0 L15,0 L20,8.66 L15,17.32 L5,17.32 L0,8.66 Z', 'rect'];
+const eixoCat = (dados, extra) => Object.assign({ type: 'category', data: dados, axisTick: { show: false }, axisLine: { lineStyle: { color: t.eixo } },
+  axisLabel: { color: t.texto3, fontSize: 11, margin: 12 } }, extra);
+const eixoVal = (formato, extra) => Object.assign({ type: 'value', splitNumber: 4, axisLine: { show: false }, axisTick: { show: false },
+  axisLabel: { color: t.texto3, fontSize: 11, margin: 12, formatter: formato }, splitLine: { lineStyle: { color: t.grade } } }, extra);
+const dica = (extra) => Object.assign({ backgroundColor: t.tooltip, borderColor: t.borda, borderWidth: 1, padding: [10, 12], confine: true,
+  textStyle: { color: t.texto, fontFamily: t.fonte, fontSize: 12 }, extraCssText: `border-radius: 10px; box-shadow: ${t.sombraTooltip};` }, extra);
+const linhasDica = (cab, linhas) => `<div class="tt"><div class="tt-t">${esc(cab)}</div>` + linhas.map((l) =>
+  `<div class="tt-l"><b class="forma f${l.forma || 1}" style="color:${l.cor}"></b><span>${esc(l.nome)}</span><b>${esc(l.valor)}</b></div>`).join('') + '</div>';
+const grade = { left: 8, right: 12, top: 14, bottom: 4, containLabel: true };
+
+const graficos = {};
+function pintar(id, r, opcao) {
+  const el = document.getElementById(id), caixa = el.closest('.caixa');
+  const texto = r.status === 'empty' ? 'Sem dados para os filtros escolhidos.' : r.status === 'error' ? 'Não foi possível carregar.' : '';
+  caixa.querySelector('.estado').textContent = texto;
+  caixa.classList.toggle('sem-dados', !!texto);
+  if (r.status !== 'ok' || !el.offsetWidth) return false;
+  const g = graficos[id] || (graficos[id] = echarts.init(el, null, { renderer: 'canvas' }));
+  g.setOption(Object.assign({ animation: false, textStyle: { fontFamily: t.fonte } }, opcao()), true);
+  g.resize();
+  return true;
+}
+const porMes = (r) => [...r.data].sort((a, b) => a.DT_ATENDIMENTO_yearMonth - b.DT_ATENDIMENTO_yearMonth);
+
+/* 1. Linha: várias séries, só linha (1px), marcador na forma da série no hover */
+function linha() {
+  const r = weknow.data('tendencia'), l = porMes(r), meses = l.map((x) => x.DT_ATENDIMENTO_yearMonth);
+  const serie = (nome, campo, i) => ({ name: nome, type: 'line', data: l.map((x) => Number(x[campo])), smooth: 0.15, symbol: SIMBOLOS[i], symbolSize: 9, showSymbol: false,
+    color: t.s[i], lineStyle: { width: 1.5, cap: 'round' }, endLabel: i === 0 ? { show: true, formatter: (q) => fmt.int(q.value), color: t.texto, fontSize: 12, fontWeight: 600, distance: 8 } : undefined, itemStyle: { borderColor: t.cartao, borderWidth: 2 } });
+  pintar('g1', r, () => ({ grid: grade,
+    xAxis: eixoCat(meses, { boundaryGap: false, axisLabel: { color: t.texto3, fontSize: 11, margin: 12, formatter: rotuloMes } }),
+    yAxis: eixoVal(fmt.eixo(Math.max(...l.map((x) => Number(x.MD_QT_TOTAL_ATENDIMENTO))) * 1.2), { min: 0 }),
+    tooltip: dica({ trigger: 'axis', axisPointer: { type: 'line', lineStyle: { color: t.eixo } },
+      formatter: (ps) => linhasDica(mesLongo(meses[ps[0].dataIndex]), ps.map((p) => ({ forma: p.seriesIndex + 1, cor: t.s[p.seriesIndex], nome: p.seriesName, valor: fmt.int(p.value) }))) }),
+    series: [serie('Atendimentos', 'MD_QT_TOTAL_ATENDIMENTO', 0), serie('Pacientes', 'MD_QT_PACIENTE', 1)], grid: { ...grade, right: 52 } }));
+}
+
+/* 2. Área: uma série, tom chapado de 8% */
+function area() {
+  const r = weknow.data('tendencia'), l = porMes(r), meses = l.map((x) => x.DT_ATENDIMENTO_yearMonth);
+  pintar('g2', r, () => ({ grid: grade,
+    xAxis: eixoCat(meses, { boundaryGap: false, axisLabel: { color: t.texto3, fontSize: 11, margin: 12, formatter: rotuloMes } }),
+    yAxis: eixoVal((v) => fmt.dec1(v), { min: 0 }),
+    tooltip: dica({ trigger: 'axis', axisPointer: { type: 'line', lineStyle: { color: t.eixo } },
+      formatter: (ps) => linhasDica(mesLongo(meses[ps[0].dataIndex]), [{ cor: t.s[0], nome: 'Permanência média', valor: fmt.dec2(ps[0].value) + ' dias' }]) }),
+    series: [{ type: 'line', data: l.map((x) => Number(x.MD_QT_MEDIA_DIAS_PERMANENCIA)), smooth: 0.15, symbol: 'circle', symbolSize: 9, showSymbol: false,
+      color: t.s[0], lineStyle: { width: 1.5 }, itemStyle: { borderColor: t.cartao, borderWidth: 2 }, areaStyle: { color: alfa(t.s[0], 0.12) } }] }));
+}
+
+/* 2b e 2c. Três áreas, sobrepostas e empilhadas. As séries são de exemplo (a tendência em três escalas), só para ver as cores juntas. */
+function tresAreas(id, empilhar) {
+  const r = weknow.data('tendencia'), l = porMes(r), meses = l.map((x) => x.DT_ATENDIMENTO_yearMonth);
+  const base = l.map((x) => Number(x.MD_QT_TOTAL_ATENDIMENTO) || 0);
+  const fatores = empilhar ? [0.5, 0.3, 0.2] : [1, 0.72, 0.45];
+  const serie = (i) => ({ name: 'Série ' + (i + 1), type: 'line', stack: empilhar ? 't' : undefined, smooth: 0.15, symbol: SIMBOLOS[i], symbolSize: 9, showSymbol: false,
+    color: t.s[i], lineStyle: { width: 1.5 }, itemStyle: { borderColor: t.cartao, borderWidth: 2 },
+    areaStyle: { color: alfa(t.s[i], empilhar ? 0.22 : 0.12) },
+    data: base.map((x, j) => Math.round(x * fatores[i] * (1 + Math.sin(j * 0.9 + i * 2) * 0.08))) });
+  pintar(id, r, () => ({ grid: grade,
+    xAxis: eixoCat(meses, { boundaryGap: false, axisLabel: { color: t.texto3, fontSize: 11, margin: 12, formatter: rotuloMes } }),
+    yAxis: eixoVal(fmt.eixo(4000), { min: 0 }),
+    tooltip: dica({ trigger: 'axis', axisPointer: { type: 'line', lineStyle: { color: t.eixo } },
+      formatter: (ps) => linhasDica(mesLongo(meses[ps[0].dataIndex]), ps.map((p) => ({ forma: p.seriesIndex + 1, cor: t.s[p.seriesIndex], nome: p.seriesName, valor: fmt.int(p.value) }))) }),
+    series: [0, 1, 2].map(serie) }));
+}
+
+/* 3. Colunas: uma cor, 46% da faixa (até 18px), ponta arredondada, valor só no maior */
+function colunas() {
+  const r = weknow.data('tendencia'), l = porMes(r), meses = l.map((x) => x.DT_ATENDIMENTO_yearMonth);
+  const v = l.map((x) => Number(x.MD_QT_TOTAL_ATENDIMENTO)), iMax = v.indexOf(Math.max(...v));
+  pintar('g3', r, () => ({ grid: { ...grade, top: 24 },
+    xAxis: eixoCat(meses, { axisLabel: { color: t.texto3, fontSize: 11, margin: 12, formatter: rotuloMes } }),
+    yAxis: eixoVal(fmt.eixo(Math.max(...v)), { min: 0 }),
+    tooltip: dica({ trigger: 'item', formatter: (p) => linhasDica(mesLongo(meses[p.dataIndex]), [{ cor: t.s[0], nome: 'Atendimentos', valor: fmt.int(p.value) }]) }),
+    series: [{ type: 'bar', barWidth: '46%', barMaxWidth: 18, itemStyle: { color: t.s[0], borderRadius: [4, 4, 0, 0] }, emphasis: { itemStyle: { color: alfa(t.s[0], 0.8) } },
+      data: v.map((x, i) => (i === iMax ? { value: x, label: { show: true, position: 'top', distance: 6, color: t.texto, fontSize: 12, fontWeight: 600, formatter: (p) => fmt.int(p.value) } } : x)) }] }));
+}
+
+/* 4. Colunas agrupadas: duas séries lado a lado, 2px de folga, faixas na ordem natural */
+function agrupadas() {
+  const r = weknow.data('piramide');
+  const idade = (s) => { const m = String(s || '').match(/\d+/); return m ? Number(m[0]) : 999; };
+  const faixas = [...new Set(r.data.map((l) => l.DS_FAIXA_ETARIA_ANS))].sort((a, b) => idade(a) - idade(b));
+  const soma = (f, sexo) => r.data.filter((l) => l.DS_FAIXA_ETARIA_ANS === f && String(l.DS_SEXO || '').trim().toUpperCase() === sexo).reduce((s, l) => s + (Number(l.MD_QT_TOTAL_ATENDIMENTO) || 0), 0);
+  const serie = (nome, sexo, i) => ({ name: nome, type: 'bar', barMaxWidth: 12, barGap: '18%', data: faixas.map((f) => soma(f, sexo)),
+    itemStyle: { color: t.s[i], borderRadius: [3, 3, 0, 0] }, emphasis: { itemStyle: { color: alfa(t.s[i], 0.8) } } });
+  pintar('g4', r, () => ({ grid: grade,
+    xAxis: eixoCat(faixas.map(faixaCurta)), yAxis: eixoVal(fmt.eixo(12000), { min: 0 }),
+    tooltip: dica({ trigger: 'axis', axisPointer: { type: 'shadow', shadowStyle: { color: alfa(t.texto3, 0.06) } },
+      formatter: (ps) => linhasDica(faixaCurta(faixas[ps[0].dataIndex]) + ' anos', ps.map((p) => ({ forma: p.seriesIndex + 1, cor: t.s[p.seriesIndex], nome: p.seriesName, valor: fmt.int(p.value) }))) }),
+    series: [serie('Masculino', 'MASCULINO', 0), serie('Feminino', 'FEMININO', 1)] }));
+}
+
+/* 5. Barras 100%: horizontais empilhadas, 2px de folga entre as partes */
+function cemPorCento() {
+  const r = weknow.data('piramide_pct'), l = r.data;
+  const serie = (nome, campo, i, raio) => ({ name: nome, type: 'bar', stack: 't', barWidth: 14, data: l.map((x) => x[campo]),
+    itemStyle: { color: t.s[i], borderRadius: raio, borderColor: t.cartao, borderWidth: 1 } });
+  pintar('g5', r, () => ({ grid: { ...grade, right: 16 },
+    xAxis: { type: 'value', max: 1, splitNumber: 4, axisLine: { show: false }, axisTick: { show: false }, axisLabel: { color: t.texto3, fontSize: 11, formatter: (v) => fmt.pct0(v) }, splitLine: { lineStyle: { color: t.grade } } },
+    yAxis: { type: 'category', data: l.map((x) => faixaCurta(x.DS_FAIXA_ETARIA_ANS)), axisLine: { show: false }, axisTick: { show: false }, axisLabel: { color: t.texto2, fontSize: 11, margin: 10 } },
+    tooltip: dica({ trigger: 'axis', axisPointer: { type: 'shadow', shadowStyle: { color: alfa(t.texto3, 0.06) } },
+      formatter: (ps) => linhasDica(faixaCurta(l[ps[0].dataIndex].DS_FAIXA_ETARIA_ANS) + ' anos', ps.map((p) => ({ forma: p.seriesIndex + 1, cor: t.s[p.seriesIndex], nome: p.seriesName, valor: fmt.pct(p.value) }))) }),
+    series: [serie('Masculino', 'PCT_MASCULINO', 0, [4, 0, 0, 4]), serie('Feminino', 'PCT_FEMININO', 1, [0, 4, 4, 0])] }));
+}
+
+/* 6. Barras horizontais: ranking, 14px, ponta arredondada e reta na base, valor na ponta */
+function ranking() {
+  const r = weknow.data('top_conv');
+  const l = [...r.data].sort((a, b) => Number(b.MD_QT_TOTAL_ATENDIMENTO) - Number(a.MD_QT_TOTAL_ATENDIMENTO)).slice(0, 10);
+  pintar('g6', r, () => ({ grid: { left: 4, right: 56, top: 0, bottom: 0, containLabel: true },
+    xAxis: { type: 'value', show: false, min: 0 },
+    yAxis: { type: 'category', inverse: true, data: l.map((x) => titulo(x.NO_CONVENIO)), axisLine: { show: false }, axisTick: { show: false },
+      axisLabel: { color: t.texto2, fontSize: 12, margin: 12, width: 130, overflow: 'truncate' } },
+    tooltip: dica({ trigger: 'item', formatter: (p) => linhasDica(p.name, [{ cor: t.s[0], nome: 'Atendimentos', valor: fmt.int(p.value) }]) }),
+    series: [{ type: 'bar', barWidth: 14, data: l.map((x) => Number(x.MD_QT_TOTAL_ATENDIMENTO)), itemStyle: { color: t.s[0], borderRadius: [0, 4, 4, 0] },
+      emphasis: { itemStyle: { color: alfa(t.s[0], 0.8) } },
+      label: { show: true, position: 'right', distance: 8, color: t.texto, fontSize: 12, fontWeight: 600, formatter: (p) => fmt.int(p.value) } }] }));
+}
+
+/* 7. Rosca: até 5 partes, folga entre fatias, total no centro, legenda com forma */
+function rosca() {
+  const r = weknow.data('tipo_top'), tot = weknow.data('tipo_total');
+  const cor = (i, nome) => (nome === 'Outros' ? t.apagado : t.s[i]);
+  document.getElementById('lg7').innerHTML = r.data.map((x, i) => `<span><b class="forma f${i + 1}" style="color:${cor(i, x.DS_TP_ATENDIMENTO)}"></b>${esc(titulo(x.DS_TP_ATENDIMENTO))}</span>`).join('');
+  const ok = pintar('g7', r, () => ({
+    tooltip: dica({ trigger: 'item', formatter: (p) => linhasDica(p.name, [{ forma: p.dataIndex + 1, cor: p.color, nome: 'Atendimentos', valor: fmt.int(p.value) },
+      { forma: p.dataIndex + 1, cor: 'transparent', nome: 'Parte', valor: fmt.pct(r.data[p.dataIndex].PCT) }]) }),
+    series: [{ type: 'pie', radius: ['64%', '84%'], padAngle: 1.5, itemStyle: { borderRadius: 3 }, label: { show: false }, emphasis: { scale: true, scaleSize: 3 },
+      data: r.data.map((x, i) => ({ name: titulo(x.DS_TP_ATENDIMENTO), value: x.MD_QT_TOTAL_ATENDIMENTO, itemStyle: { color: cor(i, x.DS_TP_ATENDIMENTO) } })) }] }));
+  document.getElementById('c7').hidden = !ok;
+  if (tot.status === 'ok') document.getElementById('v7').textContent = fmt.int(tot.data[0].TOTAL);
+}
+
+/* 8. Bolhas: uma cor, preenchimento a 28% e contorno; área proporcional; rótulo só nos 4 maiores */
+function bolhas() {
+  const r = weknow.data('top_conv'), l = r.data;
+  const maxPac = Math.max(1, ...l.map((x) => Number(x.MD_QT_PACIENTE) || 0));
+  const ordem = [...l].sort((a, b) => Number(b.MD_QT_TOTAL_ATENDIMENTO) - Number(a.MD_QT_TOTAL_ATENDIMENTO)).slice(0, 4).map((x) => x.NO_CONVENIO);
+  pintar('g8', r, () => ({ grid: { ...grade, top: 30, right: 24 },
+    xAxis: eixoVal(fmt.eixo(20000), { min: 0, name: 'Atendimentos', nameLocation: 'middle', nameGap: 28, nameTextStyle: { color: t.texto3, fontSize: 11 } }),
+    yAxis: eixoVal((v) => fmt.dec1(v), { min: 0, name: 'Dias', nameTextStyle: { color: t.texto3, fontSize: 11, align: 'right' } }),
+    tooltip: dica({ trigger: 'item', formatter: (p) => { const x = l[p.dataIndex]; return linhasDica(titulo(x.NO_CONVENIO), [
+      { cor: t.s[0], nome: 'Atendimentos', valor: fmt.int(x.MD_QT_TOTAL_ATENDIMENTO) }, { cor: 'transparent', nome: 'Pacientes', valor: fmt.int(x.MD_QT_PACIENTE) },
+      { cor: 'transparent', nome: 'Permanência', valor: fmt.dec2(x.MD_QT_MEDIA_DIAS_PERMANENCIA) + ' dias' }]); } }),
+    series: [{ type: 'scatter', data: l.map((x) => ({ value: [Number(x.MD_QT_TOTAL_ATENDIMENTO), Number(x.MD_QT_MEDIA_DIAS_PERMANENCIA)], name: titulo(x.NO_CONVENIO),
+        symbolSize: 10 + 40 * Math.sqrt((Number(x.MD_QT_PACIENTE) || 0) / maxPac),
+        label: { show: ordem.includes(x.NO_CONVENIO), position: 'top', distance: 4, formatter: (p) => p.name, color: t.texto2, fontSize: 11 } })),
+      itemStyle: { color: alfa(t.s[0], 0.28), borderColor: t.s[0], borderWidth: 1 }, labelLayout: { hideOverlap: true }, emphasis: { scale: 1.06 } }] }));
+}
+
+/* 9. Mapa de calor: ano × mês, uma cor de clara a escura, 2px de folga */
+function calor() {
+  const r = weknow.data('tendencia'), l = porMes(r);
+  const anos = [...new Set(l.map((x) => ym(x.DT_ATENDIMENTO_yearMonth).ano))];
+  const nomesMes = Array.from({ length: 12 }, (_, i) => new Date(2000, i, 1).toLocaleDateString(L, { month: 'short' }).replace('.', ''));
+  const v = l.map((x) => Number(x.MD_QT_TOTAL_ATENDIMENTO)), min = Math.min(...v), max = Math.max(...v);
+  document.getElementById('esc9').innerHTML = r.status === 'ok' ? `<span>${fmt.int(min)}</span><i style="background:linear-gradient(90deg, ${t.calor0}, ${t.s[0]})"></i><span>${fmt.int(max)}</span>` : '';
+  pintar('g9', r, () => ({ grid: { left: 4, right: 4, top: 0, bottom: 2, containLabel: true },
+    xAxis: { type: 'category', data: nomesMes, axisLine: { show: false }, axisTick: { show: false }, axisLabel: { color: t.texto3, fontSize: 11 } },
+    yAxis: { type: 'category', data: anos.map(String), inverse: true, axisLine: { show: false }, axisTick: { show: false }, axisLabel: { color: t.texto2, fontSize: 12, margin: 12 } },
+    visualMap: { show: false, min, max, inRange: { color: [t.calor0, t.s[0]] } },
+    tooltip: dica({ trigger: 'item', formatter: (p) => linhasDica(`${nomesMes[p.value[0]]} de ${anos[p.value[1]]}`, [{ cor: p.color, nome: 'Atendimentos', valor: fmt.int(p.value[2]) }]) }),
+    series: [{ type: 'heatmap', data: l.map((x) => { const { ano, mes } = ym(x.DT_ATENDIMENTO_yearMonth); return [mes - 1, anos.indexOf(ano), Number(x.MD_QT_TOTAL_ATENDIMENTO)]; }),
+      itemStyle: { borderColor: t.cartao, borderWidth: 2, borderRadius: 4 }, emphasis: { itemStyle: { borderColor: t.texto, borderWidth: 1 } } }] }));
+}
+
+/* 10. Medidor: arco de 240°, trilho em --grade, preenchimento --s1; o número em HTML no centro */
+function medidor() {
+  const r = weknow.data('internacao_parte');
+  const ok = pintar('g10', r, () => ({
+    series: [{ type: 'gauge', startAngle: 210, endAngle: -30, min: 0, max: 1, radius: '92%', center: ['50%', '58%'],
+      progress: { show: true, width: 12, roundCap: true, itemStyle: { color: t.s[0] } },
+      axisLine: { roundCap: true, lineStyle: { width: 12, color: [[1, t.grade]] } },
+      pointer: { show: false }, axisTick: { show: false }, splitLine: { show: false }, axisLabel: { show: false }, detail: { show: false }, title: { show: false },
+      data: [{ value: r.data[0].PCT }] }] }));
+  if (ok) {
+    document.getElementById('v10').textContent = fmt.pct(r.data[0].PCT);
+    document.getElementById('n10').textContent = `${fmt.int(r.data[0].INTERNACAO)} de ${fmt.int(r.data[0].TOTAL)}`;
+  }
+}
+
+/* 11. Treemap: uma cor (os blocos são da mesma série), 2px de folga, rótulo só onde cabe */
+function treemap() {
+  const r = weknow.data('por_carater');
+  const total = r.data.reduce((s, x) => s + (Number(x.MD_QT_TOTAL_ATENDIMENTO) || 0), 0);
+  pintar('g11', r, () => ({
+    tooltip: dica({ trigger: 'item', formatter: (p) => linhasDica(p.name, [{ cor: t.s[0], nome: 'Atendimentos', valor: fmt.int(p.value) },
+      { cor: 'transparent', nome: 'Parte', valor: fmt.pct(total ? p.value / total : 0) }]) }),
+    series: [{ type: 'treemap', roam: false, nodeClick: false, breadcrumb: { show: false }, left: 0, right: 0, top: 0, bottom: 0,
+      itemStyle: { color: t.s[0], borderColor: t.cartao, borderWidth: 2, gapWidth: 2, borderRadius: 4 },
+      label: { show: true, color: '#ffffff', fontSize: 12, fontFamily: t.fonte, formatter: (p) => `{n|${p.name}}\n{v|${fmt.int(p.value)}}`,
+        rich: { n: { fontSize: 12, color: '#ffffff', lineHeight: 16 }, v: { fontSize: 12, fontWeight: 600, color: '#ffffff', lineHeight: 16 } } },
+      upperLabel: { show: false }, emphasis: { itemStyle: { color: alfa(t.s[0], 0.85) } },
+      data: [...r.data].sort((a, b) => Number(b.MD_QT_TOTAL_ATENDIMENTO) - Number(a.MD_QT_TOTAL_ATENDIMENTO))
+        .map((x) => ({ name: titulo(x.DS_CARATER_ATENDIMENTO), value: Number(x.MD_QT_TOTAL_ATENDIMENTO) || 0, itemStyle: { color: t.s[0] } })) }] })); // a cor vai em cada bloco: sem isso o ECharts usa a paleta dele
+}
+
+/* 12. Cascata: barras flutuantes (base transparente), aumento em --s1, queda em --s2, início e fim em --texto-3 */
+function cascata() {
+  const r = weknow.data('cascata'), l = r.data;
+  let acumulado = 0;
+  const base = [], barra = [];
+  l.forEach((x) => {
+    if (x.TIPO === 'inicio' || x.TIPO === 'fim') { base.push(0); barra.push({ value: x.VALOR, itemStyle: { color: t.texto3 } }); acumulado = x.VALOR; }
+    else { const de = acumulado, ate = acumulado + x.VALOR; base.push(Math.min(de, ate)); barra.push({ value: Math.abs(x.VALOR), real: x.VALOR, itemStyle: { color: x.VALOR >= 0 ? t.s[0] : t.s[1] } }); acumulado = ate; }
+  });
+  const rot = l.map((x, i) => (x.TIPO === 'inicio' ? mesAno(x.MES) : x.TIPO === 'fim' ? 'Fim' : mesCurto(x.MES)));
+  pintar('g12', r, () => ({ grid: grade,
+    xAxis: eixoCat(rot), yAxis: eixoVal(fmt.eixo(4000), { min: 0 }),
+    tooltip: dica({ trigger: 'axis', axisPointer: { type: 'shadow', shadowStyle: { color: alfa(t.texto3, 0.06) } },
+      formatter: (ps) => { const x = l[ps[0].dataIndex]; const fim = x.TIPO !== 'variacao';
+        return linhasDica(x.TIPO === 'fim' ? 'Último mês, ' + mesLongo(x.MES) : mesLongo(x.MES), [{ forma: fim ? 6 : x.VALOR >= 0 ? 1 : 2, cor: fim ? t.texto3 : x.VALOR >= 0 ? t.s[0] : t.s[1],
+          nome: fim ? 'Atendimentos' : 'Variação', valor: fim ? fmt.int(x.VALOR) : fmt.sinal(x.VALOR) }]); } }),
+    series: [
+      { type: 'bar', stack: 'c', data: base, itemStyle: { color: 'transparent' }, emphasis: { disabled: true }, tooltip: { show: false }, silent: true },
+      { type: 'bar', stack: 'c', barWidth: '50%', barMaxWidth: 18, data: barra, itemStyle: { borderRadius: 3 } },
+    ] }));
+}
+
+/* Indicadores: número, nota e sparkline em --s1 com o último ponto em círculo */
+function indicadores() {
+  const k = weknow.data('kpis'), tend = weknow.data('tendencia');
+  const caixa = document.getElementById('tiles').closest('.caixa');
+  caixa.querySelector('.estado').textContent = k.status === 'error' ? 'Não foi possível carregar.' : '';
+  if (k.status !== 'ok') return;
+  const d = k.data[0], l = porMes(tend);
+  const itens = [['Atendimentos', 'MD_QT_TOTAL_ATENDIMENTO', fmt.int(d.MD_QT_TOTAL_ATENDIMENTO), '', 'no período filtrado'], ['Pacientes', 'MD_QT_PACIENTE', fmt.int(d.MD_QT_PACIENTE), '', 'pessoas atendidas'],
+    ['Permanência média', 'MD_QT_MEDIA_DIAS_PERMANENCIA', fmt.dec2(d.MD_QT_MEDIA_DIAS_PERMANENCIA), 'dias', 'por atendimento'], ['Idade média', 'MD_QT_IDADE_MEDIA', fmt.dec1(d.MD_QT_IDADE_MEDIA), 'anos', 'dos pacientes, por faixa etária']];
+  const el = document.getElementById('tiles');
+  if (!el.childElementCount) el.innerHTML = itens.map((x, i) => `<div class="tile"><span>${x[0]}</span><b><span data-source="kpis" data-field="${x[1]}" data-row="0"></span>${x[3] ? '<small>' + x[3] + '</small>' : ''}</b><div class="nota">${x[4]}</div><div class="spark" id="sp${i}"></div></div>`).join('');
+  itens.forEach((x, i) => {
+    el.querySelectorAll('.tile b > span')[i].textContent = x[2];
+    const sp = document.getElementById('sp' + i);
+    if (x[1] === 'MD_QT_IDADE_MEDIA') { miniFaixas('sp' + i); return; }
+    if (tend.status !== 'ok') return;
+    const g = graficos['sp' + i] || (graficos['sp' + i] = echarts.init(sp, null, { renderer: 'canvas' }));
+    const dados = l.map((y, j) => (j === l.length - 1 ? { value: Number(y[x[1]]), symbol: 'circle', symbolSize: 7, itemStyle: { color: t.s[0], borderColor: t.cartao, borderWidth: 2 } } : Number(y[x[1]])));
+    g.setOption({ animation: false, grid: { left: 2, right: 5, top: 5, bottom: 3 }, xAxis: { type: 'category', show: false, boundaryGap: false, data: l.map((y) => y.DT_ATENDIMENTO_yearMonth) },
+      yAxis: { type: 'value', show: false, scale: true }, series: [{ type: 'line', data: dados, smooth: 0.15, symbol: 'none', silent: true, lineStyle: { width: 1.5, color: t.s[0] } }] }, true); // na cor da série, nunca em cinza
+    g.resize();
+  });
+}
+
+
+/* A idade média não tem série no tempo: o cartão mostra a distribuição dos atendimentos por faixa etária em mini colunas. */
+function miniFaixas(id) {
+  const r = weknow.data('piramide'), el = document.getElementById(id);
+  if (!el || r.status !== 'ok' || !el.offsetWidth) return;
+  const idade = (s) => { const m = String(s || '').match(/\d+/); return m ? Number(m[0]) : 999; };
+  const faixas = [...new Set(r.data.map((l) => l.DS_FAIXA_ETARIA_ANS))].sort((a, b) => idade(a) - idade(b));
+  const v = faixas.map((f) => r.data.filter((l) => l.DS_FAIXA_ETARIA_ANS === f).reduce((s, l) => s + (Number(l.MD_QT_TOTAL_ATENDIMENTO) || 0), 0));
+  const g = graficos[id] || (graficos[id] = echarts.init(el, null, { renderer: 'canvas' }));
+  g.setOption({ animation: false, grid: { left: 2, right: 2, top: 4, bottom: 2 },
+    xAxis: { type: 'category', show: false, data: faixas }, yAxis: { type: 'value', show: false, min: 0 },
+    tooltip: dica({ trigger: 'item', formatter: (p) => linhasDica(String(p.name).trim().toLocaleLowerCase(L), [{ forma: 1, cor: t.s[0], nome: 'Atendimentos', valor: fmt.int(p.value) }]) }),
+    series: [{ type: 'bar', data: v, barWidth: '62%', itemStyle: { color: t.s[0], borderRadius: [2, 2, 0, 0] } }] }, true);
+  g.resize();
+}
+
+/* Tabela: cada <tr> leva o índice da linha no conjunto */
+function tabela() {
+  const r = weknow.data('top_conv');
+  const caixa = document.getElementById('t13').closest('.caixa');
+  caixa.querySelector('.estado').textContent = r.status === 'empty' ? 'Sem dados.' : r.status === 'error' ? 'Não foi possível carregar.' : '';
+  caixa.classList.toggle('sem-dados', r.status === 'empty' || r.status === 'error');
+  const l = r.data.map((x, i) => ({ ...x, i })).sort((a, b) => Number(b.MD_QT_TOTAL_ATENDIMENTO) - Number(a.MD_QT_TOTAL_ATENDIMENTO));
+  const maior = Math.max(1, ...l.map((x) => Number(x.MD_QT_TOTAL_ATENDIMENTO)));
+  document.getElementById('t13').innerHTML = l.map((x, p) => `<tr data-row="${x.i}"><td class="pos">${p + 1}</td><td class="nome">${esc(titulo(x.NO_CONVENIO))}</td>` +
+    `<td class="n"><div class="cb"><span>${fmt.int(x.MD_QT_TOTAL_ATENDIMENTO)}</span><i style="--w:${((100 * Number(x.MD_QT_TOTAL_ATENDIMENTO)) / maior).toFixed(1)}%"></i></div></td>` +
+    `<td class="n">${fmt.int(x.MD_QT_PACIENTE)}</td><td class="n">${fmt.dec2(x.MD_QT_MEDIA_DIAS_PERMANENCIA)} dias</td></tr>`).join('');
+}
+
+/* Barra segmentada: 10px, 2px de folga, forma e cor de cada parte na lista */
+function segmentada() {
+  const r = weknow.data('por_convtipo'), tot = weknow.data('tipo_total');
+  const caixa = document.getElementById('l14').closest('.caixa');
+  caixa.classList.toggle('sem-dados', r.status === 'empty' || r.status === 'error');
+  caixa.querySelector('.estado').textContent = r.status === 'empty' ? 'Sem dados.' : r.status === 'error' ? 'Não foi possível carregar.' : '';
+  if (r.status !== 'ok') return;
+  if (tot.status === 'ok') document.getElementById('tot14').textContent = fmt.int(tot.data[0].TOTAL);
+  const l = r.data.map((x, i) => ({ ...x, i, v: Number(x.MD_QT_TOTAL_ATENDIMENTO) || 0 })).sort((a, b) => b.v - a.v);
+  const total = l.reduce((s2, x) => s2 + x.v, 0);
+  document.getElementById('seg14').innerHTML = l.filter((x) => x.v > 0).map((x, i) => `<i style="flex:${x.v} 1 0;background:${t.s[i]}" title="${esc(titulo(x.DS_TIPO_CONVENIO))}"></i>`).join('');
+  document.getElementById('l14').innerHTML = l.map((x, i) => `<li><b class="forma f${i + 1}" style="color:${t.s[i]}"></b><span>${esc(titulo(x.DS_TIPO_CONVENIO))}</span>` +
+    `<span class="v" data-source="por_convtipo" data-row="${x.i}" data-field="MD_QT_TOTAL_ATENDIMENTO">${fmt.int(x.v)}</span><span class="p">${fmt.pct(total ? x.v / total : 0)}</span></li>`).join('');
+}
+
+/* Pirâmide: duas séries a partir do zero, 2px de folga no meio, faixas na ordem natural */
+function piramide() {
+  const r = weknow.data('piramide');
+  const idade = (x) => { const m = String(x || '').match(/\d+/); return m ? Number(m[0]) : 999; };
+  const faixas = [...new Set(r.data.map((x) => x.DS_FAIXA_ETARIA_ANS))].sort((a, b) => idade(a) - idade(b));
+  const soma = (fx, sexo) => r.data.filter((x) => x.DS_FAIXA_ETARIA_ANS === fx && String(x.DS_SEXO || '').trim().toUpperCase() === sexo).reduce((a, x) => a + (Number(x.MD_QT_TOTAL_ATENDIMENTO) || 0), 0);
+  const m = faixas.map((x) => soma(x, 'MASCULINO')), fe = faixas.map((x) => soma(x, 'FEMININO')), teto = Math.max(1, ...m, ...fe) * 1.05;
+  const metade = (nome, dados, i, raio) => ({ name: nome, type: 'bar', stack: 'p', barWidth: '58%', barMaxWidth: 18, data: dados, color: t.s[i], itemStyle: { borderRadius: raio, borderColor: t.cartao, borderWidth: 1 } });
+  pintar('g15', r, () => ({ grid: { ...grade, right: 8 },
+    xAxis: { type: 'value', min: -teto, max: teto, splitNumber: 4, axisLine: { show: false }, axisTick: { show: false }, axisLabel: { color: t.texto3, fontSize: 11, formatter: (v) => fmt.eixo(teto)(Math.abs(v)) }, splitLine: { lineStyle: { color: t.grade } } },
+    yAxis: { type: 'category', data: faixas.map(faixaCurta), axisLine: { show: false }, axisTick: { show: false }, axisLabel: { color: t.texto2, fontSize: 11 } },
+    tooltip: dica({ trigger: 'axis', axisPointer: { type: 'shadow', shadowStyle: { color: alfa(t.texto3, 0.06) } },
+      formatter: (ps) => linhasDica(faixaCurta(faixas[ps[0].dataIndex]) + ' anos', ps.map((p) => ({ forma: p.seriesIndex + 1, cor: t.s[p.seriesIndex], nome: p.seriesName, valor: fmt.int(Math.abs(p.value)) }))) }),
+    series: [metade('Masculino', m.map((v) => -v), 0, [4, 0, 0, 4]), metade('Feminino', fe, 1, [0, 4, 4, 0])] }));
+}
+
+/* Pequenos múltiplos: três gráficos de uma série, mesmo eixo de tempo, cada um na sua escala */
+function multiplos() {
+  const r = weknow.data('tendencia'), k = weknow.data('kpis');
+  const caixa = document.getElementById('g16a').closest('.caixa');
+  caixa.classList.toggle('sem-dados', r.status === 'empty' || r.status === 'error');
+  if (k.status === 'ok') {
+    const d = k.data[0];
+    document.getElementById('m16a').textContent = fmt.int(d.MD_QT_TOTAL_ATENDIMENTO);
+    document.getElementById('m16b').textContent = fmt.int(d.MD_QT_PACIENTE);
+    document.getElementById('m16c').textContent = fmt.dec2(d.MD_QT_MEDIA_DIAS_PERMANENCIA);
+  }
+  if (r.status !== 'ok') return;
+  const l = porMes(r), meses = l.map((x) => x.DT_ATENDIMENTO_yearMonth);
+  [['g16a', 'MD_QT_TOTAL_ATENDIMENTO', fmt.int], ['g16b', 'MD_QT_PACIENTE', fmt.int], ['g16c', 'MD_QT_MEDIA_DIAS_PERMANENCIA', fmt.dec2]].forEach(([id, campo, f]) => {
+    const el = document.getElementById(id);
+    if (!el.offsetWidth) return;
+    const g = graficos[id] || (graficos[id] = echarts.init(el, null, { renderer: 'canvas' }));
+    g.setOption({ animation: false, grid: { left: 2, right: 6, top: 8, bottom: 2, containLabel: true },
+      xAxis: { type: 'category', data: meses, boundaryGap: false, axisTick: { show: false }, axisLine: { lineStyle: { color: t.eixo } }, axisLabel: { color: t.texto3, fontSize: 10, interval: 11, formatter: (v) => mesAno(v) } },
+      yAxis: { type: 'value', splitNumber: 2, scale: true, axisLine: { show: false }, axisTick: { show: false }, axisLabel: { show: false }, splitLine: { lineStyle: { color: t.grade } } },
+      tooltip: dica({ trigger: 'axis', axisPointer: { type: 'line', lineStyle: { color: t.eixo } }, formatter: (ps) => linhasDica(mesLongo(meses[ps[0].dataIndex]), [{ cor: t.s[0], nome: 'Valor', valor: f(ps[0].value) }]) }),
+      series: [{ type: 'line', data: l.map((x) => Number(x[campo])), smooth: 0.15, symbol: 'circle', symbolSize: 8, showSymbol: false, color: t.s[0], lineStyle: { width: 1.5 }, itemStyle: { borderColor: t.cartao, borderWidth: 2 } }] }, true);
+    g.resize();
+  });
+}
+
+window.addEventListener('resize', () => Object.values(graficos).forEach((g) => g.resize()));
+weknow.onData(() => {
+  t = tema();
+  const info = weknow.data('tendencia').meta;
+  if (info && info.dataInfo && info.dataInfo.dateTime) {
+    const d = new Date(info.dataInfo.dateTime);
+    document.getElementById('sub').textContent = `Os mesmos dados do painel em 17 componentes, no visual padrão · Base atualizada em ${d.toLocaleDateString(L)}`;
+  }
+  indicadores(); linha(); area(); tresAreas('g2b', false); tresAreas('g2c', true); colunas(); agrupadas(); cemPorCento(); ranking(); rosca(); bolhas(); calor(); medidor(); treemap(); cascata(); tabela(); segmentada(); piramide(); multiplos();
+});
+</script>
+</body></html>

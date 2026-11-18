@@ -1,0 +1,17 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Receber dados</title>
+<!-- Recebe o HTML e os dados copiados da página do Weknow (que não deixa
+     fazer fetch nem abrir moldura para fora) pelo fragmento da URL, que não
+     sai do navegador, e grava em dados/painel.json. -->
+<body>Esperando os dados…</body>
+<script>
+  (async () => {
+    const raw = location.hash.slice(1);
+    if (!raw) return;
+    history.replaceState(null, '', location.pathname);
+    const json = decodeURIComponent(raw);
+    const r = await fetch('/__dados', { method: 'POST', body: json }).then((x) => x.text()).catch((err) => 'ERR ' + err);
+    document.body.textContent = 'Recebido: ' + json.length + ' caracteres (' + r + ')';
+  })();
+</script>

@@ -1,0 +1,14 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <!-- A mesma política do cabeçalho do Apache (<LocationMatch "^/assets/artifact-frame/">), sem frame-ancestors e sandbox, que o <meta>
+         não aceita: vale onde o cabeçalho não chega (dev server, Task Manager) -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'none'; frame-src 'none'; form-action 'none'; base-uri 'none'">
+    <meta name="referrer" content="no-referrer">
+    <title></title>
+</head>
+<body>
+    <script src="frame.js"></script>
+</body>
+</html>

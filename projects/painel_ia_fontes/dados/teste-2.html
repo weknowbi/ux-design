@@ -1,0 +1,381 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="wk-lib:echarts"></script>
+<style>
+:root {
+  color-scheme: light;
+  --fundo: #f5f7fa; --cartao: #ffffff; --cartao-2: #f7f9fc; --borda: #e6e9ef; --borda-2: #d5dae3; --grade: #eef0f4; --eixo: #d5dae3;
+  --texto: #1e2633; --texto-2: #475569; --texto-3: #64748b; --primaria: #3366cc; --veu-2: rgba(51, 102, 204, .12);
+  --bom: #0e7552; --ruim: #b83a33; --atencao: #a44a06; --apagado: #c3cad5; --tooltip: #ffffff; --esqueleto: #eef1f5;
+  --s1: #2563eb; --s2: #06a0c4; --s3: #7c3aed; --s4: #e11d48; --s5: #c026d3; --s6: #ea580c; --s7: #4f46e5; --s8: #059669;
+  --sombra: 0 0 0 1px rgba(15, 23, 42, .05), 0 1px 3px rgba(15, 23, 42, .06);
+  --sombra-tooltip: 0 10px 28px rgba(16, 24, 40, .12), 0 2px 6px rgba(16, 24, 40, .06);
+  --fonte: "Segoe UI Variable Text", "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, "Helvetica Neue", Roboto, Arial, sans-serif;
+  --fonte-display: "Segoe UI Variable Display", "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, "Helvetica Neue", Roboto, Arial, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+    --fundo: #131314; --cartao: #1c1d1f; --cartao-2: #232426; --borda: #262729; --borda-2: #323436; --grade: #252628; --eixo: #3a3c3f;
+    --texto: #eff0f0; --texto-2: #c4c7ca; --texto-3: #9a9ea4; --primaria: #8ab4f8; --veu-2: rgba(138, 180, 248, .18);
+    --bom: #5dd39e; --ruim: #f28b82; --atencao: #f0b65a; --apagado: #4a4d52; --tooltip: #242527; --esqueleto: #242527;
+    --s1: #3f82f2; --s2: #00a8b8; --s3: #9271f0; --s4: #ec5a7c; --s5: #c45ad3; --s6: #e0702c; --s7: #6f72ec; --s8: #23a679;
+    --sombra: 0 0 0 1px rgba(255, 255, 255, .04); --sombra-tooltip: 0 10px 28px rgba(0, 0, 0, .45);
+  }
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; background: var(--fundo); color: var(--texto); }
+body { padding: 20px 28px 40px; font: 14px/1.45 var(--fonte); }
+@media (max-width: 640px) { body { padding: 18px 16px 32px; } }
+button { font: inherit; color: inherit; }
+.topo { display: flex; justify-content: space-between; align-items: flex-end; gap: 12px 28px; flex-wrap: wrap; margin-bottom: 18px; }
+h1 { margin: 0; font-family: var(--fonte-display); font-size: 24px; font-weight: 600; letter-spacing: -.02em; line-height: 1.2; }
+.sub { margin: 4px 0 0; font-size: 13px; color: var(--texto-3); }
+.barra-filtros { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 10px 14px; }
+.filtro { display: grid; gap: 6px; }
+.filtro > span { font-size: 12px; font-weight: 500; color: var(--texto-3); }
+.seletor { position: relative; }
+.seletor-botao { height: 30px; min-width: 150px; max-width: 230px; display: inline-flex; align-items: center; justify-content: space-between; gap: 10px;
+  padding: 0 10px 0 12px; border: 1px solid var(--borda-2); border-radius: 8px; background: var(--cartao); color: var(--texto); font-size: 13px; cursor: pointer; }
+.seletor-botao span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.seletor-botao::after { content: ""; flex: none; width: 6px; height: 6px; border-right: 1.5px solid var(--texto-3); border-bottom: 1.5px solid var(--texto-3); transform: translateY(-2px) rotate(45deg); }
+.seletor-botao:hover { background: var(--cartao-2); }
+.seletor.ativo .seletor-botao { background: var(--veu-2); border-color: transparent; color: var(--primaria); font-weight: 600; }
+.seletor.ativo .seletor-botao::after { border-color: var(--primaria); }
+.seletor-lista { position: absolute; top: calc(100% + 6px); right: 0; z-index: 40; min-width: 220px; max-height: 300px; overflow: auto; padding: 6px;
+  background: var(--tooltip); border: 1px solid var(--borda); border-radius: 10px; box-shadow: var(--sombra-tooltip); }
+.opcao { display: flex; align-items: center; gap: 10px; width: 100%; height: 32px; padding: 0 8px; border: 0; border-radius: 6px; background: none; font-size: 13px; text-align: left; cursor: pointer; }
+.opcao:hover { background: var(--cartao-2); }
+.opcao::before { content: ""; flex: none; width: 15px; height: 15px; border-radius: 4px; border: 1.5px solid var(--borda-2); }
+.opcao[aria-selected="true"]::before { border-color: var(--primaria); background: var(--primaria); box-shadow: inset 0 0 0 3px var(--tooltip); }
+.opcao.todos { margin-bottom: 4px; box-shadow: 0 1px 0 var(--grade); border-radius: 6px 6px 0 0; }
+.opcao.atalho::before, .opcao.mes::before { display: none; }
+.opcao.mes[aria-selected="true"], .opcao.atalho { color: var(--primaria); font-weight: 600; }
+.periodo-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; min-width: 300px; }
+.periodo-col { max-height: 230px; overflow: auto; }
+.periodo-col h4 { margin: 0; padding: 4px 8px 6px; font-size: 12px; font-weight: 500; color: var(--texto-3); position: sticky; top: 0; background: var(--tooltip); }
+.limpar { height: 30px; margin-left: 2px; border: 0; background: none; color: var(--primaria); font-size: 13px; font-weight: 500; cursor: pointer; }
+.limpar[hidden] { display: none; }
+.aviso-trunc { margin: 0 0 12px; font-size: 12.5px; color: var(--atencao); }
+.aviso-trunc[hidden] { display: none; }
+.grade { display: grid; gap: 16px; grid-template-columns: repeat(12, minmax(0, 1fr)); }
+.c3 { grid-column: span 3; } .c5 { grid-column: span 5; } .c7 { grid-column: span 7; }
+@media (max-width: 1100px) { .c3 { grid-column: span 6; } .c5, .c7 { grid-column: 1 / -1; } }
+@media (max-width: 560px) { .c3 { grid-column: 1 / -1; } }
+.cartao { background: var(--cartao); border: 0; border-radius: 14px; box-shadow: var(--sombra); padding: 20px 22px 22px; min-width: 0; display: flex; flex-direction: column; }
+.cartao h2 { margin: 0; font-size: 14px; font-weight: 600; }
+.desc { margin: 3px 0 14px; font-size: 12.5px; color: var(--texto-3); }
+.cab { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+.rotulo { font-size: 13px; font-weight: 500; color: var(--texto-2); }
+.valor { margin-top: 8px; font-family: var(--fonte-display); font-size: 28px; line-height: 1.15; font-weight: 600; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+.valor small { font-size: 14px; font-weight: 500; color: var(--texto-3); letter-spacing: 0; }
+.nota { margin-top: 6px; font-size: 12.5px; color: var(--texto-3); }
+.nota b { font-weight: 600; color: var(--texto-2); font-variant-numeric: tabular-nums; }
+.caixa { position: relative; flex: 1; min-height: 360px; }
+.grafico { position: absolute; inset: 0; }
+.estado { display: none; position: absolute; inset: 0; margin: 0; align-items: center; justify-content: center; text-align: center; padding: 0 16px;
+  color: var(--texto-3); font-size: 13px; border: 1px dashed var(--borda-2); border-radius: 10px; }
+.caixa.sem-dados .estado { display: flex; }
+.caixa.sem-dados .grafico { visibility: hidden; }
+.legenda { display: flex; gap: 14px; flex-wrap: wrap; justify-content: flex-end; }
+.legenda button { display: inline-flex; align-items: center; gap: 7px; border: 0; background: none; padding: 2px 0; font-size: 12.5px; color: var(--texto-2); cursor: pointer; }
+.legenda button.off { opacity: .45; }
+.forma { display: inline-block; width: 10px; height: 10px; }
+.f-circulo { border-radius: 50%; } .f-quadrado { border-radius: 3px; }
+.tt { font: 12px/1.4 var(--fonte); color: var(--texto); min-width: 150px; }
+.tt-t { color: var(--texto-3); margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
+.tt-t::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--texto-3); }
+.tt-l { display: grid; grid-template-columns: 14px 1fr auto; gap: 8px; align-items: center; }
+.tt-l i { width: 9px; height: 9px; }
+.tt-l span { color: var(--texto-3); }
+.tt-l b { font-weight: 600; font-variant-numeric: tabular-nums; }
+[data-dash-source-state="loading"].valor span { color: transparent; background: var(--esqueleto); border-radius: 6px; display: inline-block; min-width: 80px; }
+.caixa[data-dash-source-state="loading"]::after { content: ""; position: absolute; inset: 0; border-radius: 10px; background: var(--esqueleto); }
+[data-dash-source-state="refreshing"] { opacity: .55; }
+</style></head>
+<body>
+<header class="topo">
+  <div><h1>Perfil de quem atendemos</h1><p class="sub" id="recorte"></p></div>
+  <section class="barra-filtros" aria-label="Filtros">
+    <div class="filtro" data-source="opt_meses" data-fetchpriority="high"><span>Período</span><div class="seletor" id="f-periodo"></div></div>
+    <div class="filtro" data-source="opt_sexo"><span>Sexo</span><div class="seletor" id="f-sexos"></div></div>
+    <div class="filtro" data-source="opt_tipos"><span>Tipo de atendimento</span><div class="seletor" id="f-tipos"></div></div>
+    <button class="limpar" id="limpar" type="button" hidden>Limpar filtros</button>
+  </section>
+</header>
+<p class="aviso-trunc" id="trunc" hidden>Atenção: parte dos dados foi cortada pelo limite de linhas; os totais podem estar incompletos.</p>
+<div class="grade">
+  <article class="cartao c3">
+    <div class="rotulo">Atendimentos</div>
+    <div class="valor"><span id="k-atend" data-source="kpis" data-field="MD_QT_TOTAL_ATENDIMENTO" data-row="0"></span></div>
+    <div class="nota"><b id="k-pac" data-source="kpis" data-field="MD_QT_PACIENTE" data-row="0"></b> pacientes distintos</div>
+  </article>
+  <article class="cartao c3">
+    <div class="rotulo">Idade média</div>
+    <div class="valor"><span id="k-idade" data-source="kpis" data-field="MD_QT_IDADE_MEDIA" data-row="0"></span><small> anos</small></div>
+    <div class="nota">dos pacientes atendidos</div>
+  </article>
+  <article class="cartao c3">
+    <div class="rotulo">Atendimentos de mulheres</div>
+    <div class="valor"><span id="k-fem" data-source="perfil" data-field="pct_feminino" data-row="0"></span><small> %</small></div>
+    <div class="nota">do total com sexo informado</div>
+  </article>
+  <article class="cartao c3">
+    <div class="rotulo">Entrada por urgência</div>
+    <div class="valor"><span id="k-urg" data-source="urgencia" data-field="pct_urgencia" data-row="0"></span><small> %</small></div>
+    <div class="nota">dos atendimentos; o restante é eletivo ou outras formas</div>
+  </article>
+
+  <article class="cartao c7">
+    <div class="cab">
+      <div><h2>Pirâmide etária</h2><p class="desc">Atendimentos por faixa etária e sexo. Faixa com mais atendimentos: <b id="faixa-top" data-source="faixa_top" data-field="faixa" data-row="0"></b></p></div>
+      <div class="legenda" id="leg-pir"></div>
+    </div>
+    <div class="caixa" data-source="piramide"><div class="grafico" id="g-pir"></div><p class="estado"></p></div>
+  </article>
+  <article class="cartao c5">
+    <div><h2>Como chegam</h2><p class="desc">Atendimentos por tipo de atendimento; a urgência fica em destaque</p></div>
+    <div class="caixa" data-source="por_tipo"><div class="grafico" id="g-tipo"></div><p class="estado"></p></div>
+  </article>
+</div>
+<script>
+weknow.calc('perfil', {
+  title: 'Participação feminina',
+  description: 'Atendimentos de mulheres sobre o total com sexo informado.',
+  inputs: ['piramide'],
+  fn: (piramide) => {
+    let fem = 0, tot = 0;
+    piramide.forEach((l) => {
+      const s = String(l.DS_SEXO || '').trim().toUpperCase();
+      if (s !== 'FEMININO' && s !== 'MASCULINO') return;
+      tot += l.MD_QT_TOTAL_ATENDIMENTO || 0;
+      if (s === 'FEMININO') fem += l.MD_QT_TOTAL_ATENDIMENTO || 0;
+    });
+    return [{ pct_feminino: tot ? (fem / tot) * 100 : 0 }];
+  },
+});
+weknow.calc('urgencia', {
+  title: 'Participação da urgência',
+  description: 'Atendimentos de urgência sobre o total de atendimentos.',
+  inputs: ['por_tipo'],
+  fn: (por_tipo) => {
+    let urg = 0, tot = 0;
+    por_tipo.forEach((l) => {
+      tot += l.MD_QT_TOTAL_ATENDIMENTO || 0;
+      if (String(l.DS_TP_ATENDIMENTO || '').toUpperCase().indexOf('URG') === 0) urg += l.MD_QT_TOTAL_ATENDIMENTO || 0;
+    });
+    return [{ pct_urgencia: tot ? (urg / tot) * 100 : 0 }];
+  },
+});
+weknow.calc('faixa_top', {
+  title: 'Faixa etária com mais atendimentos',
+  description: 'A faixa etária que soma mais atendimentos, nos dois sexos.',
+  inputs: ['piramide'],
+  fn: (piramide) => {
+    const soma = {};
+    piramide.forEach((l) => { const f = l.DS_FAIXA_ETARIA_ANS || ''; soma[f] = (soma[f] || 0) + (l.MD_QT_TOTAL_ATENDIMENTO || 0); });
+    let melhor = null;
+    Object.keys(soma).forEach((f) => { if (f && (melhor === null || soma[f] > soma[melhor])) melhor = f; });
+    return melhor === null ? [] : [{ faixa: melhor, qt: soma[melhor] }];
+  },
+});
+
+const nf = (opts) => new Intl.NumberFormat(weknow.locale, opts);
+const inteiro = nf({ maximumFractionDigits: 0 });
+const casa1 = nf({ minimumFractionDigits: 1, maximumFractionDigits: 1 });
+const compacto = nf({ notation: 'compact', maximumFractionDigits: 1 });
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const MESES = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
+const PEQUENAS = ['a', 'ou', 'de', 'da', 'do', 'e'];
+const nome = (s) => {
+  const t = String(s == null ? '' : s).trim();
+  if (!t) return 'Não informado';
+  if (t !== t.toUpperCase()) return t;
+  return t.toLowerCase().split(/\s+/).map((p, i) => (i > 0 && PEQUENAS.includes(p) ? p : p.charAt(0).toUpperCase() + p.slice(1))).join(' ');
+};
+const rotuloMes = (v) => `${MESES[(v % 100) - 1] || ''}/${String(Math.floor(v / 100)).slice(2)}`;
+const PADRAO_PERIODO = [200001, 209912];
+let aberto = null; // qual lista de filtro está aberta
+let picoDe = null;
+let pir, tipo;
+const oculto = {};
+
+document.getElementById('limpar').onclick = () => { aberto = null; weknow.resetParams(); };
+document.addEventListener('click', () => { if (aberto) { aberto = null; filtros(); } });
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && aberto) { aberto = null; filtros(); } });
+
+function filtroLista(id, param, todosParam, fonte, campo, rotulo) {
+  const d = weknow.data(fonte), p = weknow.params();
+  const todos = p[todosParam] || !p[param].length, marc = todos ? [] : p[param];
+  const valor = todos ? 'Todos' : marc.length === 1 ? nome(marc[0]) : `${nome(marc[0])} +${marc.length - 1}`;
+  const el = document.getElementById(id);
+  el.classList.toggle('ativo', !todos);
+  const abre = aberto === id;
+  el.innerHTML = `<button type="button" class="seletor-botao" aria-haspopup="listbox" aria-expanded="${abre}"><span>${esc(valor)}</span></button>` +
+    (abre ? '<div class="seletor-lista" role="listbox" aria-multiselectable="true">' +
+      `<button type="button" class="opcao todos" role="option" data-todos aria-selected="${todos}">Todos</button>` +
+      d.data.map((l, i) => `<button type="button" class="opcao" role="option" data-i="${i}" aria-selected="${marc.includes(l[campo])}">${esc(nome(l[campo]))}</button>`).join('') + '</div>' : '');
+  el.querySelector('.seletor-botao').onclick = (e) => { e.stopPropagation(); aberto = abre ? null : id; picoDe = null; filtros(); };
+  if (!abre) return;
+  el.querySelector('.seletor-lista').onclick = (e) => e.stopPropagation();
+  el.querySelectorAll('.opcao').forEach((b) => (b.onclick = () => {
+    if (b.hasAttribute('data-todos')) return weknow.setParams({ [param]: [], [todosParam]: true });
+    const v = d.data[+b.dataset.i][campo];
+    const novas = marc.includes(v) ? marc.filter((x) => x !== v) : [...marc, v];
+    weknow.setParams({ [param]: novas, [todosParam]: novas.length === 0 });
+  }));
+}
+
+function filtroPeriodo() {
+  const d = weknow.data('opt_meses'), p = weknow.params().periodo;
+  const meses = d.data.map((l) => l.DT_ATENDIMENTO_yearMonth).filter((v) => v != null).sort((a, b) => a - b);
+  const padrao = p[0] === PADRAO_PERIODO[0] && p[1] === PADRAO_PERIODO[1];
+  const valor = padrao ? 'Todo o período' : `${rotuloMes(p[0])} – ${rotuloMes(p[1])}`;
+  const el = document.getElementById('f-periodo');
+  el.classList.toggle('ativo', !padrao);
+  const abre = aberto === 'f-periodo';
+  const col = (titulo, tipoCol) => `<div class="periodo-col"><h4>${titulo}</h4>` + meses.map((m) =>
+    `<button type="button" class="opcao mes" data-${tipoCol}="${m}" aria-selected="${tipoCol === 'de' ? m === p[0] : m === p[1]}">${rotuloMes(m)}</button>`).join('') + '</div>';
+  el.innerHTML = `<button type="button" class="seletor-botao" aria-haspopup="listbox" aria-expanded="${abre}"><span>${esc(valor)}</span></button>` +
+    (abre ? '<div class="seletor-lista">' +
+      '<button type="button" class="opcao atalho" data-atalho="todo">Todo o período</button>' +
+      '<button type="button" class="opcao atalho" data-atalho="12">Últimos 12 meses</button>' +
+      `<div class="periodo-cols">${col('De', 'de')}${col('Até', 'ate')}</div></div>` : '');
+  el.querySelector('.seletor-botao').onclick = (e) => { e.stopPropagation(); aberto = abre ? null : 'f-periodo'; filtros(); };
+  if (!abre) return;
+  el.querySelector('.seletor-lista').onclick = (e) => e.stopPropagation();
+  el.querySelectorAll('[data-atalho]').forEach((b) => (b.onclick = () => {
+    aberto = null;
+    if (b.dataset.atalho === 'todo') return weknow.setParams({ periodo: null });
+    if (meses.length) weknow.setParams({ periodo: [meses[Math.max(0, meses.length - 12)], meses[meses.length - 1]] });
+  }));
+  el.querySelectorAll('[data-de]').forEach((b) => (b.onclick = () => {
+    const de = +b.dataset.de; weknow.setParams({ periodo: [de, Math.max(de, padrao ? meses[meses.length - 1] : p[1])] });
+  }));
+  el.querySelectorAll('[data-ate]').forEach((b) => (b.onclick = () => {
+    const ate = +b.dataset.ate; weknow.setParams({ periodo: [Math.min(ate, padrao ? meses[0] : p[0]), ate] });
+  }));
+}
+
+function filtros() {
+  filtroPeriodo();
+  filtroLista('f-sexos', 'sexos', 'sexos_todos', 'opt_sexo', 'DS_SEXO');
+  filtroLista('f-tipos', 'tipos', 'tipos_todos', 'opt_tipos', 'DS_TP_ATENDIMENTO');
+  const p = weknow.params();
+  const padrao = p.periodo[0] === PADRAO_PERIODO[0] && p.periodo[1] === PADRAO_PERIODO[1];
+  document.getElementById('limpar').hidden = padrao && p.sexos_todos && p.tipos_todos;
+}
+
+function estado(caixa, d, vazio, erro) {
+  const aviso = d.status === 'empty' ? vazio : d.status === 'error' ? erro : '';
+  caixa.querySelector('.estado').textContent = aviso;
+  caixa.classList.toggle('sem-dados', !!aviso);
+}
+function numero(id, fonte, fmt, vazio) {
+  const d = weknow.data(fonte);
+  const el = document.getElementById(id);
+  if (d.status === 'loading') return;
+  el.textContent = d.status === 'ok' && d.data.length ? fmt.format(d.data[0][vazio]) : '—';
+}
+
+weknow.onData(() => {
+  const css = getComputedStyle(document.documentElement);
+  const cor = (n) => css.getPropertyValue(n).trim();
+  filtros();
+
+  // Recorte
+  const p = weknow.params();
+  const padrao = p.periodo[0] === PADRAO_PERIODO[0] && p.periodo[1] === PADRAO_PERIODO[1];
+  const partes = [padrao ? 'Todo o período' : `${rotuloMes(p.periodo[0])} a ${rotuloMes(p.periodo[1])}`];
+  if (!p.sexos_todos && p.sexos.length) partes.push(p.sexos.map(nome).join(', '));
+  if (!p.tipos_todos && p.tipos.length) partes.push(p.tipos.map(nome).join(', '));
+  document.getElementById('recorte').textContent = partes.join(' · ');
+
+  const trunc = ['kpis', 'piramide', 'por_tipo'].some((f) => weknow.data(f).meta && weknow.data(f).meta.truncated);
+  document.getElementById('trunc').hidden = !trunc;
+
+  // Indicadores
+  numero('k-atend', 'kpis', inteiro, 'MD_QT_TOTAL_ATENDIMENTO');
+  numero('k-pac', 'kpis', inteiro, 'MD_QT_PACIENTE');
+  numero('k-idade', 'kpis', casa1, 'MD_QT_IDADE_MEDIA');
+  numero('k-fem', 'perfil', casa1, 'pct_feminino');
+  numero('k-urg', 'urgencia', casa1, 'pct_urgencia');
+  const ft = weknow.data('faixa_top'), fel = document.getElementById('faixa-top');
+  if (ft.status !== 'loading') fel.textContent = ft.status === 'ok' && ft.data.length ? nome(ft.data[0].faixa) : '—';
+
+  // Pirâmide etária
+  const dp = weknow.data('piramide');
+  const cx1 = document.querySelector('[data-source="piramide"].caixa');
+  estado(cx1, dp, 'Sem atendimentos para o recorte escolhido.', 'Não foi possível carregar a pirâmide.');
+  const series = [
+    { chave: 'FEMININO', nome: 'Feminino', cor: cor('--s1'), forma: 'f-circulo' },
+    { chave: 'MASCULINO', nome: 'Masculino', cor: cor('--s2'), forma: 'f-quadrado' },
+  ];
+  const leg = document.getElementById('leg-pir');
+  leg.innerHTML = series.map((s) => `<button type="button" data-k="${s.chave}" class="${oculto[s.chave] ? 'off' : ''}"><i class="forma ${s.forma}" style="background:${s.cor}"></i>${s.nome}</button>`).join('');
+  leg.querySelectorAll('button').forEach((b) => (b.onclick = () => { oculto[b.dataset.k] = !oculto[b.dataset.k]; weknow.refresh && 0; render(); }));
+  const render = () => {
+    if (dp.status !== 'ok') return;
+    const ordem = (f) => { const m = /\d+/.exec(f); return m ? +m[0] : -1; };
+    const faixas = [...new Set(dp.data.map((l) => l.DS_FAIXA_ETARIA_ANS).filter((f) => f))].sort((a, b) => ordem(a) - ordem(b));
+    const soma = (f, s) => dp.data.filter((l) => l.DS_FAIXA_ETARIA_ANS === f && String(l.DS_SEXO || '').trim().toUpperCase() === s).reduce((t, l) => t + (l.MD_QT_TOTAL_ATENDIMENTO || 0), 0);
+    const dados = {};
+    series.forEach((s) => { dados[s.chave] = faixas.map((f) => (oculto[s.chave] ? 0 : soma(f, s.chave))); });
+    const maior = Math.max(1, ...dados.FEMININO, ...dados.MASCULINO);
+    pir = pir || echarts.init(document.getElementById('g-pir'), null, { renderer: 'canvas' });
+    pir.setOption({
+      animation: false,
+      textStyle: { fontFamily: cor('--fonte') },
+      grid: { left: 8, right: 12, top: 8, bottom: 4, containLabel: true },
+      xAxis: { type: 'value', min: -maior, max: maior, splitNumber: 4, axisLine: { show: false }, axisTick: { show: false },
+        axisLabel: { color: cor('--texto-3'), fontSize: 11, margin: 10, formatter: (v) => compacto.format(Math.abs(v)) }, splitLine: { lineStyle: { color: cor('--grade') } } },
+      yAxis: { type: 'category', data: faixas.map(nome), axisTick: { show: false }, axisLine: { lineStyle: { color: cor('--eixo') } },
+        axisLabel: { color: cor('--texto-3'), fontSize: 11, margin: 10 } },
+      tooltip: { trigger: 'axis', axisPointer: { type: 'none' }, confine: true, backgroundColor: cor('--tooltip'), borderColor: cor('--borda'), borderWidth: 1, padding: [10, 12],
+        extraCssText: `border-radius: 10px; box-shadow: ${cor('--sombra-tooltip')};`,
+        formatter: (ps) => `<div class="tt"><div class="tt-t">${esc(ps[0].name)}</div>` + ps.map((q) => {
+          const s = series.find((x) => x.nome === q.seriesName);
+          return `<div class="tt-l"><i class="${s.forma === 'f-circulo' ? 'f-circulo' : 'f-quadrado'}" style="background:${s.cor}"></i><span>${s.nome}</span><b>${inteiro.format(Math.abs(q.value))}</b></div>`;
+        }).join('') + '</div>' },
+      series: [
+        { name: 'Feminino', type: 'bar', stack: 'p', barWidth: '62%', barMaxWidth: 20, data: dados.FEMININO.map((v) => -v),
+          itemStyle: { color: series[0].cor, borderRadius: [4, 0, 0, 4], borderColor: cor('--cartao'), borderWidth: 0 } },
+        { name: 'Masculino', type: 'bar', stack: 'p', barWidth: '62%', barMaxWidth: 20, data: dados.MASCULINO,
+          itemStyle: { color: series[1].cor, borderRadius: [0, 4, 4, 0], borderColor: cor('--cartao'), borderWidth: 0 } },
+      ],
+    }, true);
+    pir.resize();
+  };
+  render();
+
+  // Tipo de atendimento
+  const dt = weknow.data('por_tipo');
+  const cx2 = document.querySelector('[data-source="por_tipo"].caixa');
+  estado(cx2, dt, 'Sem atendimentos para o recorte escolhido.', 'Não foi possível carregar o gráfico.');
+  if (dt.status === 'ok') {
+    const linhas = [...dt.data].sort((a, b) => b.MD_QT_TOTAL_ATENDIMENTO - a.MD_QT_TOTAL_ATENDIMENTO);
+    const ehUrg = (l) => String(l.DS_TP_ATENDIMENTO || '').toUpperCase().indexOf('URG') === 0;
+    tipo = tipo || echarts.init(document.getElementById('g-tipo'), null, { renderer: 'canvas' });
+    tipo.setOption({
+      animation: false,
+      textStyle: { fontFamily: cor('--fonte') },
+      grid: { left: 8, right: 48, top: 8, bottom: 4, containLabel: true },
+      xAxis: { type: 'value', splitNumber: 3, axisLine: { show: false }, axisTick: { show: false },
+        axisLabel: { color: cor('--texto-3'), fontSize: 11, margin: 10, formatter: (v) => compacto.format(v) }, splitLine: { lineStyle: { color: cor('--grade') } } },
+      yAxis: { type: 'category', inverse: true, data: linhas.map((l) => nome(l.DS_TP_ATENDIMENTO)), axisTick: { show: false },
+        axisLine: { lineStyle: { color: cor('--eixo') } }, axisLabel: { color: cor('--texto-3'), fontSize: 11, margin: 10 } },
+      tooltip: { trigger: 'item', confine: true, backgroundColor: cor('--tooltip'), borderColor: cor('--borda'), borderWidth: 1, padding: [10, 12],
+        extraCssText: `border-radius: 10px; box-shadow: ${cor('--sombra-tooltip')};`,
+        formatter: (q) => `<div class="tt"><div class="tt-t">${esc(q.name)}</div><div class="tt-l"><i class="f-circulo" style="background:${cor('--s1')}"></i><span>Atendimentos</span><b>${inteiro.format(q.value)}</b></div></div>` },
+      series: [{ type: 'bar', barWidth: '50%', barMaxWidth: 22,
+        data: linhas.map((l) => (ehUrg(l)
+          ? { value: l.MD_QT_TOTAL_ATENDIMENTO, label: { show: true, position: 'right', distance: 6, color: cor('--texto'), fontSize: 12, fontWeight: 600, formatter: (q) => inteiro.format(q.value) } }
+          : l.MD_QT_TOTAL_ATENDIMENTO)),
+        itemStyle: { color: cor('--s1'), borderRadius: [0, 4, 4, 0] } }],
+    }, true);
+    tipo.resize();
+  }
+});
+</script>
+</body></html>

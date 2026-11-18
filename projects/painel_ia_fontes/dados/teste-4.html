@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Atendimentos overview</title>
+<script src="wk-lib:echarts"></script>
+<style>
+/* Feito do zero a partir da imagem de referência: preto, verde aceso,
+   cartões com luz em volta, componentes retos no meio. Sem filtros. */
+:root {
+  --fundo: #040706; --painel: #0a0f0d; --linha: #14231b;
+  --verde: #4ade80; --verde-2: #22a55b; --verde-escuro: #0f3d24; --laranja: #f59e0b;
+  --texto: #f2f7f4; --texto-2: #a7b8ae; --texto-3: #6f8578;
+  --fonte: "Bahnschrift", "DIN Alternate", "Arial Narrow", "Segoe UI", sans-serif;
+}
+* { box-sizing: border-box; margin: 0; }
+html, body { background: var(--fundo); }
+body {
+  min-height: 100vh; color: var(--texto); font-family: var(--fonte);
+  background:
+    radial-gradient(1200px 500px at 30% -10%, rgba(74, 222, 128, .10), transparent 60%),
+    radial-gradient(900px 600px at 100% 110%, rgba(34, 165, 91, .08), transparent 60%),
+    var(--fundo);
+  display: grid; grid-template-columns: 56px minmax(0, 1fr);
+}
+
+/* Trilho de ícones à esquerda, como na referência */
+.trilho { border-right: 1px solid var(--linha); display: flex; flex-direction: column; align-items: center; gap: 26px; padding-top: 120px; }
+.trilho svg { width: 18px; height: 18px; stroke: var(--texto-3); fill: none; stroke-width: 1.6; }
+.trilho .ativo svg { stroke: var(--texto); }
+.trilho .ativo::after { content: ""; display: block; width: 4px; height: 4px; border-radius: 50%; background: var(--verde); margin: 6px auto 0; box-shadow: 0 0 8px var(--verde); }
+
+main { padding: 22px 28px 36px; min-width: 0; }
+header { display: flex; align-items: center; gap: 16px; margin-bottom: 22px; }
+.marca { display: grid; grid-template-columns: repeat(2, 10px); gap: 3px; }
+.marca i { width: 10px; height: 10px; border: 2px solid var(--texto); border-radius: 2px; }
+.marca i:nth-child(4) { background: var(--verde); border-color: var(--verde); box-shadow: 0 0 10px var(--verde); }
+.sep { width: 1px; height: 26px; background: var(--texto-3); }
+h1 { font-size: 22px; font-weight: 400; letter-spacing: .32em; text-transform: uppercase; }
+h1 b { color: var(--verde); font-weight: 700; text-shadow: 0 0 14px rgba(74, 222, 128, .55); }
+
+/* Cartões de número: degradê verde, borda acesa e luz em volta */
+.numeros { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 18px; margin-bottom: 22px; }
+.num {
+  position: relative; padding: 14px 18px 16px; border-radius: 8px;
+  background: linear-gradient(180deg, rgba(30, 90, 55, .55) 0%, rgba(10, 26, 17, .92) 55%, rgba(6, 12, 9, .96) 100%);
+  border: 1px solid rgba(74, 222, 128, .75);
+  box-shadow: 0 0 18px rgba(74, 222, 128, .30), 0 0 2px rgba(74, 222, 128, .9), inset 0 0 22px rgba(74, 222, 128, .08);
+}
+.num .rot { font-size: 12px; font-weight: 600; color: var(--texto); }
+.num svg { position: absolute; top: 13px; right: 14px; width: 16px; height: 16px; stroke: var(--verde); fill: none; stroke-width: 1.8; }
+.num .val { display: block; margin-top: 18px; font-size: 30px; font-weight: 700; letter-spacing: -.01em; line-height: 1; font-variant-numeric: tabular-nums; }
+.num .val small { font-size: 15px; font-weight: 600; color: var(--texto-2); margin-left: 4px; }
+.num .ant { margin-top: 8px; font-size: 11.5px; font-weight: 600; color: var(--verde); font-variant-numeric: tabular-nums; }
+.num .ant.cai { color: #fb7185; }
+
+/* Componentes do meio: retos, escuros, sem luz */
+.painel { background: rgba(10, 15, 13, .82); border: 1px solid var(--linha); border-radius: 2px; padding: 14px 16px 10px; min-width: 0; }
+.painel h2 { font-size: 12px; font-weight: 600; color: var(--texto); }
+.painel.centro h2 { text-align: center; font-size: 14px; }
+.graf { width: 100%; }
+.g-barras { height: 230px; }
+.g-combo { height: 290px; }
+.baixo { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 18px; margin-top: 18px; }
+
+/* Lista por convênio: nome em caixa alta à direita, barra e valor */
+.lista { display: grid; grid-template-columns: max-content minmax(0, 1fr); column-gap: 12px; row-gap: 9px; margin: 18px 6px 8px; align-items: center; }
+.lista .nome { font-size: 12.5px; font-weight: 700; text-transform: uppercase; text-align: right; letter-spacing: .01em; white-space: nowrap; max-width: 260px; overflow: hidden; text-overflow: ellipsis; }
+.lista .trilha { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.lista .barra { height: 18px; background: var(--verde); border-radius: 0; flex: none; }
+.lista .v { font-size: 13px; font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.lista .lider .barra { display: flex; align-items: center; justify-content: flex-end; padding-right: 8px; background: linear-gradient(90deg, #36c46e, #6af59c); box-shadow: 0 0 14px rgba(74, 222, 128, .45); }
+.lista .lider .barra span { color: #04140b; font-size: 12px; font-weight: 700; }
+
+[data-dash-source-state="loading"] { opacity: .45; }
+@media (max-width: 1100px) { .numeros { grid-template-columns: repeat(2, minmax(0, 1fr)); } .baixo { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 640px) { body { grid-template-columns: minmax(0, 1fr); } .trilho { display: none; } main { padding: 16px; } .numeros { grid-template-columns: minmax(0, 1fr); } h1 { font-size: 17px; } }
+</style>
+</head>
+<body>
+<nav class="trilho" aria-hidden="true">
+  <span class="ativo"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></span>
+  <span><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 3v9l6 4"/></svg></span>
+  <span><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="13" rx="1"/><path d="M8 21h8M12 17v4"/></svg></span>
+  <span><svg viewBox="0 0 24 24"><path d="M5 20V10M12 20V4M19 20v-7"/></svg></span>
+</nav>
+<main>
+  <header>
+    <div class="marca" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+    <div class="sep" aria-hidden="true"></div>
+    <h1>Atendimentos <b>Overview</b></h1>
+  </header>
+
+  <section class="numeros">
+    <article class="num">
+      <div class="rot">Atendimentos</div>
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+      <span class="val" id="n-at" data-source="kpis" data-field="MD_QT_TOTAL_ATENDIMENTO" data-row="0">—</span>
+      <div class="ant" id="a-at"></div>
+    </article>
+    <article class="num">
+      <div class="rot">Pacientes</div>
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/></svg>
+      <span class="val" id="n-pa" data-source="kpis" data-field="MD_QT_PACIENTE" data-row="0">—</span>
+      <div class="ant" id="a-pa"></div>
+    </article>
+    <article class="num">
+      <div class="rot">Permanência média</div>
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 20V10M12 20V4M19 20v-7"/></svg>
+      <span class="val"><span id="n-pe" data-source="kpis" data-field="MD_QT_MEDIA_DIAS_PERMANENCIA" data-row="0">—</span><small>dias</small></span>
+      <div class="ant" id="a-pe"></div>
+    </article>
+    <article class="num">
+      <div class="rot">Idade média</div>
+      <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="1"/><path d="M4 10h16M9 3v4M15 3v4"/></svg>
+      <span class="val"><span id="n-id" data-source="kpis" data-field="MD_QT_IDADE_MEDIA" data-row="0">—</span><small>anos</small></span>
+      <div class="ant">dos pacientes atendidos</div>
+    </article>
+  </section>
+
+  <section class="painel">
+    <h2>Atendimentos e pacientes por mês</h2>
+    <div class="graf g-barras" id="g-barras" data-source="tendencia"></div>
+  </section>
+
+  <div class="baixo">
+    <section class="painel">
+      <h2 style="text-align:center">Atendimentos por convênio</h2>
+      <div class="lista" id="lista" data-source="top_conv"></div>
+    </section>
+    <section class="painel centro">
+      <h2>Atendimentos x Permanência</h2>
+      <div class="graf g-combo" id="g-combo" data-source="por_carater"></div>
+    </section>
+  </div>
+</main>
+
+<script>
+const inteiro = new Intl.NumberFormat(weknow.locale, { maximumFractionDigits: 0 });
+const media = new Intl.NumberFormat(weknow.locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const pct = new Intl.NumberFormat(weknow.locale, { minimumFractionDigits: 1, maximumFractionDigits: 1, signDisplay: 'always' });
+const compacto = new Intl.NumberFormat(weknow.locale, { notation: 'compact', maximumFractionDigits: 1 });
+const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const nomeMes = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
+const rotMes = (ym, i) => { const m = ym % 100, a = String(Math.floor(ym / 100)).slice(2); return i === 0 || m === 1 ? `${nomeMes[m - 1]}/${a}` : nomeMes[m - 1]; };
+const titulo = (s) => String(s ?? '').trim().toLowerCase().replace(/(^|[\s/(-])(\p{L})/gu, (x, a, b) => a + b.toUpperCase()) || 'Não informado';
+let gBarras, gCombo;
+
+function numeros() {
+  const kp = weknow.data('kpis');
+  [['n-at', 'MD_QT_TOTAL_ATENDIMENTO', inteiro], ['n-pa', 'MD_QT_PACIENTE', inteiro], ['n-pe', 'MD_QT_MEDIA_DIAS_PERMANENCIA', media], ['n-id', 'MD_QT_IDADE_MEDIA', media]].forEach(([id, f, fmt]) => {
+    if (kp.status === 'loading') return;
+    const v = kp.status === 'ok' ? kp.data[0]?.[f] : null;
+    document.getElementById(id).textContent = v != null ? fmt.format(v) : '—';
+  });
+  // Últimos 12 meses fechados contra os 12 anteriores (o último mês costuma estar incompleto)
+  const t = weknow.data('tendencia');
+  if (t.status !== 'ok') return;
+  const l = [...t.data].sort((a, b) => a.DT_ATENDIMENTO_yearMonth - b.DT_ATENDIMENTO_yearMonth).slice(0, -1);
+  if (l.length < 24) return;
+  const atual = l.slice(-12), ant = l.slice(-24, -12);
+  const soma = (arr, f) => arr.reduce((s, x) => s + (x[f] || 0), 0);
+  const perm = (arr) => soma(arr.map((x) => ({ p: (x.MD_QT_MEDIA_DIAS_PERMANENCIA || 0) * (x.MD_QT_TOTAL_ATENDIMENTO || 0) })), 'p') / soma(arr, 'MD_QT_TOTAL_ATENDIMENTO');
+  const linha = (id, a, b, fmt, un) => {
+    const el = document.getElementById(id), d = (a / b - 1) * 100;
+    el.textContent = `12m ant.: ${fmt.format(b)}${un} (${pct.format(d)}%)`;
+    el.classList.toggle('cai', d < 0);
+  };
+  linha('a-at', soma(atual, 'MD_QT_TOTAL_ATENDIMENTO'), soma(ant, 'MD_QT_TOTAL_ATENDIMENTO'), inteiro, '');
+  linha('a-pa', soma(atual, 'MD_QT_PACIENTE'), soma(ant, 'MD_QT_PACIENTE'), inteiro, '');
+  linha('a-pe', perm(atual), perm(ant), media, ' dias');
+}
+
+const eixo = { axisLine: { lineStyle: { color: '#1f3328' } }, axisTick: { show: false }, axisLabel: { color: '#f2f7f4', fontFamily: 'Bahnschrift, sans-serif', fontWeight: 700, fontSize: 11 } };
+const grade = { splitLine: { lineStyle: { color: '#13221a' } }, axisLabel: { color: '#a7b8ae', fontFamily: 'Bahnschrift, sans-serif', fontSize: 10, formatter: (v) => compacto.format(v) } };
+const dica = { trigger: 'axis', confine: true, backgroundColor: '#07100b', borderColor: '#4ade80', borderWidth: 1, textStyle: { color: '#f2f7f4', fontFamily: 'Bahnschrift, sans-serif' }, axisPointer: { type: 'shadow', shadowStyle: { color: 'rgba(74,222,128,.06)' } } };
+const legenda = { bottom: 0, right: 8, icon: 'circle', itemWidth: 9, itemHeight: 9, textStyle: { color: '#f2f7f4', fontFamily: 'Bahnschrift, sans-serif', fontWeight: 700, fontSize: 11 } };
+const degrade = (cima, baixo) => new echarts.graphic.LinearGradient(0, 0, 0, 1, [{ offset: 0, color: cima }, { offset: 1, color: baixo }]);
+
+function barras() {
+  const t = weknow.data('tendencia');
+  if (t.status !== 'ok') return;
+  const l = [...t.data].sort((a, b) => a.DT_ATENDIMENTO_yearMonth - b.DT_ATENDIMENTO_yearMonth);
+  gBarras = gBarras || echarts.init(document.getElementById('g-barras'), null, { renderer: 'canvas' });
+  gBarras.setOption({
+    animation: false, tooltip: dica, legend: legenda, grid: { left: 44, right: 8, top: 14, bottom: 44 },
+    xAxis: { type: 'category', data: l.map((x, i) => rotMes(x.DT_ATENDIMENTO_yearMonth, i)), ...eixo },
+    yAxis: { type: 'value', ...grade },
+    series: [
+      { name: 'Atendimentos', type: 'bar', barWidth: '30%', barGap: '20%', data: l.map((x) => x.MD_QT_TOTAL_ATENDIMENTO), itemStyle: { color: degrade('#6af59c', '#2fbf6a') } },
+      { name: 'Pacientes', type: 'bar', barWidth: '30%', data: l.map((x) => x.MD_QT_PACIENTE), itemStyle: { color: degrade('#2fa865', '#14673c') } },
+    ],
+  }, true);
+  gBarras.resize();
+}
+
+function lista() {
+  const c = weknow.data('top_conv'), el = document.getElementById('lista');
+  if (c.status === 'loading') return;
+  if (c.status !== 'ok') { el.innerHTML = '<p style="grid-column:1/-1;color:#6f8578">Sem dados</p>'; return; }
+  const l = c.data.map((x, i) => ({ ...x, i })).sort((a, b) => b.MD_QT_TOTAL_ATENDIMENTO - a.MD_QT_TOTAL_ATENDIMENTO).slice(0, 9);
+  const max = l[0]?.MD_QT_TOTAL_ATENDIMENTO || 1;
+  el.innerHTML = l.map((x, k) => {
+    const w = Math.max(6, Math.round((x.MD_QT_TOTAL_ATENDIMENTO / max) * 100));
+    const v = `<span data-source="top_conv" data-row="${x.i}" data-field="MD_QT_TOTAL_ATENDIMENTO">${inteiro.format(x.MD_QT_TOTAL_ATENDIMENTO)}</span>`;
+    return `<div class="nome" data-source="top_conv" data-row="${x.i}" data-field="NO_CONVENIO">${esc(String(x.NO_CONVENIO).trim())}</div>` +
+      (k === 0
+        ? `<div class="trilha lider"><div class="barra" style="width:calc(${w}% - 4px)">${v.replace('<span', '<span')}</div></div>`
+        : `<div class="trilha"><div class="barra" style="width:calc(${w * 0.62}%)"></div><span class="v">${v}</span></div>`);
+  }).join('');
+}
+
+function combo() {
+  const c = weknow.data('por_carater');
+  if (c.status !== 'ok') return;
+  const l = [...c.data].sort((a, b) => b.MD_QT_TOTAL_ATENDIMENTO - a.MD_QT_TOTAL_ATENDIMENTO).slice(0, 6);
+  gCombo = gCombo || echarts.init(document.getElementById('g-combo'), null, { renderer: 'canvas' });
+  gCombo.setOption({
+    animation: false, tooltip: dica, legend: { ...legenda, right: 'center' }, grid: { left: 44, right: 44, top: 22, bottom: 52 },
+    xAxis: { type: 'category', data: l.map((x) => titulo(x.DS_CARATER_ATENDIMENTO)), ...eixo, axisLabel: { ...eixo.axisLabel, interval: 0, width: 80, overflow: 'truncate' } },
+    yAxis: [{ type: 'value', ...grade }, { type: 'value', ...grade, splitLine: { show: false }, axisLabel: { ...grade.axisLabel, formatter: (v) => media.format(v) } }],
+    series: [
+      { name: 'Atendimentos', type: 'bar', barWidth: '42%', data: l.map((x) => x.MD_QT_TOTAL_ATENDIMENTO), itemStyle: { color: degrade('#5ee893', '#1f8f50') } },
+      { name: 'Permanência média (dias)', type: 'line', yAxisIndex: 1, data: l.map((x) => x.MD_QT_MEDIA_DIAS_PERMANENCIA), symbol: 'circle', symbolSize: 7, lineStyle: { width: 3, color: '#f59e0b', shadowBlur: 10, shadowColor: 'rgba(245,158,11,.6)' }, itemStyle: { color: '#f59e0b' } },
+    ],
+  }, true);
+  gCombo.resize();
+}
+
+function render() {
+  for (const f of [numeros, barras, lista, combo]) { try { f(); } catch (e) { console.error(e); } }
+}
+weknow.onData(render);
+addEventListener('resize', () => { gBarras?.resize(); gCombo?.resize(); });
+</script>
+</body>
+</html>

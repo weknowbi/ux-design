@@ -1,0 +1,9 @@
+# Em dados/ só sobem os dados do dashboard de exemplo e as páginas das abas;
+# o resto são versões antigas e capturas de tela dos testes.
+dados/*
+!dados/painel.json
+!dados/painel-galeria.html
+!dados/teste-1.html
+!dados/teste-2.html
+!dados/teste-3.html
+!dados/teste-4.html

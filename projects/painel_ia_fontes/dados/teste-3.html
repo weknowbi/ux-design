@@ -1,0 +1,468 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="wk-lib:echarts"></script>
+<style>
+:root {
+  color-scheme: light;
+  --fundo: #f5f7fa; --cartao: #ffffff; --cartao-2: #f7f9fc; --borda: #e6e9ef; --borda-2: #d5dae3; --grade: #eef0f4; --eixo: #d5dae3;
+  --texto: #1e2633; --texto-2: #475569; --texto-3: #64748b; --primaria: #3366cc; --veu-2: rgba(51, 102, 204, .12);
+  --bom: #0e7552; --ruim: #b83a33; --atencao: #a44a06; --apagado: #c3cad5; --tooltip: #ffffff; --esqueleto: #eef1f5;
+  --s1: #2563eb; --s2: #06a0c4; --s3: #7c3aed; --s4: #e11d48; --s5: #c026d3; --s6: #ea580c; --s7: #4f46e5; --s8: #059669;
+  --sombra: 0 0 0 1px rgba(15, 23, 42, .05), 0 1px 3px rgba(15, 23, 42, .06);
+  --sombra-tooltip: 0 10px 28px rgba(16, 24, 40, .12), 0 2px 6px rgba(16, 24, 40, .06);
+  --fonte: "Segoe UI Variable Text", "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, "Helvetica Neue", Roboto, Arial, sans-serif;
+  --fonte-display: "Segoe UI Variable Display", "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, "Helvetica Neue", Roboto, Arial, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+    --fundo: #131314; --cartao: #1c1d1f; --cartao-2: #232426; --borda: #262729; --borda-2: #323436; --grade: #252628; --eixo: #3a3c3f;
+    --texto: #eff0f0; --texto-2: #c4c7ca; --texto-3: #9a9ea4; --primaria: #8ab4f8; --veu-2: rgba(138, 180, 248, .18);
+    --bom: #5dd39e; --ruim: #f28b82; --atencao: #f0b65a; --apagado: #4a4d52; --tooltip: #242527; --esqueleto: #242527;
+    --s1: #3f82f2; --s2: #00a8b8; --s3: #9271f0; --s4: #ec5a7c; --s5: #c45ad3; --s6: #e0702c; --s7: #6f72ec; --s8: #23a679;
+    --sombra: 0 0 0 1px rgba(255, 255, 255, .04); --sombra-tooltip: 0 10px 28px rgba(0, 0, 0, .45);
+  }
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; background: var(--fundo); color: var(--texto); }
+body { padding: 20px 28px 40px; font: 14px/1.45 var(--fonte); }
+@media (max-width: 640px) { body { padding: 18px 16px 32px; } }
+button { font: inherit; color: inherit; }
+.topo { margin-bottom: 14px; }
+h1 { margin: 0; font-family: var(--fonte-display); font-size: 24px; font-weight: 600; letter-spacing: -.02em; line-height: 1.2; }
+.sub { margin: 4px 0 0; font-size: 13px; color: var(--texto-3); }
+.barra-filtros { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 10px 14px; margin-bottom: 18px; }
+.filtro { display: grid; gap: 6px; }
+.filtro > span { font-size: 12px; font-weight: 500; color: var(--texto-3); }
+.seletor { position: relative; }
+.seletor-botao { height: 30px; min-width: 150px; max-width: 220px; display: inline-flex; align-items: center; justify-content: space-between; gap: 10px;
+  padding: 0 10px 0 12px; border: 1px solid var(--borda-2); border-radius: 8px; background: var(--cartao); color: var(--texto); font-size: 13px; cursor: pointer; }
+.seletor-botao span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.seletor-botao::after { content: ""; flex: none; width: 6px; height: 6px; border-right: 1.5px solid var(--texto-3); border-bottom: 1.5px solid var(--texto-3); transform: translateY(-2px) rotate(45deg); }
+.seletor-botao:hover { background: var(--cartao-2); }
+.seletor.ativo .seletor-botao { background: var(--veu-2); border-color: transparent; color: var(--primaria); font-weight: 600; }
+.seletor.ativo .seletor-botao::after { border-color: var(--primaria); }
+.seletor-lista { position: absolute; top: calc(100% + 6px); left: 0; z-index: 40; min-width: 220px; max-height: 300px; overflow: auto; padding: 6px;
+  background: var(--tooltip); border: 1px solid var(--borda); border-radius: 10px; box-shadow: var(--sombra-tooltip); }
+.opcao { display: flex; align-items: center; gap: 10px; width: 100%; height: 32px; padding: 0 8px; border: 0; border-radius: 6px; background: none; font-size: 13px; text-align: left; cursor: pointer; }
+.opcao:hover { background: var(--cartao-2); }
+.opcao::before { content: ""; flex: none; box-sizing: border-box; width: 15px; height: 15px; border-radius: 4px; border: 1.5px solid var(--borda-2); }
+.opcao[aria-selected="true"]::before { border-color: var(--primaria); background: var(--primaria); box-shadow: inset 0 0 0 3px var(--tooltip); }
+.opcao.todos { margin-bottom: 4px; box-shadow: 0 1px 0 var(--grade); border-radius: 6px 6px 0 0; }
+.periodo-lista { display: grid; grid-template-columns: 1fr 1fr; gap: 0 8px; min-width: 300px; }
+.periodo-lista h3 { grid-column: span 2; margin: 2px 8px 6px; font-size: 12px; font-weight: 500; color: var(--texto-3); }
+.atalhos { grid-column: span 2; display: flex; flex-wrap: wrap; gap: 6px; padding: 0 2px 8px; margin-bottom: 6px; box-shadow: 0 1px 0 var(--grade); }
+.atalho { height: 26px; padding: 0 10px; border: 1px solid var(--borda-2); border-radius: 8px; background: none; font-size: 12.5px; cursor: pointer; }
+.atalho:hover { background: var(--cartao-2); }
+.col-titulo { margin: 0 8px 4px; font-size: 12px; font-weight: 500; color: var(--texto-3); }
+.opcao.mes::before { display: none; }
+.opcao.mes { height: 28px; }
+.opcao.mes[aria-selected="true"] { background: var(--veu-2); color: var(--primaria); font-weight: 600; }
+.limpar { height: 30px; margin-left: 2px; border: 0; background: none; color: var(--primaria); font-size: 13px; font-weight: 500; cursor: pointer; }
+.limpar[hidden] { display: none; }
+.aviso { margin: 0 0 14px; padding: 8px 12px; border: 1px dashed var(--borda-2); border-radius: 10px; font-size: 12.5px; color: var(--atencao); }
+.aviso[hidden] { display: none; }
+.grade { display: grid; gap: 16px; grid-template-columns: repeat(12, minmax(0, 1fr)); }
+.grade > * { grid-column: span 12; }
+.c3 { grid-column: span 3; } .c6 { grid-column: span 6; } .c12 { grid-column: span 12; }
+@media (max-width: 1100px) { .grade > .c3 { grid-column: span 6; } .grade > .c6 { grid-column: span 12; } }
+@media (max-width: 560px) { .grade > .c3 { grid-column: span 12; } }
+.cartao { background: var(--cartao); border: 0; border-radius: 14px; box-shadow: var(--sombra); padding: 20px 22px 22px; min-width: 0; display: flex; flex-direction: column; }
+.cabeca { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px 16px; flex-wrap: wrap; }
+.cartao h2 { margin: 0; font-size: 14px; font-weight: 600; }
+.desc { margin: 3px 0 18px; font-size: 12.5px; color: var(--texto-3); }
+.rotulo { font-size: 13px; font-weight: 500; color: var(--texto-2); }
+.valor { display: block; margin-top: 8px; font-size: 28px; line-height: 1.15; font-weight: 600; font-family: var(--fonte-display); letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+.valor small { font-size: 13px; font-weight: 500; color: var(--texto-3); margin-left: 4px; letter-spacing: 0; }
+.valor .num { display: inline-block; min-width: 1ch; }
+.nota { margin-top: 6px; font-size: 12.5px; color: var(--texto-3); }
+.legenda { display: flex; gap: 14px; flex-wrap: wrap; justify-content: flex-end; }
+.leg { display: inline-flex; align-items: center; gap: 7px; border: 0; background: none; padding: 2px 0; font-size: 12.5px; color: var(--texto-2); cursor: pointer; }
+.leg.off { opacity: .4; }
+.forma { width: 9px; height: 9px; flex: none; display: inline-block; }
+.caixa { position: relative; flex: 1; min-height: 280px; }
+.grafico { position: absolute; inset: 0; }
+.estado { display: none; position: absolute; inset: 0; margin: 0; align-items: center; justify-content: center; text-align: center; padding: 0 16px;
+  color: var(--texto-3); font-size: 13px; border: 1px dashed var(--borda-2); border-radius: 10px; }
+.caixa.sem-dados .estado { display: flex; }
+.caixa.sem-dados .grafico { visibility: hidden; }
+.tt { font: 12px/1.4 var(--fonte); color: var(--texto); min-width: 150px; }
+.tt-t { color: var(--texto-3); margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
+.tt-t i { width: 5px; height: 5px; border-radius: 50%; background: var(--texto-3); }
+.tt-l { display: grid; grid-template-columns: 14px 1fr auto; gap: 8px; align-items: center; margin-top: 3px; }
+.tt-l span { color: var(--texto-3); }
+.tt-l b { font-weight: 600; font-variant-numeric: tabular-nums; }
+/* Estados da moldura */
+.valor[data-dash-source-state="loading"] .num, .valor .num[data-dash-source-state="loading"] { color: transparent; background: var(--esqueleto); border-radius: 8px; width: 90px; }
+.caixa[data-dash-source-state="loading"]::after { content: ""; position: absolute; inset: 0; border-radius: 10px; background: var(--esqueleto); }
+[data-dash-source-state="refreshing"] { opacity: .55; }
+</style></head>
+<body>
+<header class="topo">
+  <h1>Atendimentos e pacientes: evolução e sazonalidade</h1>
+  <p class="sub">Mês a mês, com os meses de maior movimento e a permanência média, para o planejamento do próximo ano</p>
+</header>
+
+<section class="barra-filtros" aria-label="Filtros">
+  <div class="filtro" data-source="opt_meses" data-fetchpriority="high"><span>Período</span><div class="seletor" id="f-periodo"></div></div>
+  <div class="filtro" data-source="opt_tipos"><span>Tipo de atendimento</span><div class="seletor" id="f-tipos"></div></div>
+  <div class="filtro" data-source="opt_conv"><span>Tipo de convênio</span><div class="seletor" id="f-conv"></div></div>
+  <div class="filtro" data-source="opt_carater"><span>Caráter/clínica</span><div class="seletor" id="f-carater"></div></div>
+  <div class="filtro" data-source="opt_sexo"><span>Sexo</span><div class="seletor" id="f-sexo"></div></div>
+  <button class="limpar" id="limpar" type="button" hidden>Limpar filtros</button>
+</section>
+<p class="aviso" id="aviso" hidden>Alguns conjuntos foram limitados em quantidade de linhas: os totais podem estar incompletos.</p>
+
+<div class="grade">
+  <article class="cartao c3">
+    <div class="rotulo">Atendimentos</div>
+    <span class="valor"><span class="num" data-source="kpis" data-field="MD_QT_TOTAL_ATENDIMENTO" data-row="0" id="k-atend"></span></span>
+    <div class="nota">no período e filtros escolhidos</div>
+  </article>
+  <article class="cartao c3">
+    <div class="rotulo">Pacientes</div>
+    <span class="valor"><span class="num" data-source="kpis" data-field="MD_QT_PACIENTE" data-row="0" id="k-pac"></span></span>
+    <div class="nota">pacientes distintos</div>
+  </article>
+  <article class="cartao c3">
+    <div class="rotulo">Permanência média</div>
+    <span class="valor"><span class="num" data-source="kpis" data-field="MD_QT_MEDIA_DIAS_PERMANENCIA" data-row="0" id="k-perm"></span><small>dias</small></span>
+    <div class="nota">por atendimento</div>
+  </article>
+  <article class="cartao c3">
+    <div class="rotulo">Mês de maior movimento</div>
+    <span class="valor"><span class="num" data-source="pico" data-field="indice" data-row="0" id="k-pico"></span><small>índice</small></span>
+    <div class="nota" id="n-pico">média dos meses = 100</div>
+  </article>
+
+  <article class="cartao c12">
+    <div class="cabeca">
+      <div><h2>Atendimentos e pacientes por mês</h2><p class="desc">Evolução ao longo do período</p></div>
+      <div class="legenda" id="leg-evol"></div>
+    </div>
+    <div class="caixa" data-source="tendencia"><div class="grafico" id="g-evol"></div><p class="estado"></p></div>
+  </article>
+
+  <article class="cartao c6">
+    <div class="cabeca">
+      <div><h2>Os anos, mês contra mês</h2><p class="desc">Atendimentos de cada ano sobre os meses do calendário</p></div>
+      <div class="legenda" id="leg-anos"></div>
+    </div>
+    <div class="caixa" data-source="sazonal"><div class="grafico" id="g-anos"></div><p class="estado"></p></div>
+  </article>
+
+  <article class="cartao c6">
+    <div class="cabeca">
+      <div><h2>Época do ano com mais movimento</h2><p class="desc">Média de atendimentos de cada mês em relação à média geral; o mês de pico está marcado</p></div>
+    </div>
+    <div class="caixa" data-source="indice"><div class="grafico" id="g-sazon"></div><p class="estado"></p></div>
+  </article>
+
+  <article class="cartao c12">
+    <div class="cabeca">
+      <div><h2>A permanência acompanhou o volume?</h2><p class="desc">Atendimentos (colunas) e permanência média em dias (linha, eixo à direita)</p></div>
+      <div class="legenda" id="leg-perm"></div>
+    </div>
+    <div class="caixa" data-source="tendencia"><div class="grafico" id="g-perm"></div><p class="estado"></p></div>
+  </article>
+</div>
+
+<script>
+weknow.calc('sazonal', {
+  title: 'Atendimentos por ano e mês do calendário',
+  description: 'Separa o mês/ano em ano e mês para comparar um ano com o outro.',
+  inputs: ['tendencia'],
+  fn: (tendencia) => tendencia.map((l) => ({
+    ano: Math.floor(l.DT_ATENDIMENTO_yearMonth / 100),
+    mes: l.DT_ATENDIMENTO_yearMonth % 100,
+    MD_QT_TOTAL_ATENDIMENTO: l.MD_QT_TOTAL_ATENDIMENTO,
+  })),
+});
+
+weknow.calc('indice', {
+  title: 'Índice de sazonalidade por mês',
+  description: 'Média de atendimentos de cada mês do calendário dividida pela média de todos os meses, vezes 100.',
+  inputs: ['tendencia'],
+  fn: (tendencia) => {
+    const soma = {}, qtd = {};
+    tendencia.forEach((l) => {
+      const m = l.DT_ATENDIMENTO_yearMonth % 100;
+      soma[m] = (soma[m] || 0) + (l.MD_QT_TOTAL_ATENDIMENTO || 0);
+      qtd[m] = (qtd[m] || 0) + 1;
+    });
+    const meses = Object.keys(soma).map(Number).sort((a, b) => a - b);
+    const medias = meses.map((m) => soma[m] / qtd[m]);
+    const geral = medias.reduce((a, b) => a + b, 0) / (medias.length || 1);
+    return meses.map((m, i) => ({ mes: m, media: medias[i], indice: geral ? (medias[i] / geral) * 100 : 0 }));
+  },
+});
+
+weknow.calc('pico', {
+  title: 'Mês de maior movimento',
+  description: 'O mês do calendário com o maior índice de sazonalidade.',
+  inputs: ['indice'],
+  fn: (indice) => {
+    if (!indice.length) return [];
+    const topo = indice.reduce((a, b) => (b.indice > a.indice ? b : a));
+    return [{ mes: topo.mes, indice: topo.indice }];
+  },
+});
+
+const MESES = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
+const MESES_LONGO = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
+const inteiro = new Intl.NumberFormat(weknow.locale, { maximumFractionDigits: 0 });
+const compacto = new Intl.NumberFormat(weknow.locale, { notation: 'compact', maximumFractionDigits: 1 });
+const taxa = new Intl.NumberFormat(weknow.locale, { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+const media2 = new Intl.NumberFormat(weknow.locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const rotuloYM = (ym) => MESES[(ym % 100) - 1] + '/' + String(Math.floor(ym / 100)).slice(2);
+const PEQ = ['de', 'da', 'do', 'das', 'dos', 'e'];
+function nome(s) {
+  if (s === null || s === undefined || String(s).trim() === '') return 'Não informado';
+  s = String(s).trim();
+  if (s !== s.toUpperCase()) return s;
+  return s.toLowerCase().split(' ').map((w, i) => (i && PEQ.includes(w) ? w : w.charAt(0).toUpperCase() + w.slice(1))).join(' ');
+}
+// Forma de cada série, na ordem das cores
+function forma(i, cor, px) {
+  const t = px || 9;
+  const base = `display:inline-block;width:${t}px;height:${t}px;background:${cor};flex:none;`;
+  return [
+    base + 'border-radius:50%;',
+    base + 'border-radius:2px;',
+    base + 'transform:rotate(45deg) scale(.8);',
+    base + 'clip-path:polygon(50% 0,100% 100%,0 100%);',
+    base + 'clip-path:polygon(25% 5%,75% 5%,100% 50%,75% 95%,25% 95%,0 50%);',
+    `display:inline-block;width:${t}px;height:${t}px;background:${cor};border-radius:2px 2px 0 0;`,
+  ][i % 6];
+}
+
+let aberto = null;           // qual lista de filtro está aberta
+const ocultas = { evol: new Set(), anos: new Set(), perm: new Set() };
+const graficos = {};
+let cores = [];
+
+document.getElementById('limpar').onclick = () => weknow.resetParams();
+document.addEventListener('click', () => { if (aberto) { aberto = null; desenhar(); } });
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && aberto) { aberto = null; desenhar(); } });
+
+// ---------- filtros ----------
+function filtroLista(id, dataset, campo, param, todos, rotuloTodos) {
+  const d = weknow.data(dataset), p = weknow.params();
+  const tudo = p[todos] || !p[param].length, marc = tudo ? [] : p[param];
+  const valor = tudo ? rotuloTodos : marc.length === 1 ? nome(marc[0]) : `${nome(marc[0])} +${marc.length - 1}`;
+  const el = document.getElementById(id);
+  el.classList.toggle('ativo', !tudo);
+  const abre = aberto === id;
+  el.innerHTML = `<button type="button" class="seletor-botao" aria-haspopup="listbox" aria-expanded="${abre}"><span>${esc(valor)}</span></button>` +
+    (abre ? '<div class="seletor-lista" role="listbox" aria-multiselectable="true">' +
+      `<button type="button" class="opcao todos" role="option" data-todos aria-selected="${tudo}">${esc(rotuloTodos)}</button>` +
+      d.data.map((l, i) => `<button type="button" class="opcao" role="option" data-i="${i}" aria-selected="${marc.includes(l[campo])}">${esc(nome(l[campo]))}</button>`).join('') + '</div>' : '');
+  el.querySelector('.seletor-botao').onclick = (e) => { e.stopPropagation(); aberto = abre ? null : id; desenhar(); };
+  if (!abre) return;
+  el.querySelector('.seletor-lista').onclick = (e) => e.stopPropagation();
+  el.querySelectorAll('.opcao').forEach((b) => (b.onclick = () => {
+    if (b.hasAttribute('data-todos')) return weknow.setParams({ [param]: [], [todos]: true });
+    const v = d.data[+b.dataset.i][campo];
+    const novas = marc.includes(v) ? marc.filter((x) => x !== v) : [...marc, v];
+    weknow.setParams({ [param]: novas, [todos]: novas.length === 0 });
+  }));
+}
+
+function filtroPeriodo() {
+  const d = weknow.data('opt_meses'), p = weknow.params();
+  const meses = d.data.map((l) => l.DT_ATENDIMENTO_yearMonth).sort((a, b) => a - b);
+  const [ini, fim] = p.periodo;
+  const tudo = !meses.length || (ini <= meses[0] && fim >= meses[meses.length - 1]);
+  const el = document.getElementById('f-periodo');
+  el.classList.toggle('ativo', !tudo);
+  const abre = aberto === 'f-periodo';
+  const valor = tudo ? 'Todo o período' : `${rotuloYM(Math.max(ini, meses[0]))} – ${rotuloYM(Math.min(fim, meses[meses.length - 1]))}`;
+  const lista = (col) => meses.map((m) => {
+    const sel = col === 0 ? m === Math.max(ini, meses[0]) : m === Math.min(fim, meses[meses.length - 1]);
+    return `<button type="button" class="opcao mes" role="option" data-col="${col}" data-m="${m}" aria-selected="${sel}">${rotuloYM(m)}</button>`;
+  }).join('');
+  el.innerHTML = `<button type="button" class="seletor-botao" aria-haspopup="listbox" aria-expanded="${abre}"><span>${esc(valor)}</span></button>` +
+    (abre ? '<div class="seletor-lista periodo-lista">' +
+      '<div class="atalhos"><button type="button" class="atalho" data-at="tudo">Todo o período</button><button type="button" class="atalho" data-at="12">Últimos 12 meses</button><button type="button" class="atalho" data-at="ano">Ano mais recente</button></div>' +
+      `<div><p class="col-titulo">De</p>${lista(0)}</div><div><p class="col-titulo">Até</p>${lista(1)}</div></div>` : '');
+  el.querySelector('.seletor-botao').onclick = (e) => { e.stopPropagation(); aberto = abre ? null : 'f-periodo'; desenhar(); };
+  if (!abre) return;
+  el.querySelector('.seletor-lista').onclick = (e) => e.stopPropagation();
+  el.querySelectorAll('.opcao.mes').forEach((b) => (b.onclick = () => {
+    const m = +b.dataset.m;
+    const a = +b.dataset.col === 0 ? m : Math.max(ini, meses[0]), z = +b.dataset.col === 1 ? m : Math.min(fim, meses[meses.length - 1]);
+    weknow.setParams({ periodo: a <= z ? [a, z] : [m, m] });
+  }));
+  el.querySelectorAll('.atalho').forEach((b) => (b.onclick = () => {
+    const ult = meses[meses.length - 1];
+    if (b.dataset.at === 'tudo') weknow.setParams({ periodo: null });
+    else if (b.dataset.at === '12') weknow.setParams({ periodo: [meses[Math.max(0, meses.length - 12)], ult] });
+    else weknow.setParams({ periodo: [Math.floor(ult / 100) * 100 + 1, ult] });
+  }));
+}
+
+// ---------- gráficos ----------
+function legenda(id, chave, itens) {
+  const el = document.getElementById(id);
+  el.innerHTML = itens.map((it, i) => `<button type="button" class="leg${ocultas[chave].has(it.nome) ? ' off' : ''}" data-n="${esc(it.nome)}"><i class="forma" style="${forma(i, it.cor)}"></i>${esc(it.nome)}</button>`).join('');
+  el.querySelectorAll('.leg').forEach((b) => (b.onclick = (e) => {
+    e.stopPropagation();
+    const n = b.dataset.n;
+    ocultas[chave].has(n) ? ocultas[chave].delete(n) : ocultas[chave].add(n);
+    desenhar();
+  }));
+}
+
+function estado(sel, fonte, vazio) {
+  const caixa = document.querySelector(sel).closest('.caixa');
+  const aviso = fonte.status === 'empty' ? vazio : fonte.status === 'error' ? 'Não foi possível carregar o gráfico.' : '';
+  caixa.querySelector('.estado').textContent = aviso;
+  caixa.classList.toggle('sem-dados', !!aviso);
+  return fonte.status === 'ok';
+}
+
+function grafico(id) {
+  graficos[id] = graficos[id] || echarts.init(document.getElementById(id), null, { renderer: 'canvas' });
+  return graficos[id];
+}
+
+function dica(cor, formatTitulo, itensFmt) {
+  return {
+    trigger: 'axis', confine: true, backgroundColor: cor('--tooltip'), borderColor: cor('--borda'), borderWidth: 1, padding: [10, 12],
+    extraCssText: `border-radius: 10px; box-shadow: ${cor('--sombra-tooltip')};`,
+    axisPointer: { type: 'line', lineStyle: { color: cor('--borda-2'), width: 1 } },
+    formatter: (ps) => `<div class="tt"><div class="tt-t"><i></i>${esc(formatTitulo(ps[0]))}</div>` +
+      ps.map((p) => `<div class="tt-l"><i style="${forma(p.seriesIndex === undefined ? 0 : (p.seriesOrdem ?? p.seriesIndex), p.color)}"></i><span>${esc(p.seriesName)}</span><b>${itensFmt(p)}</b></div>`).join('') + '</div>',
+  };
+}
+
+function desenhar() {
+  const css = getComputedStyle(document.documentElement);
+  const cor = (n) => css.getPropertyValue(n).trim();
+  cores = [cor('--s1'), cor('--s2'), cor('--s3'), cor('--s4'), cor('--s5'), cor('--s6')];
+
+  // filtros
+  filtroPeriodo();
+  filtroLista('f-tipos', 'opt_tipos', 'DS_TP_ATENDIMENTO', 'tipos', 'tipos_todos', 'Todos');
+  filtroLista('f-conv', 'opt_conv', 'DS_TIPO_CONVENIO', 'convtipos', 'convtipos_todos', 'Todos');
+  filtroLista('f-carater', 'opt_carater', 'DS_CARATER_ATENDIMENTO', 'carater', 'carater_todos', 'Todos');
+  filtroLista('f-sexo', 'opt_sexo', 'DS_SEXO', 'sexos', 'sexos_todos', 'Todos');
+  const p = weknow.params();
+  const mesesOpt = weknow.data('opt_meses').data.map((l) => l.DT_ATENDIMENTO_yearMonth);
+  const periodoFiltrado = mesesOpt.length && (p.periodo[0] > Math.min(...mesesOpt) || p.periodo[1] < Math.max(...mesesOpt));
+  document.getElementById('limpar').hidden = !(periodoFiltrado || !p.tipos_todos || !p.convtipos_todos || !p.carater_todos || !p.sexos_todos);
+
+  const todas = ['kpis', 'tendencia'].map((n) => weknow.data(n));
+  document.getElementById('aviso').hidden = !todas.some((d) => d.meta && d.meta.truncated);
+
+  // indicadores
+  const kpis = weknow.data('kpis');
+  const ok = kpis.status === 'ok' && kpis.data.length;
+  const l0 = ok ? kpis.data[0] : null;
+  const set = (id, f) => { const el = document.getElementById(id); if (kpis.status !== 'loading') el.textContent = l0 ? f(l0) : '—'; };
+  set('k-atend', (l) => inteiro.format(l.MD_QT_TOTAL_ATENDIMENTO));
+  set('k-pac', (l) => inteiro.format(l.MD_QT_PACIENTE));
+  set('k-perm', (l) => media2.format(l.MD_QT_MEDIA_DIAS_PERMANENCIA));
+  const pico = weknow.data('pico');
+  const ep = document.getElementById('k-pico');
+  if (pico.status !== 'loading') ep.textContent = pico.status === 'ok' ? taxa.format(pico.data[0].indice) : '—';
+  document.getElementById('n-pico').textContent = pico.status === 'ok' ? `${nome(MESES_LONGO[pico.data[0].mes - 1])}, com a média dos meses em 100` : 'média dos meses = 100';
+
+  // eixos e estilos comuns
+  const eixoCat = (dados) => ({ type: 'category', data: dados, axisTick: { show: false }, axisLine: { lineStyle: { color: cor('--eixo') } }, axisLabel: { color: cor('--texto-3'), fontSize: 11, margin: 12, hideOverlap: true } });
+  const eixoVal = (fmt, extra) => Object.assign({ type: 'value', splitNumber: 4, axisLine: { show: false }, axisTick: { show: false }, axisLabel: { color: cor('--texto-3'), fontSize: 11, margin: 12, formatter: fmt }, splitLine: { lineStyle: { color: cor('--grade'), width: 1 } } }, extra || {});
+  const base = { animation: false, textStyle: { fontFamily: cor('--fonte') } };
+  const linha = (nomeS, dados, c, extra) => Object.assign({ name: nomeS, type: 'line', data: dados, smooth: 0.25, showSymbol: false, symbol: 'circle', symbolSize: 9, lineStyle: { width: 1.5, color: c }, itemStyle: { color: c, borderColor: cor('--cartao'), borderWidth: 2 }, emphasis: { scale: false } }, extra || {});
+
+  // 1) evolução mensal: atendimentos e pacientes
+  const tend = weknow.data('tendencia');
+  if (estado('#g-evol', tend, 'Sem atendimentos para os filtros escolhidos.')) {
+    const linhas = [...tend.data].sort((a, b) => a.DT_ATENDIMENTO_yearMonth - b.DT_ATENDIMENTO_yearMonth);
+    const cats = linhas.map((l) => rotuloYM(l.DT_ATENDIMENTO_yearMonth));
+    const defs = [{ nome: 'Atendimentos', campo: 'MD_QT_TOTAL_ATENDIMENTO', cor: cores[0] }, { nome: 'Pacientes', campo: 'MD_QT_PACIENTE', cor: cores[1] }];
+    legenda('leg-evol', 'evol', defs);
+    const maxA = Math.max(...linhas.map((l) => l.MD_QT_TOTAL_ATENDIMENTO));
+    const g = grafico('g-evol');
+    g.setOption(Object.assign({}, base, {
+      grid: { left: 8, right: 12, top: 16, bottom: 4, containLabel: true },
+      xAxis: eixoCat(cats), yAxis: eixoVal((v) => compacto.format(v), { min: 0 }),
+      tooltip: dica(cor, (p) => p.axisValue, (p) => inteiro.format(p.value)),
+      series: defs.map((dd, i) => !ocultas.evol.has(dd.nome) && linha(dd.nome, linhas.map((l) => l[dd.campo]), dd.cor, i === 0 ? {
+        markPoint: { symbol: 'circle', symbolSize: 9, itemStyle: { color: dd.cor, borderColor: cor('--cartao'), borderWidth: 2 }, label: { show: true, position: 'top', distance: 8, color: cor('--texto'), fontSize: 12, fontWeight: 600, formatter: (q) => inteiro.format(q.value) },
+          data: [{ type: 'max', name: 'Maior mês', value: maxA }] },
+      } : null)).filter(Boolean).map((s, k, arr) => Object.assign(s, { seriesOrdem: defs.findIndex((x) => x.nome === s.name) })),
+    }), true);
+    g.resize();
+  }
+
+  // 2) ano contra ano
+  const saz = weknow.data('sazonal');
+  if (estado('#g-anos', saz, 'Sem atendimentos para os filtros escolhidos.')) {
+    const anos = [...new Set(saz.data.map((l) => l.ano))].sort((a, b) => a - b);
+    const defs = anos.map((a, i) => ({ nome: String(a), cor: cores[i % cores.length] }));
+    legenda('leg-anos', 'anos', defs);
+    const g = grafico('g-anos');
+    g.setOption(Object.assign({}, base, {
+      grid: { left: 8, right: 12, top: 16, bottom: 4, containLabel: true },
+      xAxis: eixoCat(MESES), yAxis: eixoVal((v) => compacto.format(v), { min: 0 }),
+      tooltip: dica(cor, (p) => nome(MESES_LONGO[p.dataIndex]), (p) => (p.value === undefined || p.value === null || p.value === '-' ? '—' : inteiro.format(p.value))),
+      series: defs.map((dd, i) => !ocultas.anos.has(dd.nome) && Object.assign(linha(dd.nome, MESES.map((_, m) => {
+        const r = saz.data.find((l) => String(l.ano) === dd.nome && l.mes === m + 1);
+        return r ? r.MD_QT_TOTAL_ATENDIMENTO : null;
+      }), dd.cor), { seriesOrdem: i })).filter(Boolean),
+    }), true);
+    g.resize();
+  }
+
+  // 3) índice de sazonalidade
+  const ind = weknow.data('indice');
+  if (estado('#g-sazon', ind, 'Sem atendimentos para os filtros escolhidos.')) {
+    const linhas = [...ind.data].sort((a, b) => a.mes - b.mes);
+    const maior = Math.max(...linhas.map((l) => l.indice));
+    const g = grafico('g-sazon');
+    g.setOption(Object.assign({}, base, {
+      grid: { left: 8, right: 12, top: 26, bottom: 4, containLabel: true },
+      xAxis: eixoCat(linhas.map((l) => MESES[l.mes - 1])), yAxis: eixoVal((v) => inteiro.format(v), { min: 0 }),
+      tooltip: Object.assign(dica(cor, (p) => nome(MESES_LONGO[linhas[p.dataIndex].mes - 1]), (p) => taxa.format(p.value)), {
+        formatter: (ps) => { const p = ps[0], l = linhas[p.dataIndex];
+          return `<div class="tt"><div class="tt-t"><i></i>${esc(nome(MESES_LONGO[l.mes - 1]))}</div>` +
+            `<div class="tt-l"><i style="${forma(0, cor('--s1'))}"></i><span>Índice</span><b>${taxa.format(l.indice)}</b></div>` +
+            `<div class="tt-l"><i style="${forma(1, cor('--s1'))}"></i><span>Média de atendimentos</span><b>${inteiro.format(l.media)}</b></div></div>`; } }),
+      series: [{ type: 'bar', name: 'Índice', barWidth: '46%', barMaxWidth: 24,
+        itemStyle: { color: cor('--s1'), borderRadius: [4, 4, 0, 0], borderColor: cor('--cartao'), borderWidth: 0 },
+        data: linhas.map((l) => (l.indice === maior
+          ? { value: l.indice, label: { show: true, position: 'top', distance: 6, color: cor('--texto'), fontSize: 12, fontWeight: 600, formatter: (q) => taxa.format(q.value) } }
+          : l.indice)),
+        markLine: { silent: true, symbol: 'none', label: { show: false }, lineStyle: { type: 'dashed', color: cor('--texto-3'), width: 1.5 }, data: [{ yAxis: linhas.length ? 100 : 0 }] } }],
+    }), true);
+    g.resize();
+  }
+
+  // 4) permanência x volume
+  if (estado('#g-perm', tend, 'Sem atendimentos para os filtros escolhidos.')) {
+    const linhas = [...tend.data].sort((a, b) => a.DT_ATENDIMENTO_yearMonth - b.DT_ATENDIMENTO_yearMonth);
+    const cats = linhas.map((l) => rotuloYM(l.DT_ATENDIMENTO_yearMonth));
+    const defs = [{ nome: 'Atendimentos', cor: cores[0] }, { nome: 'Permanência média (dias)', cor: cores[1] }];
+    legenda('leg-perm', 'perm', defs);
+    const g = grafico('g-perm');
+    const series = [];
+    if (!ocultas.perm.has(defs[0].nome)) series.push({ name: defs[0].nome, type: 'bar', yAxisIndex: 0, barWidth: '46%', barMaxWidth: 24, seriesOrdem: 0,
+      itemStyle: { color: defs[0].cor, borderRadius: [4, 4, 0, 0] }, data: linhas.map((l) => l.MD_QT_TOTAL_ATENDIMENTO) });
+    if (!ocultas.perm.has(defs[1].nome)) series.push(linha(defs[1].nome, linhas.map((l) => l.MD_QT_MEDIA_DIAS_PERMANENCIA), defs[1].cor, { yAxisIndex: 1, seriesOrdem: 1, z: 5 }));
+    g.setOption(Object.assign({}, base, {
+      grid: { left: 8, right: 8, top: 16, bottom: 4, containLabel: true },
+      xAxis: eixoCat(cats),
+      yAxis: [eixoVal((v) => compacto.format(v), { min: 0 }),
+        eixoVal((v) => media2.format(v), { min: 0, splitLine: { show: false } })],
+      tooltip: dica(cor, (p) => p.axisValue, (p) => (p.seriesName.indexOf('Perman') === 0 ? media2.format(p.value) + ' dias' : inteiro.format(p.value))),
+      series,
+    }), true);
+    g.resize();
+  }
+}
+
+weknow.onData(() => desenhar());
+</script>
+</body></html>

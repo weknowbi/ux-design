@@ -1,0 +1,10 @@
+{
+  "name": "dashboard-mcp",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Visual padrão dos dashboards criados pelo MCP: galeria de componentes e testes com o JSON de instruções",
+  "scripts": {
+    "dev": "node server.js",
+    "start": "node server.js"
+  }
+}
