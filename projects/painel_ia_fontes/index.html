@@ -1399,7 +1399,7 @@ ul.versions + .note { padding-left: 12px; }
   let htmlOriginal = '';
   async function lerPagina(p) {
     const r = await fetch(p.arquivo, { cache: 'no-store' }).catch(() => null);
-    return r && r.ok ? r.text() : `<!doctype html><body style="font:14px system-ui;padding:24px;color:#64748b">Esta página ainda não existe (${esc(p.arquivo)}).</body>`;
+    return r && r.ok ? r.text() : `<!doctype html><body style="font:14px system-ui;padding:24px;color:#64748b">Esta página ainda não existe (${esc(p.arquivo)}).`;
   }
   /* A barra inferior do dashboard do portal (DashboardBar): setas juntas na
      frente, as abas como item de navegação (fundo e cor de ativo do menu,
