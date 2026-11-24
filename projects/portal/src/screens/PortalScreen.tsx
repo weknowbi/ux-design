@@ -16,10 +16,13 @@ import {
   FolderMark,
   ICON_MODES,
   IconModeContext,
+  TITLE_SIZES,
+  TitleSizeContext,
   ToastContext,
   type CardStyle,
   type DashThumb,
   type IconMode,
+  type TitleSize,
 } from '@/components/browser/Items'
 import { useAppearances } from '@/components/browser/appearance'
 import type { PortalRoute } from '@/components/PortalSidebar'
@@ -81,6 +84,16 @@ function iconModeMenuItems(mode: IconMode, onChange: (m: IconMode) => void): Men
   }))
 }
 
+/**
+ * Teste do WM-6656: o nome dos cards em 13px, como o pedido sugere, contra os
+ * 14px de hoje. Como o menu dos ícones, mostra só o modo em que você não está.
+ */
+function titleSizeMenuItem(size: TitleSize, onChange: (s: TitleSize) => void): MenuItem {
+  return size === '14'
+    ? { icon: 'text_decrease', label: 'Nome dos cards em 13px', onClick: () => onChange('13') }
+    : { icon: 'text_increase', label: 'Nome dos cards em 14px', onClick: () => onChange('14') }
+}
+
 /* Dashboard sem imagem mostra o croqui do layout. A alternativa com o ícone
    saiu do menu "…": o croqui ficou. */
 const DASH_THUMB: DashThumb = 'croqui'
@@ -110,6 +123,7 @@ export function PortalScreen({ onRoute }: { onRoute: (route: PortalRoute) => voi
   const [heroCollapsed, setHeroCollapsed] = useState(false)
   const [openTab, setSection] = useState<SectionId>('pastas')
   const [iconMode, setIconMode] = usePref<IconMode>('wk-portal-icones', ICON_MODES, 'definidos')
+  const [titleSize, setTitleSize] = usePref<TitleSize>('wk-portal-titulo', TITLE_SIZES, '14')
   const prefs = useBrowserPrefs()
   const [toast, setToast] = useState<{ text: string; at: number } | null>(null)
   /** O modal de "Nova pasta" está aberto. */
@@ -304,21 +318,23 @@ export function PortalScreen({ onRoute }: { onRoute: (route: PortalRoute) => voi
   const browser = (
     <CardStyleContext.Provider value={cardStyle}>
       <DashThumbContext.Provider value={DASH_THUMB}>
-        <ContentBrowser
-          root={PORTAL_ROOT}
-          path={path}
-          query={query}
-          favorites={favorites}
-          prefs={prefs}
-          section={section}
-          globalSearch={results}
-          controls={atRoot && !results ? controls : undefined}
-          controlsHidden={dynamicHero && heroCollapsed}
-          mobile={isMobile}
-          revision={folderRevision}
-          onNavigate={navigate}
-          onToggleFavorite={toggleFavorite}
-        />
+        <TitleSizeContext.Provider value={titleSize}>
+          <ContentBrowser
+            root={PORTAL_ROOT}
+            path={path}
+            query={query}
+            favorites={favorites}
+            prefs={prefs}
+            section={section}
+            globalSearch={results}
+            controls={atRoot && !results ? controls : undefined}
+            controlsHidden={dynamicHero && heroCollapsed}
+            mobile={isMobile}
+            revision={folderRevision}
+            onNavigate={navigate}
+            onToggleFavorite={toggleFavorite}
+          />
+        </TitleSizeContext.Provider>
       </DashThumbContext.Provider>
     </CardStyleContext.Provider>
   )
@@ -471,7 +487,7 @@ export function PortalScreen({ onRoute }: { onRoute: (route: PortalRoute) => voi
         else onRoute(route)
       }}
       trail={trail}
-      menuItems={iconModeMenuItems(iconMode, setIconMode)}
+      menuItems={[...iconModeMenuItems(iconMode, setIconMode), titleSizeMenuItem(titleSize, setTitleSize)]}
       search={topbarSearch}
       mainRef={mainRef}
       overlay={

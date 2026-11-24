@@ -330,7 +330,9 @@ export function ContentBrowser({
           <ItemCollection
             entries={s.entries}
             view={s.view}
-            quietFavorites={favs.length > 0 && s.id !== 'favoritos'}
+            // Inclusive na própria seção Favoritos: o título dela já diz o que
+            // a estrela de cada card repetia (ver restingStar em Items).
+            quietFavorites={favs.length > 0}
             {...collection}
           />
         )

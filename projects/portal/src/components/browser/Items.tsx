@@ -631,6 +631,19 @@ export const CARD_STYLES: CardStyle[] = ['padrao', 'atual', 'referencia', 'tingi
 const isClean = (style: CardStyle) => style !== 'atual'
 export const CardStyleContext = createContext<CardStyle>('padrao')
 
+/**
+ * Corpo do nome no card, em teste (WM-6656, pedido de fonte menor). O espaço
+ * que o nome ganhou com as ações por cima resolve a maior parte do corte;
+ * os 13px ficam no menu "…" para comparar o que a fonte ainda acrescenta.
+ */
+export type TitleSize = '14' | '13'
+export const TITLE_SIZES: TitleSize[] = ['14', '13']
+export const TitleSizeContext = createContext<TitleSize>('14')
+const TITLE_TYPE: Record<TitleSize, string> = {
+  '14': 'text-[14px] leading-[18px]',
+  '13': 'text-[13px] leading-[17px]',
+}
+
 /** Altura do card de referência: círculo de 38px, título e duas linhas de nome. */
 const REFERENCE_TILE_HEIGHT = 100
 /** Referência Márcio: sem borda, só sombra — no hover ela cresce um pouco. */
@@ -664,6 +677,12 @@ const cleanTileHeight = (style: CardStyle) => (style === 'referencia' ? REFERENC
 const tileHeight = (style: CardStyle, trail: boolean) =>
   (isClean(style) ? cleanTileHeight(style) : TILE_HEIGHT) + (trail ? TRAIL_HEIGHT : 0)
 const FADE_FAST = 'transition-opacity duration-150'
+/**
+ * Respiro do card limpo. Com mouse, a direita volta aos 16px da esquerda: as
+ * ações não ocupam mais a ponta da linha, então o nome vai até a borda como
+ * qualquer texto. No toque elas seguem na linha e encostam nos 8px.
+ */
+const CLEAN_PAD = 'pl-4 pr-2 [@media(hover:hover)]:pr-4'
 
 /**
  * Estado dos ícones das pastas, alternado no menu "…". Não é um desenho de
@@ -1443,6 +1462,14 @@ function CleanTileBody({
     )
   }
 
+  const titleSize = useContext(TitleSizeContext)
+  /* Estrela em repouso só fora do modo quieto. Na seção Favoritos ela também
+     é quieta: o título da seção já diz que todos ali são favoritos, e repetir
+     a estrela em cada card custava 36px de nome em toda a primeira linha da
+     home — justamente a que mais se lê. */
+  const restingStar = favorite && !quietFavorite
+  const veil = style === 'tingido' ? 'var(--wk-card-hover)' : 'var(--wk-card-surface-hover)'
+
   // Limpo: a anatomia do card atual (ícone, nome, ações) com o fio no lugar do
   // fundo cinza e o ícone na cor do item. Sem título curto, sem fio colorido e
   // na mesma altura do atual — com título e descrição o card ficava alto demais
@@ -1483,26 +1510,42 @@ function CleanTileBody({
         {trail && <TrailLine trail={trail} />}
         <span
           ref={tipRef}
-          className="min-w-0 line-clamp-2 break-words text-[14px] leading-[18px]"
+          // A vaga da estrela só existe quando ela aparece em repouso; o ⋮
+          // nunca guarda vaga (ver o bloco de ações abaixo).
+          className={`min-w-0 line-clamp-2 break-words ${TITLE_TYPE[titleSize]} ${
+            restingStar ? '[@media(hover:hover)]:mr-7' : ''
+          }`}
           style={NAME_STYLE}
         >
           {name}
         </span>
       </span>
-      {/* Ações: o ⋮ (personalizar e favoritar) aparece no hover, e a estrela
-          fica na ponta, como sinal de favorito — fora da seção Favoritos, só
-          no hover. Sem estrela não há vaga guardada: no card que não é
-          favorito o ⋮ encosta na borda direita. */}
-      <span className="shrink-0 flex items-center">
+      {/* Ações: o ⋮ (personalizar e favoritar) e, fora do repouso, a estrela.
+          Com mouse, elas NÃO guardam vaga: ficam por cima da ponta do nome e
+          só aparecem no hover, sobre um véu na cor do card em hover que
+          dissolve o fim do texto. Antes o ⋮ invisível reservava 28px em todo
+          card, e com quatro cards por linha o nome perdia um quinto da linha
+          para um botão que ninguém via. No hover o nome inteiro já está no
+          tooltip, então cobrir a ponta dele ali não esconde nada.
+          Sem mouse (toque) não há hover: as ações ficam na linha, visíveis,
+          e o nome divide o espaço com elas. */}
+      <span className="shrink-0 flex items-center [@media(hover:hover)]:absolute [@media(hover:hover)]:right-2 [@media(hover:hover)]:top-1/2 [@media(hover:hover)]:-translate-y-1/2 z-10 has-[[data-open]]:z-30">
+        <span
+          aria-hidden
+          className={`pointer-events-none absolute -inset-y-1 -left-4 right-0 hidden [@media(hover:hover)]:block ${REVEAL} ${FADE_FAST}`}
+          style={{
+            background: `linear-gradient(to right, transparent, ${veil} 16px)`,
+          }}
+        />
         {favoritable(item) && (
-          <span className={`relative z-10 has-[[data-open]]:z-30 ${REVEAL}`}>
+          <span className={`relative ${REVEAL}`}>
             <CardMenu item={item} favorite={favorite} onToggleFavorite={onToggleFavorite} />
           </span>
         )}
         {favorite && (
           <span
-            className={`pointer-events-none flex items-center justify-center ${
-              quietFavorite ? `opacity-0 ${FADE_FAST} group-hover:opacity-100` : ''
+            className={`relative pointer-events-none flex items-center justify-center ${
+              restingStar ? '' : `opacity-0 ${FADE_FAST} group-hover:opacity-100`
             }`}
             style={{ width: 28, height: 28 }}
           >
@@ -1590,7 +1633,7 @@ function ItemTile({
       onMouseLeave={tip.hide}
       className={`group relative flex items-center gap-3 ${
         isClean(style)
-          ? `${style === 'referencia' ? 'px-5' : 'pl-4 pr-2'} ${cleanCardClass(style)}`
+          ? `${style === 'referencia' ? 'px-5' : CLEAN_PAD} ${cleanCardClass(style)}`
           : 'pl-4 pr-2 rounded-xl transition-colors bg-[var(--wk-canvas)] hover:bg-[var(--wk-card-hover)]'
       }`}
       style={{ height: tileHeight(style, Boolean(reserveTrail)) }}
@@ -1718,7 +1761,7 @@ function ItemThumb({
         )}
       </div>
       <div
-        className={`flex items-center gap-3 ${isClean(style) ? (style === 'referencia' ? 'px-5' : 'pl-4 pr-2') : 'pl-4 pr-2'}`}
+        className={`relative flex items-center gap-3 ${isClean(style) ? (style === 'referencia' ? 'px-5' : CLEAN_PAD) : 'pl-4 pr-2'}`}
         style={{ height: tileHeight(style, Boolean(reserveTrail)) }}
       >
         <TileBody
