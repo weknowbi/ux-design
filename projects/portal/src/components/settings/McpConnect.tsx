@@ -2,30 +2,30 @@ import { useState, type ReactNode } from 'react'
 import { COLOR, FONT, RADIUS, TABLE } from '@/design/tokens'
 import { Btn, IconBtn } from '@ds/Btn'
 import { FIELD, FormField, fieldBoxStyle, fieldTextStyle } from '@ds/Field'
-import { Switch } from '@ds/Switch'
 import { FilterChip } from '@/components/Hero'
 import { Icon } from '@/components/icons'
 import { MCP_CONNECTION } from '@/data/settings'
 
 /**
- * Conectar ao Claude/ChatGPT — a tela `#/mcp-connect` do Weknow, refeita com
- * as peças do design system.
+ * Conectar assistentes de IA (MCP) — a tela `#/mcp-connect` do Weknow, refeita
+ * com as peças do design system.
  *
- * O conteúdo e a ordem são os da produção: os mesmos passos, os mesmos
- * comandos gerados, o mesmo texto. O que muda é o vocabulário visual, que lá
- * era o de outra biblioteca:
+ * O conteúdo e a ordem são os da produção (a versão do Leonel, com três
+ * clientes no modo local e o remoto sem instalação): os mesmos passos, os
+ * mesmos comandos gerados, o mesmo texto. O que muda é o vocabulário visual,
+ * que lá era o de outra biblioteca:
  *
  *   abas         viraram os chips que as telas irmãs de Configurações já usam
  *                para alternar entre si. Aba sublinhada não existe no sistema.
- *   faixa cinza  o aviso "O ChatGPT não aceita MCP local" era uma faixa
- *                permanente; virou a linha de explicação do modo escolhido,
- *                que é o lugar onde a pessoa decide entre os dois.
+ *   subabas      o cliente (Claude, ChatGPT, outro) virou uma fileira de
+ *                chips compactos com rótulo; ver o comentário em `LocalSteps`.
+ *   faixa cinza  a explicação do modo era uma faixa permanente; virou texto
+ *                normal logo abaixo dos chips, onde a pessoa decide o modo.
  *   campos       rótulo flutuante na borda virou o `FormField`: rótulo em
  *                cima, sempre visível, caixa de 38.
  *   dados        URL, conta e usuário eram código solto ao lado de um rótulo.
  *                Viraram linhas de leitura com o copiar na ponta, porque são
  *                exatamente o que a pessoa vai colar em outro lugar.
- *   checkbox     "Fixar a conta" muda o conteúdo gerado na hora: é switch.
  *   copiar       os botões contornados soltos abaixo de cada bloco viraram o
  *                ícone de copiar na barra do próprio bloco, junto do nome do
  *                arquivo. Assim fica claro O QUE está sendo copiado.
@@ -164,41 +164,59 @@ function Step({ n, children }: { n: number; children: ReactNode }) {
   )
 }
 
-/** Linha de leitura dos dados da conta: rótulo, valor e copiar. */
-function InfoRow({ label, value }: { label: string; value: string }) {
+/**
+ * Linha de leitura: rótulo, valor e copiar.
+ *
+ * Na mesa é uma linha só, com o rótulo numa coluna fixa. No celular o rótulo
+ * sobe para cima do valor: com 104px de rótulo sobravam ~150 para o valor, e
+ * a conta e as variáveis de ambiente apareciam cortadas no meio.
+ */
+function InfoRow({
+  label,
+  value,
+  what,
+  monoLabel,
+  labelWidth = 'md:w-[112px]',
+  copy = true,
+}: {
+  label: string
+  value: string
+  /** Complemento da dica do copiar: "Copiar a conta". */
+  what?: string
+  /** Rótulo que é nome técnico (variável de ambiente): vai em monoespaçada. */
+  monoLabel?: boolean
+  labelWidth?: string
+  /** Sem copiar quando o valor não é para colar em lugar nenhum: "(nenhum)". */
+  copy?: boolean
+}) {
   return (
-    <div
-      className="flex items-center gap-3 min-h-[44px] px-4"
-      style={{ borderTop: `1px solid ${TABLE.border}` }}
-    >
-      <span className="shrink-0 w-[104px] md:w-[112px]" style={{ ...MUTED, color: COLOR.textSecondary }}>
-        {label}
-      </span>
-      <span className="flex-1 min-w-0 truncate" style={{ fontFamily: MONO, fontSize: 12.5, color: COLOR.text }} title={value}>
-        {value}
-      </span>
-      <CopyButton text={value} what={label === 'Conta' ? 'a conta' : label === 'Usuário' ? 'o usuário' : `a ${label}`} />
+    <div className="flex items-center gap-3 min-h-[44px] px-4" style={{ borderTop: `1px solid ${TABLE.border}` }}>
+      <div className="flex-1 min-w-0 flex flex-col md:flex-row md:items-center gap-0.5 md:gap-3 py-2 md:py-0">
+        <span
+          className={`shrink-0 ${labelWidth}`}
+          style={monoLabel ? { fontFamily: MONO, fontSize: 12, lineHeight: '20px', color: COLOR.textSecondary } : { ...MUTED, color: COLOR.textSecondary }}
+        >
+          {label}
+        </span>
+        <span
+          className="min-w-0 truncate"
+          style={copy ? { fontFamily: MONO, fontSize: 12.5, lineHeight: '20px', color: COLOR.text } : MUTED}
+          title={value}
+        >
+          {value}
+        </span>
+      </div>
+      {copy && <CopyButton text={value} what={what ?? label} />}
     </div>
   )
 }
 
-function TextInput({
-  value,
-  onChange,
-  placeholder,
-  type = 'text',
-}: {
-  value: string
-  onChange: (v: string) => void
-  placeholder?: string
-  type?: 'text' | 'number'
-}) {
+function TextInput({ value, onChange }: { value: string; onChange: (v: string) => void }) {
   const [focused, setFocused] = useState(false)
   return (
     <input
-      type={type}
+      type="text"
       value={value}
-      placeholder={placeholder}
       onChange={(e) => onChange(e.target.value)}
       onFocus={() => setFocused(true)}
       onBlur={() => setFocused(false)}
@@ -208,82 +226,154 @@ function TextInput({
   )
 }
 
-/** Moldura dos dados que alimentam os comandos: lido em cima, editável embaixo. */
-function ConnectionPanel({
-  children,
-  rows,
-  columns = 'md:grid-cols-2',
-}: {
-  children: ReactNode
-  rows: { label: string; value: string }[]
-  /** Grade dos campos na mesa; no celular é sempre uma coluna. */
-  columns?: string
-}) {
+/** Moldura com título: a mesma borda e o mesmo raio da tabela. */
+function Panel({ title, children }: { title: string; children: ReactNode }) {
   return (
     <section
-      aria-label="Dados da conexão"
+      aria-label={title}
       className="flex flex-col"
       style={{ border: `1px solid ${TABLE.border}`, borderRadius: TABLE.radius }}
     >
       <h3 className="px-4 pt-3 pb-2 text-[13px] font-semibold leading-[20px]" style={{ fontFamily: FONT, color: COLOR.textSecondary }}>
-        Dados da conexão
+        {title}
       </h3>
-      {rows.map((r) => (
-        <InfoRow key={r.label} {...r} />
-      ))}
-      <div
-        className={`grid gap-x-4 px-4 pt-4 grid-cols-1 ${columns}`}
-        style={{ borderTop: `1px solid ${TABLE.border}` }}
-      >
-        {children}
-      </div>
+      {children}
     </section>
+  )
+}
+
+/** Subtítulo dentro do painel, separando um grupo de linhas do anterior. */
+function PanelGroup({ label }: { label: string }) {
+  return (
+    <p
+      className="px-4 pt-3 pb-1 text-[12px] font-medium leading-[16px]"
+      style={{ fontFamily: FONT, color: COLOR.textMuted, borderTop: `1px solid ${TABLE.border}` }}
+    >
+      {label}
+    </p>
+  )
+}
+
+/** Revela o caminho manual. O fantasma do sistema, mas com quebra de linha: o
+ *  `Btn` não quebra o rótulo, e estas frases passam de 375px no celular. */
+function Disclosure({ label, children }: { label: string; children: ReactNode }) {
+  const [open, setOpen] = useState(false)
+  return (
+    <div className="flex flex-col gap-3">
+      <button
+        type="button"
+        aria-expanded={open}
+        onClick={() => setOpen((v) => !v)}
+        className="self-start -ml-3 flex items-start gap-1.5 px-3 py-2 rounded-lg text-left transition-colors hover:bg-[var(--wk-btn-ghost-hover)] focus-visible:shadow-[var(--wk-btn-focus-ring)] outline-none"
+        style={{ fontFamily: FONT, fontSize: 14, lineHeight: '20px', color: COLOR.textSecondary }}
+      >
+        <Icon name={open ? 'expand_less' : 'expand_more'} size={20} color="currentColor" className="shrink-0" />
+        {label}
+      </button>
+      {open && (
+        <div className="flex flex-col gap-3" style={TEXT}>
+          {children}
+        </div>
+      )}
+    </div>
   )
 }
 
 /* ------------------------------------------------------------------ local */
 
+type Client = 'claude' | 'chatgpt' | 'outro'
+
+const CLIENTS: { id: Client; label: string }[] = [
+  { id: 'claude', label: 'Claude Desktop' },
+  { id: 'chatgpt', label: 'ChatGPT (aplicativo desktop)' },
+  { id: 'outro', label: 'Outro cliente MCP' },
+]
+
+/**
+ * O que se digita no cadastro STDIO do cliente (ChatGPT e outros): comando,
+ * argumentos e as três variáveis. Na produção é uma lista de definição com
+ * código solto; aqui são as mesmas linhas de leitura dos dados da conexão,
+ * cada valor com o seu copiar, porque é campo por campo que a pessoa cola.
+ */
+function StdioPanel({ exe, env }: { exe: string; env: Record<string, string> }) {
+  return (
+    <Panel title="Preencha no cadastro do servidor">
+      <InfoRow label="Comando" value={exe} what="o comando" labelWidth="md:w-[184px]" />
+      <InfoRow label="Argumentos" value="(nenhum)" copy={false} labelWidth="md:w-[184px]" />
+      <PanelGroup label="Variáveis de ambiente" />
+      {Object.entries(env).map(([k, v]) => (
+        <InfoRow key={k} label={k} value={v} what={k} monoLabel labelWidth="md:w-[184px]" />
+      ))}
+    </Panel>
+  )
+}
+
 function LocalSteps() {
   const { baseUrl, account, user } = MCP_CONNECTION
+  const [client, setClient] = useState<Client>('claude')
   const [folder, setFolder] = useState('C:\\weknow-mcp')
   const [name, setName] = useState('weknow')
-  const [manual, setManual] = useState(false)
 
   const dir = folder.replace(/[\\/]+$/, '') || 'C:\\weknow-mcp'
   const exe = `${dir}\\weknow-mcp.exe`
   const server = name.trim() || 'weknow'
+  const env = { WEKNOW_BASE_URL: baseUrl, WEKNOW_ACCOUNT_TOKEN: account, WEKNOW_USER: user }
 
-  const setup = `"${exe}" setup --base-url "${baseUrl}" --account "${account}" --user "${user}" --name "${server}"`
-  const json = JSON.stringify(
-    {
-      mcpServers: {
-        [server]: {
-          command: exe,
-          args: [],
-          env: { WEKNOW_BASE_URL: baseUrl, WEKNOW_ACCOUNT_TOKEN: account, WEKNOW_USER: user },
-        },
-      },
-    },
-    null,
-    2,
-  )
+  const setupBase = `"${exe}" setup --base-url "${baseUrl}" --account "${account}" --user "${user}"`
+  const json = JSON.stringify({ mcpServers: { [server]: { command: exe, args: [], env } } }, null, 2)
+  /* TOML aceita a mesma escrita de string do JSON: aspas duplas e a barra
+     invertida dobrada. */
+  const toml = [
+    `[mcp_servers.${server}]`,
+    `command = ${JSON.stringify(exe)}`,
+    'args = []',
+    '',
+    `[mcp_servers.${server}.env]`,
+    ...Object.entries(env).map(([k, v]) => `${k} = ${JSON.stringify(v)}`),
+    '',
+  ].join('\n')
+
+  const stdio = client !== 'claude'
 
   return (
     <>
-      <ConnectionPanel
-        rows={[
-          { label: 'URL do Weknow', value: baseUrl },
-          { label: 'Conta', value: account },
-          { label: 'Usuário', value: user },
-        ]}
-      >
-        <FormField label="Pasta onde o MCP foi extraído">
-          <TextInput value={folder} onChange={setFolder} />
-        </FormField>
-        <FormField label="Nome do servidor no Claude Desktop">
-          <TextInput value={name} onChange={setName} />
-        </FormField>
-      </ConnectionPanel>
+      {/* O cliente em chips, as três opções à vista, como nas subabas da
+          produção. Já foi um seletor: ele escondia duas das três, e com só
+          três opções curtas esconder não economiza nada.
+
+          O que impede de ler esta fileira como continuação dos modos lá em
+          cima é a diferença entre as duas: esta tem rótulo ("Cliente MCP",
+          na voz dos campos do formulário), fica dentro do conteúdo do modo e
+          usa o chip compacto, sem ícone. Os modos são navegação; o cliente é
+          uma escolha que muda os passos abaixo. */}
+      <div className="flex flex-col gap-2">
+        <span id="mcp-client-label" style={fieldTextStyle}>
+          Cliente MCP
+        </span>
+        <div
+          role="group"
+          aria-labelledby="mcp-client-label"
+          className="flex gap-2 overflow-x-auto wk-no-scrollbar -mx-4 px-4 md:mx-0 md:px-0"
+        >
+          {CLIENTS.map((c) => (
+            <FilterChip key={c.id} icon="" compact label={c.label} active={c.id === client} onSelect={() => setClient(c.id)} />
+          ))}
+        </div>
+      </div>
+
+      <Panel title="Dados da conexão">
+        <InfoRow label="URL do Weknow" value={baseUrl} what="a URL do Weknow" />
+        <InfoRow label="Conta" value={account} what="a conta" />
+        <InfoRow label="Usuário" value={user} what="o usuário" />
+        <div className="grid gap-x-4 px-4 pt-4 grid-cols-1 md:grid-cols-2" style={{ borderTop: `1px solid ${TABLE.border}` }}>
+          <FormField label="Pasta onde o MCP foi extraído">
+            <TextInput value={folder} onChange={setFolder} />
+          </FormField>
+          <FormField label="Nome do servidor MCP">
+            <TextInput value={name} onChange={setName} />
+          </FormField>
+        </div>
+      </Panel>
 
       <ol className="flex flex-col gap-6">
         <Step n={1}>
@@ -298,167 +388,141 @@ function LocalSteps() {
           </p>
         </Step>
         <Step n={3}>
-          <p>
-            Abra o Prompt de Comando (cmd) e execute o comando abaixo. Ele pede a sua senha do Weknow, testa o login,
-            guarda a senha protegida no Windows (DPAPI) e grava a configuração no Claude Desktop, mantendo uma cópia
-            do arquivo anterior (.bak).
-          </p>
-          <CodeBlock label="Prompt de Comando" code={setup} />
+          {stdio ? (
+            <p>
+              Abra o Prompt de Comando (cmd) e execute o comando abaixo. Ele pede a sua senha do Weknow, testa o login,
+              guarda a senha protegida no Windows (DPAPI), que o MCP usa ao ser iniciado pelo cliente, e mostra o
+              comando e as variáveis de ambiente para cadastrar o servidor no cliente. O cadastro no cliente é feito no
+              passo seguinte.
+            </p>
+          ) : (
+            <p>
+              Abra o Prompt de Comando (cmd) e execute o comando abaixo. Ele pede a sua senha do Weknow, testa o login,
+              guarda a senha protegida no Windows (DPAPI) e grava a configuração no Claude Desktop, mantendo uma cópia
+              do arquivo anterior (.bak).
+            </p>
+          )}
+          <CodeBlock label="Prompt de Comando" code={stdio ? `${setupBase} --print-only` : `${setupBase} --name "${server}"`} />
         </Step>
-        <Step n={4}>
-          <p>Feche o Claude Desktop pelo ícone da bandeja do Windows (Sair; fechar a janela não basta) e abra-o de novo.</p>
-        </Step>
+
+        {client === 'claude' && (
+          <Step n={4}>
+            <p>Feche o Claude Desktop pelo ícone da bandeja do Windows (Sair; fechar a janela não basta) e abra-o de novo.</p>
+          </Step>
+        )}
+
+        {stdio && (
+          <Step n={4}>
+            {client === 'chatgpt' ? (
+              <p>
+                No ChatGPT, abra Settings &gt; Plugins &gt; Adicionar &gt; Adicionar servidor MCP, informe o nome{' '}
+                <Code>{server}</Code>, escolha o tipo STDIO e preencha:
+              </p>
+            ) : (
+              <p>
+                No seu cliente de IA, cadastre um servidor MCP local (STDIO) com o nome <Code>{server}</Code> e preencha:
+              </p>
+            )}
+            <StdioPanel exe={exe} env={env} />
+            <p>Não informe argumentos nem a senha: ela já está guardada no cofre DPAPI.</p>
+            {client === 'chatgpt' && (
+              <p style={MUTED}>Em versões anteriores do aplicativo, o cadastro fica em Settings &gt; MCP servers &gt; Add server.</p>
+            )}
+          </Step>
+        )}
+
+        {stdio && (
+          <Step n={5}>
+            <p>
+              {client === 'chatgpt'
+                ? 'Salve o servidor. As ferramentas do Weknow passam a aparecer nas conversas do aplicativo desktop do ChatGPT.'
+                : 'Salve o servidor e, se o cliente pedir, reinicie-o. As ferramentas do Weknow passam a aparecer nas conversas.'}
+            </p>
+          </Step>
+        )}
       </ol>
 
-      <div className="flex flex-col gap-3">
-        {/* O fantasma do sistema, mas com quebra de linha: o `Btn` não quebra
-            o rótulo, e esta frase passa de 375px no celular. */}
-        <button
-          type="button"
-          aria-expanded={manual}
-          onClick={() => setManual((v) => !v)}
-          className="self-start -ml-3 flex items-start gap-1.5 px-3 py-2 rounded-lg text-left transition-colors hover:bg-[var(--wk-btn-ghost-hover)] focus-visible:shadow-[var(--wk-btn-focus-ring)] outline-none"
-          style={{ fontFamily: FONT, fontSize: 14, lineHeight: '20px', color: COLOR.textSecondary }}
-        >
-          <Icon name={manual ? 'expand_less' : 'expand_more'} size={20} color="currentColor" className="shrink-0" />
-          Prefiro editar a configuração do Claude Desktop manualmente
-        </button>
-        {manual && (
-          <div className="flex flex-col gap-3" style={TEXT}>
-            <p>
-              Inclua o servidor abaixo em <Code>mcpServers</Code> no arquivo{' '}
-              <Code>%APPDATA%\Claude\claude_desktop_config.json</Code>. A senha não vai no arquivo: rode o comando do
-              passo 3 uma vez para guardá-la, ou inclua <Code>WEKNOW_PASSWORD</Code> em <Code>env</Code> só na
-              primeira execução e remova depois (a senha passa a ficar no cofre DPAPI).
-            </p>
-            <CodeBlock
-              label="claude_desktop_config.json"
-              code={json}
-              file={{ name: 'claude_desktop_config.json', type: 'application/json' }}
-            />
-          </div>
-        )}
-      </div>
+      {client === 'claude' && (
+        <Disclosure key="claude" label="Prefiro editar a configuração do Claude Desktop manualmente">
+          <p>
+            Inclua o servidor abaixo em <Code>mcpServers</Code> no arquivo{' '}
+            <Code>%APPDATA%\Claude\claude_desktop_config.json</Code>. A senha não vai no arquivo: rode o comando do
+            passo 3 uma vez para guardá-la, ou inclua <Code>WEKNOW_PASSWORD</Code> em <Code>env</Code> só na primeira
+            execução e remova depois (a senha passa a ficar no cofre DPAPI).
+          </p>
+          <CodeBlock
+            label="claude_desktop_config.json"
+            code={json}
+            file={{ name: 'claude_desktop_config.json', type: 'application/json' }}
+          />
+        </Disclosure>
+      )}
+      {client === 'chatgpt' && (
+        <Disclosure key="chatgpt" label="Prefiro editar a configuração do ChatGPT manualmente">
+          <p>
+            O aplicativo desktop do ChatGPT compartilha a configuração de MCP com o Codex. Inclua o trecho abaixo no
+            arquivo <Code>%USERPROFILE%\.codex\config.toml</Code> (crie o arquivo se ele não existir) e reinicie o
+            ChatGPT. A senha não vai no arquivo: rode o comando do passo 3 uma vez para guardá-la.
+          </p>
+          <CodeBlock label="config.toml" code={toml} />
+        </Disclosure>
+      )}
+      {client === 'outro' && (
+        <Disclosure key="outro" label="Meu cliente usa um arquivo de configuração JSON">
+          <p>
+            Vários clientes MCP aceitam o servidor no formato <Code>mcpServers</Code> abaixo. Consulte a documentação
+            do cliente para saber o nome e a pasta do arquivo. A senha não vai no arquivo: rode o comando do passo 3 uma
+            vez para guardá-la.
+          </p>
+          <CodeBlock label="JSON" code={json} />
+        </Disclosure>
+      )}
+
+      <p style={MUTED}>Os nomes dos menus podem mudar entre versões do Claude, do ChatGPT e dos outros clientes.</p>
     </>
   )
 }
 
 /* ----------------------------------------------------------------- remoto */
 
+/**
+ * Remoto: sem instalação. O MCP já roda publicado junto do Weknow, então a
+ * tela só entrega a URL do conector e diz onde cadastrá-la em cada cliente.
+ */
 function RemoteSteps() {
-  const { baseUrl, account } = MCP_CONNECTION
-  const [publicUrl, setPublicUrl] = useState('')
-  const [port, setPort] = useState('8000')
-  const [folder, setFolder] = useState('C:\\weknow-mcp')
-  const [pinAccount, setPinAccount] = useState(false)
-
-  const dir = folder.replace(/[\\/]+$/, '') || 'C:\\weknow-mcp'
-  const exe = `${dir}\\weknow-mcp.exe`
-  const url = publicUrl.trim().replace(/\/+$/, '').replace(/\/mcp$/i, '')
-  const ready = Boolean(url && port.trim())
-  const pending = 'Preencha a URL pública e a porta acima para gerar este conteúdo.'
-
-  const env = ready
-    ? [
-        'WEKNOW_MCP_TRANSPORT=http',
-        `WEKNOW_BASE_URL=${baseUrl}`,
-        `WEKNOW_MCP_PUBLIC_URL=${url}`,
-        ...(pinAccount ? [`WEKNOW_ACCOUNT_TOKEN=${account}`] : []),
-        'WEKNOW_MCP_HOST=127.0.0.1',
-        `WEKNOW_MCP_PORT=${port.trim()}`,
-        '',
-      ].join('\n')
-    : undefined
-
   return (
     <>
-      {/* A porta é um número de quatro dígitos: meia linha para ela deixava a
-          URL, que é o campo longo, com a mesma largura de um número. */}
-      <ConnectionPanel rows={[{ label: 'URL do Weknow', value: baseUrl }]} columns="md:grid-cols-[1fr_160px]">
-        <FormField label="URL pública do MCP (sem /mcp)" hint="Endereço HTTPS pelo qual o Claude e o ChatGPT acessam o MCP.">
-          <TextInput value={publicUrl} onChange={setPublicUrl} placeholder="https://mcp.empresa.com.br" />
-        </FormField>
-        <FormField label="Porta local">
-          <TextInput type="number" value={port} onChange={setPort} />
-        </FormField>
-        <div className="col-span-full">
-          <FormField label="Pasta onde o MCP foi extraído (na máquina do MCP)">
-            <TextInput value={folder} onChange={setFolder} />
-          </FormField>
-        </div>
-        {/* Linha de preferência com o switch na ponta: a linha não é clicável
-            inteira, porque o controle já é um botão (regra 2 dos controles). */}
-        <div className="col-span-full flex items-start gap-4 pb-4">
-          <div className="flex-1 min-w-0 flex flex-col gap-0.5">
-            <span style={TEXT}>Fixar a conta</span>
-            <span style={MUTED}>
-              A página de login do MCP não pede a conta. Fixada, ela vai no <Code>.env</Code>: <Code>{account}</Code>
-            </span>
-          </div>
-          <div className="pt-0.5">
-            <Switch checked={pinAccount} onChange={setPinAccount} label="Fixar a conta" />
-          </div>
-        </div>
-      </ConnectionPanel>
-
       <ol className="flex flex-col gap-6">
         <Step n={1}>
-          <p>Na máquina que vai rodar o MCP, baixe e extraia o MCP do Weknow:</p>
-          <div>
-            <Btn iconLeft="download">Baixar o MCP</Btn>
-          </div>
-          <p style={MUTED}>
-            Extraia o conteúdo do zip na pasta informada acima, de forma que exista o arquivo <Code>{exe}</Code>.
-          </p>
+          <p>Copie a URL do conector:</p>
+          <CodeBlock label="URL do conector" code={MCP_CONNECTION.connectorUrl} />
         </Step>
         <Step n={2}>
-          <p>
-            Salve o arquivo abaixo com o nome <Code>.env</Code> na pasta do <Code>weknow-mcp.exe</Code> (se o navegador
-            mudar o nome ao baixar, renomeie para <Code>.env</Code>). O serviço do MCP lê a configuração desse arquivo.
-          </p>
-          <CodeBlock label=".env" code={env} file={{ name: '.env' }} empty={pending} />
-        </Step>
-        <Step n={3}>
-          <p>
-            Abra o Prompt de Comando (cmd) como administrador e execute o comando abaixo. Ele instala o MCP como
-            serviço Windows (<Code>weknow-mcp</Code>, início automático, conta LocalSystem) e o inicia. A instalação é
-            recusada se o <Code>.env</Code> não estiver na pasta ou se a configuração for inválida.
-          </p>
-          <CodeBlock label="Prompt de Comando (administrador)" code={`"${exe}" service install && "${exe}" service start`} />
-          <p style={MUTED}>
-            Para conferir o estado do serviço, rode <Code>"{exe}" service status</Code>. O log fica em{' '}
-            <Code>%ProgramData%\weknow-mcp\weknow-mcp\logs\weknow-mcp.log</Code>. Para atualizar o MCP, pare o serviço
-            (<Code>service stop</Code>), extraia o zip novo por cima da pasta mantendo o <Code>.env</Code> e inicie-o de
-            novo (<Code>service start</Code>). Para remover, use <Code>service uninstall</Code>.
-          </p>
-        </Step>
-        <Step n={4}>
-          <p>
-            Publique o MCP em HTTPS na URL pública informada acima: por um túnel (Cloudflare Tunnel, recomendado), por
-            um proxy reverso (Apache ou IIS) ou com TLS direto no MCP. Os detalhes estão no README do MCP (
-            <Code>serverapps\mcpserver\README.md</Code>, seção "Expor o MCP em HTTPS").
-          </p>
-        </Step>
-        <Step n={5}>
-          <p>Cadastre o conector no Claude ou no ChatGPT com a URL abaixo:</p>
-          <CodeBlock label="URL do conector" code={ready ? `${url}/mcp` : undefined} empty={pending} />
-          <ul className="flex flex-col gap-2">
+          <p>Cadastre o conector no seu cliente de IA com essa URL:</p>
+          <ul className="flex flex-col gap-2 list-disc pl-5 marker:text-[var(--wk-text-muted)]">
             <li>
-              <strong className="font-semibold">Claude:</strong> Settings &gt; Connectors &gt; Add custom connector,
-              com a URL acima. Ao conectar, o navegador abre a página de login do Weknow.
+              <strong className="font-semibold">Claude:</strong> Customize &gt; Connectors &gt; + Add &gt; Add custom
+              connector, com a URL acima. Nos planos Team e Enterprise, quem cadastra é o Owner da organização, em
+              Organization settings &gt; Connectors.
             </li>
             <li>
-              <strong className="font-semibold">ChatGPT:</strong> ative o Developer Mode (Settings &gt; Apps &amp;
-              Connectors &gt; Advanced settings) e crie o conector em Settings &gt; Connectors, com a URL acima e
-              autenticação OAuth.
+              <strong className="font-semibold">ChatGPT:</strong> Settings &gt; Plugins (ou chatgpt.com/plugins) &gt;
+              "+" &gt; Adicionar servidor MCP personalizado, com a URL acima e autenticação OAuth; crie como plugin.
+            </li>
+            <li>
+              <strong className="font-semibold">Outros clientes:</strong> cadastre um servidor MCP remoto (Streamable
+              HTTP) com autenticação OAuth e a URL acima.
             </li>
           </ul>
-          <p style={MUTED}>
-            O cadastro do cliente OAuth é automático: não há client id nem secret para informar. Os nomes dos menus
-            podem mudar entre versões do Claude e do ChatGPT.
-          </p>
+        </Step>
+        <Step n={3}>
+          <p>Ao conectar, o navegador abre a página de login do Weknow: entre com o seu usuário e senha do Weknow.</p>
         </Step>
       </ol>
+      <p style={MUTED}>
+        O cadastro do cliente OAuth é automático: não há client id nem secret para informar. Os nomes dos menus podem
+        mudar entre versões do Claude, do ChatGPT e dos outros clientes.
+      </p>
     </>
   )
 }
@@ -468,16 +532,17 @@ function RemoteSteps() {
 const MODES: { id: Mode; label: string; icon: string; lead: string }[] = [
   {
     id: 'local',
-    label: 'Claude Desktop (local)',
+    label: 'Local (aplicativo desktop)',
     icon: 'computer',
-    lead: 'O ChatGPT não aceita MCP local: para conectá-lo, use "Conector remoto (HTTPS)".',
+    lead:
+      'O MCP local roda no próprio computador e só é aceito pelos aplicativos desktop que executam servidores MCP locais. Para usar o Weknow pelo navegador ou pelo celular, use "Conector remoto (HTTPS)".',
   },
   {
     id: 'remoto',
     label: 'Conector remoto (HTTPS)',
     icon: 'cloud',
     lead:
-      'Para o Claude (web, desktop e celular) e o ChatGPT. O MCP roda em modo http numa máquina da empresa, publicado em HTTPS e acessível pela internet, e cada pessoa entra com o próprio usuário e senha do Weknow ao conectar.',
+      'Para usar o Weknow no Claude, no ChatGPT ou em outro cliente compatível com MCP, inclusive pelo navegador e pelo celular, sem instalar nada no computador. Cada pessoa entra com o próprio usuário e senha do Weknow ao conectar.',
   },
 ]
 
@@ -490,8 +555,8 @@ export function McpConnect() {
   return (
     <div className="flex flex-col gap-6 max-w-[760px]">
       <p style={{ ...TEXT, color: COLOR.textSecondary }}>
-        Conecte o Claude ou o ChatGPT ao Weknow pelo MCP (Model Context Protocol). O assistente passa a consultar
-        metadados e componentes com as suas permissões de acesso no Weknow.
+        Conecte o Claude, o ChatGPT ou outro cliente de IA compatível com o MCP (Model Context Protocol) ao Weknow. O
+        assistente passa a consultar metadados e componentes com as suas permissões de acesso no Weknow.
       </p>
 
       <div className="flex flex-col gap-3">
@@ -505,8 +570,8 @@ export function McpConnect() {
         <p style={TEXT}>{current.lead}</p>
       </div>
 
-      {/* Os dois modos ficam montados: quem preenche a URL pública, vai olhar
-          o modo local e volta, encontra o que digitou. */}
+      {/* Os dois modos ficam montados: quem escolhe o aplicativo e preenche a
+          pasta, vai olhar o remoto e volta, encontra tudo como deixou. */}
       <div hidden={mode !== 'local'} className="flex flex-col gap-8">
         <LocalSteps />
       </div>
