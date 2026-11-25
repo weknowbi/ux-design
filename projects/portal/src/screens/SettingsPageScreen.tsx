@@ -7,6 +7,7 @@ import { FolderHeader } from '@/components/FolderHeader'
 import { FilterChip, SearchField } from '@/components/Hero'
 import { Icon } from '@/components/icons'
 import { Chip, ChipList, CELL_STYLE, DataTable, MUTED_CELL_STYLE, type Column } from '@/components/settings/DataTable'
+import { McpConnect } from '@/components/settings/McpConnect'
 import {
   CONTACT_GROUPS,
   SETTINGS_PAGES,
@@ -237,9 +238,10 @@ const CONTACT_GROUP_COLUMNS: Column<ContactGroup>[] = [
 
 /* --------------------------------------------------------------------- tela */
 
-type Content = 'users' | 'user-groups' | 'contact-groups' | 'stub'
+type Content = 'users' | 'user-groups' | 'contact-groups' | 'mcp' | 'stub'
 
 function contentOf(pageId: string): Content {
+  if (pageId === 'conectar-claude-chatgpt') return 'mcp'
   if (pageId === 'usuarios') return 'users'
   if (pageId === 'grupos-de-usuarios') return 'user-groups'
   if (pageId === 'grupos-de-contato') return 'contact-groups'
@@ -322,11 +324,12 @@ export function SettingsPageScreen({ pageId, onRoute }: { pageId: string; onRout
         />
       ),
     },
+    mcp: { node: <McpConnect /> },
     stub: { node: <Stub name={page.name} description={page.description} icon={page.icon} /> },
   }
 
   const current = table[content]
-  const searchable = content !== 'stub'
+  const searchable = content !== 'stub' && content !== 'mcp'
 
   /**
    * A busca da tela assume a barra de topo, como acontece dentro de uma pasta

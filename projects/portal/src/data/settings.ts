@@ -95,6 +95,13 @@ export const SETTINGS_GROUPS: SettingsGroup[] = [
         keywords: ['ask', 'sql', 'token', 'consumo', 'modelo'],
         stub: true,
       },
+      {
+        id: 'conectar-claude-chatgpt',
+        name: 'Conectar ao Claude/ChatGPT',
+        description: 'Consulte o Weknow pelo Claude ou pelo ChatGPT, via MCP.',
+        icon: 'hub',
+        keywords: ['mcp', 'claude', 'chatgpt', 'openai', 'anthropic', 'conector', 'assistente'],
+      },
     ],
   },
   {
@@ -146,6 +153,17 @@ export const SETTINGS_GROUPS: SettingsGroup[] = [
     ],
   },
 ]
+
+/**
+ * Dados que a tela Conectar ao Claude/ChatGPT injeta nos comandos. No produto
+ * vêm da sessão (a URL de onde o Weknow foi aberto, a conta e o login); aqui
+ * são de maquete, do mesmo hospital da lista de usuários.
+ */
+export const MCP_CONNECTION = {
+  baseUrl: 'https://bi.hsj.com.br/weknow',
+  account: '{7c2e91a4-3b5d-4f08-9e61-2a4d8c0b5f17}',
+  user: 'matt.murdock',
+}
 
 /** Todas as telas, na ordem em que aparecem — a busca varre esta lista. */
 export const SETTINGS_PAGES: (SettingsPage & { group: SettingsGroup })[] = SETTINGS_GROUPS.flatMap(
