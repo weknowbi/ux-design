@@ -97,6 +97,13 @@
      mesmo lugar de onde --wk-danger veio; aqui ele pinta só um ponto de 8px,
      nunca uma faixa. */
   --wk-ok: #198754;
+  /* Nota de aviso (o remoto desligado na tela do MCP). A produção usava o
+     amarelo cheio do Bootstrap (#fff3cd), que gritava mais que a tela
+     inteira. Aqui o âmbar fica só no tom: fundo quase branco, borda clara e
+     o ícone; o texto continua na cor secundária de sempre. */
+  --wk-warn-bg: #fffaeb;
+  --wk-warn-border: #f3e2b3;
+  --wk-warn-icon: #b7791f;
 
 /* Botões — nó Make "Button variations with animations" (tema claro) */
   --wk-btn-on-primary: #ffffff;
@@ -270,6 +277,10 @@
   /* #198754 dá 2,6:1 sobre a folha escura e some; este é o verde do botão de
      sucesso do mesmo design system, que já nasceu para fundo escuro. */
   --wk-ok: #5cb85c;
+  /* No escuro o âmbar entra como véu sobre a folha, não como cor chapada. */
+  --wk-warn-bg: rgba(234, 179, 8, 0.06);
+  --wk-warn-border: rgba(234, 179, 8, 0.24);
+  --wk-warn-icon: #d9a93a;
 
 /* Botões — mesma fonte, bloco "Dark theme" */
   --wk-btn-on-primary: #0d1b2a;

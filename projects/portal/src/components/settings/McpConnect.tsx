@@ -527,7 +527,38 @@ function RemoteSteps() {
   )
 }
 
+/**
+ * Nota da tela: um recado que vale para o modo inteiro, como "o remoto não
+ * está habilitado nesta instalação".
+ *
+ * Na produção era a faixa de aviso amarela. Não há erro de quem lê nem nada
+ * a corrigir ali, e o amarelo cheio chamava mais atenção do que qualquer
+ * outra coisa da tela, sobretudo no escuro. O âmbar continua, mas só no tom:
+ * fundo quase branco (véu de 6% no escuro), borda clara e o ícone. O texto
+ * fica em `textSecondary`, como o resto da tela, e não em marrom sobre
+ * amarelo. As cores são as `--wk-warn-*` do `index.css`.
+ */
+function Note({ children }: { children: ReactNode }) {
+  return (
+    <div
+      role="note"
+      className="flex items-start gap-3 px-4 py-3"
+      style={{ background: 'var(--wk-warn-bg)', border: '1px solid var(--wk-warn-border)', borderRadius: TABLE.radius }}
+    >
+      <Icon name="info" size={20} color="var(--wk-warn-icon)" className="shrink-0 mt-px" />
+      <p style={{ ...TEXT, color: COLOR.textSecondary }}>{children}</p>
+    </div>
+  )
+}
+
 /* ------------------------------------------------------------------- tela */
+
+/**
+ * O protótipo mostra o remoto habilitado. Para ver a tela de uma instalação
+ * sem ele, como a do link de produção, abra com `?remoto=desabilitado` antes
+ * do `#`.
+ */
+const REMOTE_ENABLED = new URLSearchParams(window.location.search).get('remoto') !== 'desabilitado'
 
 const MODES: { id: Mode; label: string; icon: string; lead: string }[] = [
   {
@@ -535,7 +566,7 @@ const MODES: { id: Mode; label: string; icon: string; lead: string }[] = [
     label: 'Local (aplicativo desktop)',
     icon: 'computer',
     lead:
-      'O MCP local roda no próprio computador e só é aceito pelos aplicativos desktop que executam servidores MCP locais. Para usar o Weknow pelo navegador ou pelo celular, use "Conector remoto (HTTPS)".',
+      'O MCP local roda no próprio computador e só é aceito pelos aplicativos desktop que executam servidores MCP locais. Para usar o Weknow pelo navegador ou pelo celular, use a aba "Conector remoto (HTTPS)".',
   },
   {
     id: 'remoto',
@@ -576,7 +607,11 @@ export function McpConnect() {
         <LocalSteps />
       </div>
       <div hidden={mode !== 'remoto'} className="flex flex-col gap-8">
-        <RemoteSteps />
+        {REMOTE_ENABLED ? (
+          <RemoteSteps />
+        ) : (
+          <Note>O conector remoto não está habilitado nesta instalação do Weknow. Procure o administrador.</Note>
+        )}
       </div>
     </div>
   )
